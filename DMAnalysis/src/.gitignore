@@ -1,0 +1,16 @@
+# no emacs temp files
+*~
+# no tables files
+*.tex
+*.aux
+*.log
+*.pdf
+LSFJOB*
+# no python compiled files:
+*pyc
+# no python init file
+python/__init__.py
+
+# no private directory
+backup
+private
