@@ -11,6 +11,7 @@ LSFJOB*
 # no python init file
 python/__init__.py
 
+checkDAS.sh
 # no private directory
 backup
 private

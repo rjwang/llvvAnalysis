@@ -14,3 +14,5 @@ python/__init__.py
 # no private directory
 backup
 private
+Makefile
+test/crab/

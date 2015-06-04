@@ -69,7 +69,7 @@
 
 
 #include "DataFormats/Common/interface/ValueMap.h"
-#include "EgammaAnalysis/ElectronTools/interface/EGammaMvaEleEstimatorCSA14.h"
+#include "llvvAnalysis/DMAnalysis/interface/EGammaMvaEleEstimatorCSA14.h"
 
 
 //
@@ -263,8 +263,8 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
 
     //set up electron MVA ID
     std::vector<std::string> myTrigWeights;
-    myTrigWeights.push_back(edm::FileInPath("EgammaAnalysis/ElectronTools/data/CSA14/TrigIDMVA_25ns_EB_BDT.weights.xml").fullPath().c_str());
-    myTrigWeights.push_back(edm::FileInPath("EgammaAnalysis/ElectronTools/data/CSA14/TrigIDMVA_25ns_EE_BDT.weights.xml").fullPath().c_str());
+    myTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/TrigIDMVA_25ns_EB_BDT.weights.xml").fullPath().c_str());
+    myTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/TrigIDMVA_25ns_EE_BDT.weights.xml").fullPath().c_str());
 
     myMVATrig = new EGammaMvaEleEstimatorCSA14();
     myMVATrig->initialize("BDT",
@@ -273,10 +273,10 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
                           myTrigWeights);
 
     std::vector<std::string> myNonTrigWeights;
-    myNonTrigWeights.push_back(edm::FileInPath("EgammaAnalysis/ElectronTools/data/CSA14/EIDmva_EB_5_25ns_BDT.weights.xml").fullPath().c_str());
-    myNonTrigWeights.push_back(edm::FileInPath("EgammaAnalysis/ElectronTools/data/CSA14/EIDmva_EE_5_25ns_BDT.weights.xml").fullPath().c_str());
-    myNonTrigWeights.push_back(edm::FileInPath("EgammaAnalysis/ElectronTools/data/CSA14/EIDmva_EB_10_25ns_BDT.weights.xml").fullPath().c_str());
-    myNonTrigWeights.push_back(edm::FileInPath("EgammaAnalysis/ElectronTools/data/CSA14/EIDmva_EE_10_25ns_BDT.weights.xml").fullPath().c_str());
+    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EB_5_25ns_BDT.weights.xml").fullPath().c_str());
+    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EE_5_25ns_BDT.weights.xml").fullPath().c_str());
+    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EB_10_25ns_BDT.weights.xml").fullPath().c_str());
+    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EE_10_25ns_BDT.weights.xml").fullPath().c_str());
 
     myMVANonTrig = new EGammaMvaEleEstimatorCSA14();
     myMVANonTrig->initialize("BDT",
