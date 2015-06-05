@@ -15,3 +15,5 @@ checkDAS.sh
 # no private directory
 backup
 private
+local
+crab

@@ -23,40 +23,32 @@ process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 #process.GlobalTag.globaltag = 'PLS170_V6AN1::All'
 #global tag for PHYS14 asymptotic 25ns scenario
 #process.GlobalTag.globaltag = 'PHYS14_25_V3::All'
-process.GlobalTag.globaltag = 'PHYS14_25_V1'
+process.GlobalTag.globaltag = 'PHYS14_25_V1::All'
+
 
 
 #
 # Cut-based Electron ID
 #
-# Set up everything that is needed to compute electron IDs and
-# add the ValueMaps with ID decisions into the event data stream
+
 #
-
-# Load tools and function definitions
+# Set up electron ID (VID framework)
+#
+## https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2
 from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+# turn on VID producer, indicate data format  to be
+# DataFormat.AOD or DataFormat.MiniAOD, as appropriate
+dataFormat = DataFormat.MiniAOD
 
-process.load("RecoEgamma.ElectronIdentification.egmGsfElectronIDs_cfi")
-# overwrite a default parameter: for miniAOD, the collection name is a slimmed one
-process.egmGsfElectronIDs.physicsObjectSrc = cms.InputTag('slimmedElectrons')
+switchOnVIDElectronIdProducer(process, dataFormat)
 
-from PhysicsTools.SelectorUtils.centralIDRegistry import central_id_registry
-process.egmGsfElectronIDSequence = cms.Sequence(process.egmGsfElectronIDs)
+# define which IDs we want to produce
+my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V2_cff']
 
-# Define which IDs we want to produce
-# Each of these two example IDs contains all four standard
-# cut-based ID working points (only two WP of the PU20bx25 are actually used here).
-my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V1_miniAOD_cff']
-#Add them to the VID producer
+#add them to the VID producer
 for idmod in my_id_modules:
     setupAllVIDIdsInModule(process,idmod,setupVIDElectronSelection)
 
-# Do not forget to add the egmGsfElectronIDSequence to the path,
-# as in the example below!
-
-#
-# Cut-based Electron ID
-#
 
 
 

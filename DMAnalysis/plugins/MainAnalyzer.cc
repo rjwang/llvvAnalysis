@@ -893,7 +893,7 @@ MainAnalyzer::getMCtruth(const edm::Event& event, const edm::EventSetup& iSetup)
 	for(size_t i=0; i<packed->size(); i++) {
 	    const Candidate * genParticle = &(*packed)[i];
 	    int pid=genParticle->pdgId();
-	    if(abs(pid) == 2000012) {
+	    if(abs(pid) == 2000012 || abs(pid) == 5000039) {
 		prunedV.push_back(genParticle);
 	    }
 	}
@@ -925,7 +925,7 @@ MainAnalyzer::getMCtruth(const edm::Event& event, const edm::EventSetup& iSetup)
                     int pid=prunedV[i]->pdgId();
                     int mompid = mom->pdgId();
 		    //cout << "pid: " << pid << " mom: " << mompid << endl;
-                    if(abs(pid) != 2000012 && abs(mompid)!=15 && abs(mompid)!=23 && abs(mompid)!=24 && abs(mompid)!=25) continue;
+                    if(abs(pid) !=2000012 && abs(pid)!=5000039 && abs(mompid)!=23 && abs(mompid)!=24 && abs(mompid)!=25) continue;
                     if(prunedV[i]->status()!=1 && prunedV[i]->status()!=2) continue;
 
                     ev.mc_px[ev.nmcparticles] = prunedV[i]->px();

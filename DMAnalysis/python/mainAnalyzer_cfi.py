@@ -28,10 +28,10 @@ process.mainAnalyzer = cms.EDAnalyzer('MainAnalyzer',
     muonsTag = cms.InputTag("slimmedMuons"),
 
     electronsTag = cms.InputTag("slimmedElectrons"),
-    	electronVetoIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-veto"),
-	electronLooseIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-loose"),
-	electronMediumIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-medium"),
-    	electronTightIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V1-miniAOD-standalone-tight"),
+    	electronVetoIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-veto"),
+	electronLooseIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-loose"),
+	electronMediumIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-medium"),
+    	electronTightIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-tight"),
 
     tausTag = cms.InputTag("slimmedTaus"),
 
