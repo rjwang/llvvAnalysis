@@ -43,7 +43,8 @@ dataFormat = DataFormat.MiniAOD
 switchOnVIDElectronIdProducer(process, dataFormat)
 
 # define which IDs we want to produce
-my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V2_cff']
+my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V2_cff',
+                 'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV51_cff']
 
 #add them to the VID producer
 for idmod in my_id_modules:
@@ -56,8 +57,6 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
     )
 )
-
-process.mainAnalyzer.isPythia8 = cms.bool(True)
 
 
 process.TFileService = cms.Service("TFileService",

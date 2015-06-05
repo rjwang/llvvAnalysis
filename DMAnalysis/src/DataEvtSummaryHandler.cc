@@ -128,6 +128,7 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("en_passLoose",          evSummary_.en_passLoose,            "en_passLoose[en]/O");
     t_->Branch("en_passMedium",         evSummary_.en_passMedium,           "en_passMedium[en]/O");
     t_->Branch("en_passTight",          evSummary_.en_passTight,            "en_passTight[en]/O");
+    t_->Branch("en_passHEEP",           evSummary_.en_passHEEP,             "en_passHEEP[en]/O");
     t_->Branch("en_IDMVATrig",          evSummary_.en_IDMVATrig,            "en_IDMVATrig[en]/F");
     t_->Branch("en_IDMVANonTrig",       evSummary_.en_IDMVANonTrig,         "en_IDMVANonTrig[en]/F");
     t_->Branch("en_istrue",             evSummary_.en_istrue,               "en_istrue[en]/I");
@@ -341,6 +342,7 @@ bool DataEvtSummaryHandler::attachToTree(TTree *t)
     t_->SetBranchAddress("en_passLoose",            evSummary_.en_passLoose);
     t_->SetBranchAddress("en_passMedium",           evSummary_.en_passMedium);
     t_->SetBranchAddress("en_passTight",            evSummary_.en_passTight);
+    t_->SetBranchAddress("en_passHEEP",             evSummary_.en_passHEEP);
     t_->SetBranchAddress("en_IDMVATrig",            evSummary_.en_IDMVATrig);
     t_->SetBranchAddress("en_IDMVANonTrig",         evSummary_.en_IDMVANonTrig);
     t_->SetBranchAddress("en_istrue",               evSummary_.en_istrue);

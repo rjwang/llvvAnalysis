@@ -32,6 +32,7 @@ process.mainAnalyzer = cms.EDAnalyzer('MainAnalyzer',
 	electronLooseIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-loose"),
 	electronMediumIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-medium"),
     	electronTightIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-tight"),
+	electronHEEPIdTag = cms.InputTag("egmGsfElectronIDs:heepElectronID-HEEPV51"),
 
     tausTag = cms.InputTag("slimmedTaus"),
 
@@ -51,30 +52,24 @@ process.mainAnalyzer = cms.EDAnalyzer('MainAnalyzer',
     prescales = cms.InputTag("patTrigger"),
     objects = cms.InputTag("selectedPatTrigger"),
 
-    	DoubleMuTrigs = cms.vstring("HLT_Mu17_Mu8_v",
-					"HLT_Mu17_TkMu8_v",
-					"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v",
-					"HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v"
+    	DoubleMuTrigs = cms.vstring("HLT_Mu17_Mu8",
+					"HLT_Mu17_TkMu8",
+					"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL",
+					"HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL"
 				   ),
 
-    	DoubleEleTrigs = cms.vstring("HLT_Ele23_Ele12_CaloId_TrackId_Iso_v",
+    	DoubleEleTrigs = cms.vstring("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL",
 					"HLT_Ele20WP60_Ele8_Mass55_v",
 					"HLT_Ele25WP60_SC4_Mass55_v",
-					"HLT_Ele17_Ele12_Ele10_CaloId_TrackId_v",
-					"HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_MW_v",
-					"HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v"),
+					"HLT_DoubleEle33_CaloIdL_GsfTrkIdVL"),
 
-    	SingleMuTrigs = cms.vstring("HLT_IsoMu24_IterTrk02_v",
-					"HLT_IsoTkMu24_IterTrk02_v",
-					"HLT_IsoMu20_eta2p1_IterTrk02_v",
-					"HLT_IsoTkMu20_eta2p1_IterTrk02_v",
-					"HLT_Mu40_v"),
+    	SingleMuTrigs = cms.vstring("HLT_IsoMu20_v",
+					"HLT_IsoTkMu20_v"),
 
-    	SingleEleTrigs = cms.vstring("HLT_Ele27_eta2p1_WP85_Gsf_v",
-					"HLT_Ele95_CaloIdVT_GsfTrkIdT_v"),
+    	SingleEleTrigs = cms.vstring("HLT_Ele27_WP85_Gsf_v"),
 
-   	MuEGTrigs = cms.vstring("HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v",
-					"HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v"),
+   	MuEGTrigs = cms.vstring("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v",
+					"HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v"),
 
 	#DoubleTauTrigs = cms.vstring("HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v")
 )

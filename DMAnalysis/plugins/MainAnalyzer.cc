@@ -106,6 +106,7 @@ private:
     edm::EDGetTokenT<edm::ValueMap<bool> > electronLooseIdTag_;
     edm::EDGetTokenT<edm::ValueMap<bool> > electronMediumIdTag_;
     edm::EDGetTokenT<edm::ValueMap<bool> > electronTightIdTag_;
+    edm::EDGetTokenT<edm::ValueMap<bool> > electronHEEPIdTag_;
     edm::EDGetTokenT<pat::TauCollection> tauTag_;
     edm::EDGetTokenT<pat::PhotonCollection> photonTag_;
     edm::EDGetTokenT<pat::JetCollection> jetTag_;
@@ -204,6 +205,7 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
     electronLooseIdTag_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronLooseIdTag"))       ),
     electronMediumIdTag_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronMediumIdTag"))     ),
     electronTightIdTag_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronTightIdTag"))	),
+    electronHEEPIdTag_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronHEEPIdTag"))       ),
     tauTag_(		consumes<pat::TauCollection>(iConfig.getParameter<edm::InputTag>("tausTag"))			),
     photonTag_(		consumes<pat::PhotonCollection>(iConfig.getParameter<edm::InputTag>("photonsTag"))		),
     jetTag_(		consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jetsTag"))			),
@@ -532,11 +534,13 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
     edm::Handle<edm::ValueMap<bool> > loose_id_decisions;
     edm::Handle<edm::ValueMap<bool> > medium_id_decisions;
     edm::Handle<edm::ValueMap<bool> > tight_id_decisions;
+    edm::Handle<edm::ValueMap<bool> > heep_id_decisions;
 
     event.getByToken(electronVetoIdTag_,veto_id_decisions);
     event.getByToken(electronLooseIdTag_,loose_id_decisions);
     event.getByToken(electronMediumIdTag_,medium_id_decisions);
     event.getByToken(electronTightIdTag_,tight_id_decisions);
+    event.getByToken(electronHEEPIdTag_,heep_id_decisions);
 
     ev.en=0;
     //for (const pat::Electron &el : *electrons) {
@@ -618,6 +622,7 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
         ev.en_passLoose[ev.en] = (*loose_id_decisions)[ elPtr ];
         ev.en_passMedium[ev.en]= (*medium_id_decisions)[ elPtr ];
         ev.en_passTight[ev.en] = (*tight_id_decisions)[ elPtr ];
+        ev.en_passHEEP[ev.en]  = (*heep_id_decisions) [ elPtr ];
 
         //ID MVA
         //https://twiki.cern.ch/twiki/bin/viewauth/CMS/MultivariateElectronIdentificationRun2

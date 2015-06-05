@@ -67,7 +67,7 @@ struct DataEvtSummary_t {
     Float_t en_dEtaIn[MAXPARTICLES],en_dPhiIn[MAXPARTICLES],en_hOverE[MAXPARTICLES],en_R9[MAXPARTICLES],en_sigmaIetaIeta[MAXPARTICLES],en_sigmaIetaIeta5x5[MAXPARTICLES],en_ooEmooP[MAXPARTICLES];
     Float_t en_pileupIso[MAXPARTICLES],en_chargedIso[MAXPARTICLES],en_photonIso[MAXPARTICLES],en_neutralHadIso[MAXPARTICLES];
     Float_t en_relIsoWithEA[MAXPARTICLES],en_relIsoWithDBeta[MAXPARTICLES],en_MissingHits[MAXPARTICLES],en_passConversionVeto[MAXPARTICLES];
-    Bool_t en_passVeto[MAXPARTICLES],en_passLoose[MAXPARTICLES],en_passMedium[MAXPARTICLES],en_passTight[MAXPARTICLES];
+    Bool_t en_passVeto[MAXPARTICLES],en_passLoose[MAXPARTICLES],en_passMedium[MAXPARTICLES],en_passTight[MAXPARTICLES],en_passHEEP[MAXPARTICLES];
     Float_t en_IDMVATrig[MAXPARTICLES],en_IDMVANonTrig[MAXPARTICLES];
     Int_t en_istrue[MAXPARTICLES];
 

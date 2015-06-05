@@ -1,0 +1,268 @@
+{
+  "proc": [
+    {
+      "isdata": false, 
+      "color": "856", 
+      "lcolor": "1", 
+      "tag": "WZ#rightarrow 3l#nu", 
+      "marker": 856, 
+      "data": [
+        {
+          "dtag": "MC13TeV_WZ", 
+          "xsec": 66.1, 
+          "split": 1, 
+          "br": [
+            0.032715576
+          ]
+        }
+      ]
+    }, 
+    {
+      "isdata": false, 
+      "color": "842", 
+      "lcolor": "1", 
+      "tag": "ZZ#rightarrow 2l2#nu", 
+      "marker": 842, 
+      "data": [
+        {
+          "dtag": "MC13TeV_ZZ", 
+          "xsec": 19.3, 
+          "split": 1, 
+          "br": [
+            0.0134632
+          ]
+        }
+      ]
+    }, 
+    {
+      "isdata": false, 
+      "color": "798", 
+      "lcolor": "1", 
+      "tag": "WW#rightarrow l#nul#nu", 
+      "marker": 798, 
+      "data": [
+        {
+          "dtag": "MC13TeV_WW", 
+          "xsec": 118.7, 
+          "split": 1, 
+          "br": [
+            0.046656
+          ]
+        }
+      ]
+    }, 
+    {
+      "isdata": false, 
+      "color": "400", 
+      "lcolor": "1", 
+      "tag": "W+jets", 
+      "marker": 400, 
+      "data": [
+        {
+          "dtag": "MC13TeV_WJets", 
+          "xsec": 50100, 
+          "split": 5, 
+          "br": [
+            0.318
+          ]
+        }
+      ]
+    }, 
+    {
+      "isdata": false, 
+      "color": "876", 
+      "lcolor": "1", 
+      "tag": "Single top", 
+      "marker": 876, 
+      "data": [
+        {
+          "dtag": "MC13TeV_SingleTbar_tW", 
+          "xsec": 35.6, 
+          "split": 1
+        }, 
+        {
+          "dtag": "MC13TeV_SingleT_tW", 
+          "xsec": 35.6, 
+          "split": 1
+        }
+      ]
+    }, 
+    {
+      "isdata": false, 
+      "color": "885", 
+      "lcolor": "1", 
+      "tag": "t#bar{t}", 
+      "marker": 885, 
+      "data": [
+        {
+          "dtag": "MC13TeV_TTJetsFullLeptMGDecays", 
+          "xsec": 424.5, 
+          "split": 10, 
+          "br": [
+            0.208
+          ]
+        }, 
+        {
+          "dtag": "MC13TeV_TTWJets", 
+          "xsec": 1.152, 
+          "split": 1, 
+          "br": [
+            0.997
+          ]
+        }, 
+        {
+          "dtag": "MC13TeV_TTZJets", 
+          "xsec": 2.232, 
+          "split": 1, 
+          "br": [
+            0.998
+          ]
+        }
+      ]
+    }, 
+    {
+      "isdata": false, 
+      "color": "901", 
+      "lcolor": "1", 
+      "tag": "Z+jets", 
+      "marker": 901, 
+      "data": [
+        {
+          "dtag": "MC13TeV_DYJetsToLL_50toInf", 
+          "xsec": 4746, 
+          "split": 1, 
+          "br": [
+            0.293
+          ]
+        }
+      ]
+    }, 
+    {
+      "isdata": false, 
+      "color": "90", 
+      "issignal": true, 
+      "tag": "ZH(125)", 
+      "lwidth": 2, 
+      "marker": 90, 
+      "data": [
+        {
+          "dtag": "MC13TeV_ZEE_H125", 
+          "xsec": 0.8696, 
+          "split": 1, 
+          "br": [
+            0.033658
+          ]
+        }, 
+        {
+          "dtag": "MC13TeV_ZMM_H125", 
+          "xsec": 0.8696, 
+          "split": 1, 
+          "br": [
+            0.033658
+          ]
+        }
+      ], 
+      "fill": 0, 
+      "spimpose": true, 
+      "lcolor": "90", 
+      "lstyle": 1
+    }, 
+    {
+      "isdata": false, 
+      "color": "93", 
+      "issignal": true, 
+      "tag": "Vector_gQgDM(0.5)mx(200)M(1000)", 
+      "lwidth": 2, 
+      "marker": 93, 
+      "data": [
+        {
+          "dtag": "MC13TeV_VectorMediator_V_gDM0.5_gQ0.5_Mx200_Mmed1000", 
+          "xsec": 0.00072761, 
+          "split": 1
+        }
+      ], 
+      "fill": 0, 
+      "spimpose": true, 
+      "lcolor": "93", 
+      "lstyle": 1
+    }, 
+    {
+      "isdata": false, 
+      "color": "616", 
+      "issignal": true, 
+      "tag": "Vector_gQgDM(0.5)mx(200)M(500)_Fake", 
+      "lwidth": 2, 
+      "marker": 616, 
+      "data": [
+        {
+          "dtag": "MC13TeV_VectorMediator_V_gDM0.5_gQ0.5_Mx200_Mmed500_Fake", 
+          "xsec": 0.0040021, 
+          "split": 1, 
+          "wimpweights": "${CMSSW_BASE}/src/llvvAnalysis/DMAnalysis/data/weights/weights_VectorMediator_V_pp2Zxx_gDM0.5_gQ0.5_Mx200_Mmed500.root"
+        }
+      ], 
+      "fill": 0, 
+      "spimpose": true, 
+      "lcolor": "616", 
+      "lstyle": 1
+    }, 
+    {
+      "isdata": false, 
+      "color": "626", 
+      "issignal": true, 
+      "tag": "Vector_gQgDM(0.5)mx(200)M(500)", 
+      "lwidth": 2, 
+      "marker": 626, 
+      "data": [
+        {
+          "dtag": "MC13TeV_VectorMediator_V_gDM0.5_gQ0.5_Mx200_Mmed500", 
+          "xsec": 0.0040021, 
+          "split": 1
+        }
+      ], 
+      "fill": 0, 
+      "spimpose": true, 
+      "lcolor": "626", 
+      "lstyle": 1
+    }, 
+    {
+      "isdata": false, 
+      "color": "616", 
+      "issignal": true, 
+      "tag": "Vector_gQgDM(0.5)mx(200)M(5000)_Fake", 
+      "lwidth": 2, 
+      "marker": 616, 
+      "data": [
+        {
+          "dtag": "MC13TeV_VectorMediator_V_gDM0.5_gQ0.5_Mx200_Mmed5000_Fake", 
+          "xsec": 3.1585E-7, 
+          "split": 1, 
+          "wimpweights": "${CMSSW_BASE}/src/llvvAnalysis/DMAnalysis/data/weights/weights_VectorMediator_V_pp2Zxx_gDM0.5_gQ0.5_Mx200_Mmed5000.root"
+        }
+      ], 
+      "fill": 0, 
+      "spimpose": true, 
+      "lcolor": "616", 
+      "lstyle": 1
+    }, 
+    {
+      "isdata": false, 
+      "color": "626", 
+      "issignal": true, 
+      "tag": "Vector_gQgDM(0.5)mx(200)M(5000)", 
+      "lwidth": 2, 
+      "marker": 626, 
+      "data": [
+        {
+          "dtag": "MC13TeV_VectorMediator_V_gDM0.5_gQ0.5_Mx200_Mmed5000", 
+          "xsec": 3.1585E-7, 
+          "split": 1
+        }
+      ], 
+      "fill": 0, 
+      "spimpose": true, 
+      "lcolor": "626", 
+      "lstyle": 1
+    }
+  ]
+}
