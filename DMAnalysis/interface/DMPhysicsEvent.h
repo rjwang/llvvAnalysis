@@ -82,8 +82,8 @@ public :
 //
 class PhysicsObject_Jet : public LorentzVector {
 public :
-    PhysicsObject_Jet(LorentzVector vec, Float_t pumva_/*, Bool_t isPFLoose_, Bool_t isPFTight_*/):
-        LorentzVector(vec), pumva(pumva_)/*, isPFLoose(isPFLoose_), isPFTight(isPFTight_)*/ { }
+    PhysicsObject_Jet(LorentzVector vec, Float_t pumva_, Bool_t isPFLoose_, Bool_t isPFTight_):
+        LorentzVector(vec), pumva(pumva_), isPFLoose(isPFLoose_), isPFTight(isPFTight_) { }
 
     void setBtagInfo(Float_t btag0_=0, Float_t btag1_=0, Float_t btag2_=0, Float_t btag3_=0, Float_t btag4_=0, Float_t btag5_=0, Float_t btag6_=0, Float_t btag7_=0) {
         btag0=btag0_;
@@ -103,7 +103,7 @@ public :
 
     Float_t btag0, btag1, btag2, btag3, btag4, btag5, btag6, btag7;
     Float_t pumva;
-    //Bool_t isPFLoose,isPFTight;
+    Bool_t isPFLoose,isPFTight;
     Int_t flavid;
 
 };
@@ -111,7 +111,7 @@ public :
 
 typedef std::vector<PhysicsObject>        PhysicsObjectCollection;
 typedef std::vector<PhysicsObject_Lepton> PhysicsObjectLeptonCollection;
-typedef std::vector<PhysicsObject_Jet> PhysicsObjectJetCollection;
+typedef std::vector<PhysicsObject_Jet>    PhysicsObjectJetCollection;
 
 //
 struct PhysicsEvent_t {

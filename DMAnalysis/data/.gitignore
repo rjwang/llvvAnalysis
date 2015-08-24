@@ -11,6 +11,8 @@ LSFJOB*
 # no python init file
 python/__init__.py
 
+dumpJsonfile_Phys14.py
+html
 # no private directory
 backup
 private

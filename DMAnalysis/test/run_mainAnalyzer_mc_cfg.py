@@ -2,6 +2,8 @@ import FWCore.ParameterSet.Config as cms
 
 from llvvAnalysis.DMAnalysis.mainAnalyzer_cfi import *
 
+process.mainAnalyzer.isMC = cms.bool(True)
+
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.FwkReport.reportEvery = 5000
 
@@ -23,7 +25,9 @@ process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 #process.GlobalTag.globaltag = 'PLS170_V6AN1::All'
 #global tag for PHYS14 asymptotic 25ns scenario
 #process.GlobalTag.globaltag = 'PHYS14_25_V3::All'
-process.GlobalTag.globaltag = 'PHYS14_25_V1::All'
+#process.GlobalTag.globaltag = 'MCRUN2_74_V9A::All'
+
+process.GlobalTag.globaltag = 'MCRUN2_74_V9'
 
 
 
@@ -43,8 +47,16 @@ dataFormat = DataFormat.MiniAOD
 switchOnVIDElectronIdProducer(process, dataFormat)
 
 # define which IDs we want to produce
-my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V2_cff',
-                 'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV51_cff']
+## 25ns
+#my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V2_cff',
+#                 'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV51_cff']
+my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Spring15_25ns_V1_cff',
+                 'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV60_cff']
+## 50ns
+#my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_CSA14_50ns_V1_cff',
+#                 'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV51_cff']
+
+
 
 #add them to the VID producer
 for idmod in my_id_modules:

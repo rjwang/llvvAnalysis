@@ -130,6 +130,7 @@ private:
     TSelectionMonitor controlHistos_;
     bool isPythia8_;
     bool isMC_;
+    bool verbose_;
 
 
     edm::EDGetTokenT<double> rhoAllTag_;
@@ -227,6 +228,7 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
     controlHistos_(	iConfig.getParameter<std::string>("dtag")							),
     isPythia8_(		iConfig.getParameter<bool>("isPythia8")								),
     isMC_(		iConfig.getParameter<bool>("isMC")								),
+    verbose_(		iConfig.getParameter<bool>("verbose")								),
     rhoAllTag_(			consumes<double>(iConfig.getParameter<edm::InputTag>("rhoAll"))				),
     rhoFastjetAllTag_(  	consumes<double>(iConfig.getParameter<edm::InputTag>("rhoFastjetAll")) 			),
     rhoFastjetAllCaloTag_( 	consumes<double>(iConfig.getParameter<edm::InputTag>("rhoFastjetAllCalo")) 		),
@@ -264,9 +266,16 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
 
 
     //set up electron MVA ID
+
+    //twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2
+    //twiki.cern.ch/twiki/bin/viewauth/CMS/MultivariateElectronIdentificationRun2
+    //twiki.cern.ch/twiki/bin/viewauth/CMS/HEEPElectronIdentificationRun2
     std::vector<std::string> myTrigWeights;
-    myTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/TrigIDMVA_25ns_EB_BDT.weights.xml").fullPath().c_str());
-    myTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/TrigIDMVA_25ns_EE_BDT.weights.xml").fullPath().c_str());
+//    myTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/TrigIDMVA_25ns_EB_BDT.weights.xml").fullPath().c_str());
+//    myTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/TrigIDMVA_25ns_EE_BDT.weights.xml").fullPath().c_str());
+    myTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/TrigIDMVA_50ns_EB_BDT.weights.xml").fullPath().c_str());
+    myTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/TrigIDMVA_50ns_EE_BDT.weights.xml").fullPath().c_str());
+
 
     myMVATrig = new EGammaMvaEleEstimatorCSA14();
     myMVATrig->initialize("BDT",
@@ -275,10 +284,15 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
                           myTrigWeights);
 
     std::vector<std::string> myNonTrigWeights;
-    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EB_5_25ns_BDT.weights.xml").fullPath().c_str());
-    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EE_5_25ns_BDT.weights.xml").fullPath().c_str());
-    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EB_10_25ns_BDT.weights.xml").fullPath().c_str());
-    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EE_10_25ns_BDT.weights.xml").fullPath().c_str());
+//    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EB_5_25ns_BDT.weights.xml").fullPath().c_str());
+//    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EE_5_25ns_BDT.weights.xml").fullPath().c_str());
+//    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EB_10_25ns_BDT.weights.xml").fullPath().c_str());
+//    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EE_10_25ns_BDT.weights.xml").fullPath().c_str());
+    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EB_5_50ns_BDT.weights.xml").fullPath().c_str());
+    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EE_5_50ns_BDT.weights.xml").fullPath().c_str());
+    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EB_10_50ns_BDT.weights.xml").fullPath().c_str());
+    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EE_10_50ns_BDT.weights.xml").fullPath().c_str());
+
 
     myMVANonTrig = new EGammaMvaEleEstimatorCSA14();
     myMVANonTrig->initialize("BDT",
@@ -324,11 +338,14 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
 
     // Pruned particles are the one containing "important" stuff
     edm::Handle<edm::View<reco::GenParticle> > pruned;
-    event.getByToken(prunedGenTag_,pruned);
+    //event.getByToken(prunedGenTag_,pruned);
 
 
     //MC truth
-    getMCtruth(event, iSetup);
+    if(isMC_) {
+        event.getByToken(prunedGenTag_,pruned);
+        getMCtruth(event, iSetup);
+    }
 
     //
     // trigger
@@ -350,15 +367,17 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
 //    bool hasDoubleTauTrigs(false);
 
     const edm::TriggerNames &names = event.triggerNames(*triggerBits);
-/*
-    std::cout << "\n === TRIGGER PATHS === " << std::endl;
-    for (unsigned int i = 0, n = triggerBits->size(); i < n; ++i) {
-        std::cout << "Trigger " << names.triggerName(i) <<
-                  ", prescale " << triggerPrescales->getPrescaleForIndex(i) <<
-                  ": " << (triggerBits->accept(i) ? "PASS" : "fail (or not run)")
-                  << std::endl;
+
+    if (verbose_) {
+        std::cout << "\n === TRIGGER PATHS === " << std::endl;
+        for (unsigned int i = 0, n = triggerBits->size(); i < n; ++i) {
+            std::cout << "Trigger " << names.triggerName(i) <<
+                      ", prescale " << triggerPrescales->getPrescaleForIndex(i) <<
+                      ": " << (triggerBits->accept(i) ? "PASS" : "fail (or not run)")
+                      << std::endl;
+        }
     }
-*/
+
     for(size_t it=0; it<DoubleMuTrigs_.size(); it++) {
         hasDoubleMuTrigs |= checkIfTriggerFired(triggerBits, names, DoubleMuTrigs_[it]);
     }
@@ -385,9 +404,12 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
                      | ( hasDoubleEleTrigs << 2 )
                      | ( hasSingleEleTrigs << 3 )
                      | ( hasMuEGTrigs	 << 4 );
-                     //| ( hasDoubleTauTrigs << 5 );
+    //| ( hasDoubleTauTrigs << 5 );
 
-    if(!isMC_ && !ev.hasTrigger) return; // skip the event if no trigger
+    //if(!isMC_ && !ev.hasTrigger) return; // skip the event if no trigger, only for Data
+    if(!ev.hasTrigger) return; // skip the event if no trigger, for both Data and MC
+
+
 
     //
     // vertex and beam spot
@@ -608,7 +630,7 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
         float absiso = pfIso.sumChargedHadronPt + max(0.0 , pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - 0.5 * pfIso.sumPUPt );
         ev.en_relIsoWithDBeta[ev.en] = absiso/pt_;
 
-	// this part should move to DMPhysicsEvent.h
+        // this part should move to DMPhysicsEvent.h
 
         // Conversion rejection
         ev.en_MissingHits[ev.en] = el->gsfTrack()->hitPattern().numberOfHits(reco::HitPattern::MISSING_INNER_HITS);
@@ -632,7 +654,8 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
         //
         // Explicit loop over gen candidates method
         //
-        ev.en_istrue[ev.en] = matchToTruth( *el, pruned);
+        if(isMC_) ev.en_istrue[ev.en] = matchToTruth( *el, pruned);
+        else ev.en_istrue[ev.en] = 0;
 
         ev.en++;
     }
@@ -653,25 +676,25 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
         ev.ta_en[ev.ta] = tau.energy();
         ev.ta_id[ev.ta] = 15*tau.charge();
 
-	//Decay Mode Reconstruction
+        //Decay Mode Reconstruction
         ev.ta_dm[ev.ta] = bool(tau.tauID("decayModeFinding"));
         ev.ta_newdm[ev.ta] = bool(tau.tauID("decayModeFindingNewDMs"));
 
-	//Isolation
+        //Isolation
         ev.ta_IsLooseIso[ev.ta] = bool(tau.tauID("byLooseCombinedIsolationDeltaBetaCorr3Hits"));
         ev.ta_IsMediumIso[ev.ta] = bool(tau.tauID("byMediumCombinedIsolationDeltaBetaCorr3Hits"));
         ev.ta_IsTightIso[ev.ta] = bool(tau.tauID("byTightCombinedIsolationDeltaBetaCorr3Hits"));
-	ev.ta_combIsoDBeta3Hits[ev.ta] = tau.tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits");
-	ev.ta_chargedIso[ev.ta] = tau.tauID("chargedIsoPtSum");
-	ev.ta_neutralIso[ev.ta] = tau.tauID("neutralIsoPtSum");
-	ev.ta_pileupIso[ev.ta]  = tau.tauID("puCorrPtSum");
+        ev.ta_combIsoDBeta3Hits[ev.ta] = tau.tauID("byCombinedIsolationDeltaBetaCorrRaw3Hits");
+        ev.ta_chargedIso[ev.ta] = tau.tauID("chargedIsoPtSum");
+        ev.ta_neutralIso[ev.ta] = tau.tauID("neutralIsoPtSum");
+        ev.ta_pileupIso[ev.ta]  = tau.tauID("puCorrPtSum");
 
-	//Electron Rejection
+        //Electron Rejection
         ev.ta_passEleVetoLoose[ev.ta] = bool(tau.tauID("againstElectronLooseMVA5"));
         ev.ta_passEleVetoMedium[ev.ta] = bool(tau.tauID("againstElectronMediumMVA5"));
         ev.ta_passEleVetoTight[ev.ta] = bool(tau.tauID("againstElectronTightMVA5"));
 
-	//Muon Rejection
+        //Muon Rejection
         ev.ta_passMuVetoLoose3[ev.ta] = bool(tau.tauID("againstMuonLoose3"));
         ev.ta_passMuVetoTight3[ev.ta] = bool(tau.tauID("againstMuonTight3") );
 
@@ -693,13 +716,13 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
     for (const pat::Jet &j : *jets) {
         if(j.pt() < 20) continue;
 
-	//jet id
+        //jet id
         hasLooseId.set(false);
         hasTightId.set(false);
         bool passLooseId(looseJetIdSelector( j, hasLooseId ));
         bool passTightId(tightJetIdSelector( j, hasTightId ));
-	ev.jet_PFLoose[ev.jet] = passLooseId;
-	ev.jet_PFTight[ev.jet] = passTightId;
+        ev.jet_PFLoose[ev.jet] = passLooseId;
+        ev.jet_PFTight[ev.jet] = passTightId;
 
         ev.jet_px[ev.jet] = j.correctedP4(0).px();
         ev.jet_py[ev.jet] = j.correctedP4(0).py();
@@ -894,14 +917,14 @@ MainAnalyzer::getMCtruth(const edm::Event& event, const edm::EventSetup& iSetup)
 
     if(isPythia8_) {
 
-	std::vector<const reco::Candidate*> prunedV;
-	for(size_t i=0; i<packed->size(); i++) {
-	    const Candidate * genParticle = &(*packed)[i];
-	    int pid=genParticle->pdgId();
-	    if(abs(pid) == 2000012 || abs(pid) == 5000039) {
-		prunedV.push_back(genParticle);
-	    }
-	}
+        std::vector<const reco::Candidate*> prunedV;
+        for(size_t i=0; i<packed->size(); i++) {
+            const Candidate * genParticle = &(*packed)[i];
+            int pid=genParticle->pdgId();
+            if(abs(pid) == 2000012 || abs(pid) == 5000039) {
+                prunedV.push_back(genParticle);
+            }
+        }
 
         //Allows easier comparison for mother finding
         //std::vector<const reco::Candidate*> prunedV;
@@ -929,7 +952,7 @@ MainAnalyzer::getMCtruth(const edm::Event& event, const edm::EventSetup& iSetup)
                 if(mom) {
                     int pid=prunedV[i]->pdgId();
                     int mompid = mom->pdgId();
-		    //cout << "pid: " << pid << " mom: " << mompid << endl;
+                    //cout << "pid: " << pid << " mom: " << mompid << endl;
                     if(abs(pid) !=2000012 && abs(pid)!=5000039 && abs(mompid)!=23 && abs(mompid)!=24 && abs(mompid)!=25) continue;
                     if(prunedV[i]->status()!=1 && prunedV[i]->status()!=2) continue;
 

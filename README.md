@@ -12,6 +12,7 @@ Prepare:
 	scramv1 project CMSSW CMSSW_7_4_2
 	cd CMSSW_7_4_2/src
 	cmsenv
+	git cms-merge-topic ikrav:egm_id_747_v2
 
 MiniAOD PHYS14:
 

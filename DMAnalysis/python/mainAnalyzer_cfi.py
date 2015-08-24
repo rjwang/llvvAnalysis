@@ -13,6 +13,7 @@ process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True),
 process.mainAnalyzer = cms.EDAnalyzer('MainAnalyzer',
     dtag = cms.string('llvv'),
     isMC = cms.bool(True),
+    verbose = cms.bool(False),
     isPythia8 = cms.bool(True),
 
     beamSpotTag = cms.InputTag("offlineBeamSpot"),
@@ -28,11 +29,19 @@ process.mainAnalyzer = cms.EDAnalyzer('MainAnalyzer',
     muonsTag = cms.InputTag("slimmedMuons"),
 
     electronsTag = cms.InputTag("slimmedElectrons"),
-    	electronVetoIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-veto"),
-	electronLooseIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-loose"),
-	electronMediumIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-medium"),
-    	electronTightIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-PHYS14-PU20bx25-V2-standalone-tight"),
-	electronHEEPIdTag = cms.InputTag("egmGsfElectronIDs:heepElectronID-HEEPV51"),
+	## 25ns
+    	electronVetoIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-veto"),
+	electronLooseIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-loose"),
+	electronMediumIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-medium"),
+    	electronTightIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-tight"),
+	electronHEEPIdTag = cms.InputTag("egmGsfElectronIDs:heepElectronID-HEEPV60"),
+	## 50ns
+#    	electronVetoIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-CSA14-50ns-V1-standalone-veto"),
+#	electronLooseIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-CSA14-50ns-V1-standalone-loose"),
+#	electronMediumIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-CSA14-50ns-V1-standalone-medium"),
+#    	electronTightIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-CSA14-50ns-V1-standalone-tight"),
+#	electronHEEPIdTag = cms.InputTag("egmGsfElectronIDs:heepElectronID-HEEPV51"),
+
 
     tausTag = cms.InputTag("slimmedTaus"),
 
@@ -52,21 +61,18 @@ process.mainAnalyzer = cms.EDAnalyzer('MainAnalyzer',
     prescales = cms.InputTag("patTrigger"),
     objects = cms.InputTag("selectedPatTrigger"),
 
-    	DoubleMuTrigs = cms.vstring("HLT_Mu17_Mu8",
-					"HLT_Mu17_TkMu8",
-					"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL",
-					"HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL"
-				   ),
+    	DoubleMuTrigs = cms.vstring("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v",
+					"HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v",
+					"HLT_Mu27_TkMu8_v"),
 
-    	DoubleEleTrigs = cms.vstring("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL",
-					"HLT_Ele20WP60_Ele8_Mass55_v",
-					"HLT_Ele25WP60_SC4_Mass55_v",
-					"HLT_DoubleEle33_CaloIdL_GsfTrkIdVL"),
+    	DoubleEleTrigs = cms.vstring("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v",
+					"HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v",
+					"HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf_v"),
 
     	SingleMuTrigs = cms.vstring("HLT_IsoMu20_v",
 					"HLT_IsoTkMu20_v"),
 
-    	SingleEleTrigs = cms.vstring("HLT_Ele27_WP85_Gsf_v"),
+    	SingleEleTrigs = cms.vstring("HLT_Ele27_eta2p1_WPLoose_Gsf_v"),
 
    	MuEGTrigs = cms.vstring("HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v",
 					"HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v"),
