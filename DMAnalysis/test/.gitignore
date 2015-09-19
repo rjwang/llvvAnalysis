@@ -16,4 +16,8 @@ checkDAS.sh
 backup
 private
 local
-crab
+crab_mc
+crab_data
+pickupEvents
+uploadtoEOS.csh
+tandp

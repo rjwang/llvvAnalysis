@@ -201,6 +201,13 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("met_pt",               	&evSummary_.met_pt,                 "met_pt/F");
     t_->Branch("met_phi",               &evSummary_.met_phi,                "met_phi/F");
     t_->Branch("met_sumMET",            &evSummary_.met_sumMET,             "met_sumMET/F");
+    t_->Branch("rawpfmet_pt",               	&evSummary_.rawpfmet_pt,                 "rawpfmet_pt/F");
+    t_->Branch("rawpfmet_phi",               &evSummary_.rawpfmet_phi,                "rawpfmet_phi/F");
+    t_->Branch("rawpfmet_sumMET",            &evSummary_.rawpfmet_sumMET,             "rawpfmet_sumMET/F");
+    t_->Branch("rawcalomet_pt",               	&evSummary_.rawcalomet_pt,                 "rawcalomet_pt/F");
+    t_->Branch("rawcalomet_phi",               &evSummary_.rawcalomet_phi,                "rawcalomet_phi/F");
+    t_->Branch("rawcalomet_sumMET",            &evSummary_.rawcalomet_sumMET,             "rawcalomet_sumMET/F");
+
 
     t_->Branch("flag_HBHENoiseFilter",                      &evSummary_.flag_HBHENoiseFilter,                       "flag_HBHENoiseFilter/O");
     t_->Branch("flag_CSCTightHaloFilter",                   &evSummary_.flag_CSCTightHaloFilter,                    "flag_CSCTightHaloFilter/O");
@@ -415,6 +422,16 @@ bool DataEvtSummaryHandler::attachToTree(TTree *t)
     t_->SetBranchAddress("met_pt",                  &evSummary_.met_pt);
     t_->SetBranchAddress("met_phi",                 &evSummary_.met_phi);
     t_->SetBranchAddress("met_sumMET",              &evSummary_.met_sumMET);
+
+    t_->SetBranchAddress("rawpfmet_pt",                  &evSummary_.rawpfmet_pt);
+    t_->SetBranchAddress("rawpfmet_phi",                 &evSummary_.rawpfmet_phi);
+    t_->SetBranchAddress("rawpfmet_sumMET",              &evSummary_.rawpfmet_sumMET);
+
+    t_->SetBranchAddress("rawcalomet_pt",                  &evSummary_.rawcalomet_pt);
+    t_->SetBranchAddress("rawcalomet_phi",                 &evSummary_.rawcalomet_phi);
+    t_->SetBranchAddress("rawcalomet_sumMET",              &evSummary_.rawcalomet_sumMET);
+
+
 
     t_->SetBranchAddress("flag_HBHENoiseFilter",                      &evSummary_.flag_HBHENoiseFilter);
     t_->SetBranchAddress("flag_CSCTightHaloFilter",                   &evSummary_.flag_CSCTightHaloFilter);

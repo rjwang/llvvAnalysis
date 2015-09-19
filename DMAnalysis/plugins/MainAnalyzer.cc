@@ -259,6 +259,8 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
 //    for(size_t istep=0; istep<nselFilters; istep++) h->GetXaxis()->SetBinLabel(istep+1,selFilters[istep]);
 
     controlHistos_.addHistogram("nevents",";nevents; nevents",1,-0.5,0.5);
+    controlHistos_.addHistogram("n_negevents",";n_negevents; n_negevents",1,-0.5,0.5);
+    controlHistos_.addHistogram("n_posevents",";n_posevents; n_posevents",1,-0.5,0.5);
     controlHistos_.addHistogram("pileup", ";Pileup; Events",100,-0.5,99.5);
     //controlHistos_.addHistogram("integlumi", ";Integrated luminosity ; Events",100,0,1e5);
     //controlHistos_.addHistogram("instlumi", ";Max average inst. luminosity; Events",100,0,1e5);
@@ -779,9 +781,22 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
     edm::Handle<pat::METCollection> mets;
     event.getByToken(metTag_, mets);
     const pat::MET &met = mets->front();
+
+    //PF type-1 ETmiss
     ev.met_pt = met.pt();
     ev.met_phi = met.phi();
     ev.met_sumMET = met.sumEt();
+
+    // raw PF ETmiss
+    ev.rawpfmet_pt = met.uncorrectedPt();
+    ev.rawpfmet_phi = met.uncorrectedPhi();
+    ev.rawpfmet_sumMET = met.uncorrectedSumEt();
+
+    // raw calo ETmiss
+    ev.rawcalomet_pt = met.caloMETPt();
+    ev.rawcalomet_phi = met.caloMETPhi();
+    ev.rawcalomet_sumMET = met.caloMETSumEt();
+
 
     //met filters
     edm::Handle<edm::TriggerResults> metFilterBits;
@@ -860,7 +875,7 @@ MainAnalyzer::getMCtruth(const edm::Event& event, const edm::EventSetup& iSetup)
 {
     DataEvtSummary_t &ev=summaryHandler_.getEvent();
     ev.nmcparticles = 0;
-    if(event.isRealData()) return;
+    //if(event.isRealData()) return;
 
     edm::Handle<std::vector<PileupSummaryInfo> > puInfoH;
     event.getByLabel("addPileupInfo", puInfoH);
@@ -884,21 +899,22 @@ MainAnalyzer::getMCtruth(const edm::Event& event, const edm::EventSetup& iSetup)
     controlHistos_.fillHisto("pileuptrue","all",truePU);
 
 
+
     //retrieve pdf info
     edm::Handle<GenEventInfoProduct> genEventInfoProd;
     event.getByLabel("generator", genEventInfoProd);
-    if(genEventInfoProd.isValid()) {
-        ev.genWeight = genEventInfoProd->weight();
-        ev.qscale = genEventInfoProd->qScale();
-        if(genEventInfoProd->pdf()) {
-            ev.x1  = genEventInfoProd->pdf()->x.first;
-            ev.x2  = genEventInfoProd->pdf()->x.second;
-            ev.id1 = genEventInfoProd->pdf()->id.first;
-            ev.id2 = genEventInfoProd->pdf()->id.second;
-        }
-        if(genEventInfoProd->binningValues().size()>0) ev.pthat = genEventInfoProd->binningValues()[0];
+    ev.genWeight = genEventInfoProd->weight();
+    ev.qscale = genEventInfoProd->qScale();
+    if(genEventInfoProd->pdf()) {
+        ev.x1  = genEventInfoProd->pdf()->x.first;
+        ev.x2  = genEventInfoProd->pdf()->x.second;
+        ev.id1 = genEventInfoProd->pdf()->id.first;
+        ev.id2 = genEventInfoProd->pdf()->id.second;
     }
+    if(genEventInfoProd->binningValues().size()>0) ev.pthat = genEventInfoProd->binningValues()[0];
 
+    if(ev.genWeight<0) controlHistos_.fillHisto("n_negevents","all",0); //increment negative event count
+    if(ev.genWeight>0) controlHistos_.fillHisto("n_posevents","all",0); //increment positive event count
 
     //
     // gen particles

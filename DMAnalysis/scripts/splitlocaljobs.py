@@ -14,7 +14,7 @@ with open(allsubmits) as fp:
     SCRIPT.writelines('cd $CMSSW_BASE/src/llvvAnalysis/DMAnalysis/; \n\n')
 
     for line in fp:
-	if 'run2014_' in line:
+	if 'run2014_' in line or 'run2015_' in line:
 		SCRIPT.writelines(line+'\n')
 	if 'sleep 25' in line:
 		count = count + 1

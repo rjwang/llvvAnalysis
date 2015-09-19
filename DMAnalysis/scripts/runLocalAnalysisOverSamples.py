@@ -156,7 +156,7 @@ for proc in procList :
                 sedcmd += 's%@brnew%' +str(getByLabel(d,'brnew' ,-1))+'%;'
                 sedcmd += 's%@suffix%' +suffix+'%;'
 		sedcmd += 's%@tag%' +str(getByLabel(desc,'tag',-1))+'%;'#RJ
-		sedcmd += 's%@wimpweights%' +str(getByLabel(d,'wimpweights',-1))+'%;'#RJ
+		#sedcmd += 's%@wimpweights%' +str(getByLabel(d,'wimpweights',-1))+'%;'#RJ
             	if(params.find('@useMVA')<0) :          params = '@useMVA=False ' + params
                 if(params.find('@weightsFile')<0) :     params = '@weightsFile= ' + params
                 if(params.find('@evStart')<0) :         params = '@evStart=0 ' + params

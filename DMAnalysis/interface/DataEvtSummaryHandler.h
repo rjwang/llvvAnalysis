@@ -100,6 +100,8 @@ struct DataEvtSummary_t {
 
     //met
     Float_t met_pt,met_phi,met_sumMET;
+    Float_t rawpfmet_pt,rawpfmet_phi,rawpfmet_sumMET;
+    Float_t rawcalomet_pt,rawcalomet_phi,rawcalomet_sumMET;
     Bool_t flag_HBHENoiseFilter,flag_CSCTightHaloFilter,flag_hcalLaserEventFilter,flag_EcalDeadCellTriggerPrimitiveFilter,flag_goodVertices;
     Bool_t flag_trackingFailureFilter,flag_eeBadScFilter,flag_ecalLaserCorrFilter,flag_trkPOGFilters,flag_trkPOG_manystripclus53X,flag_trkPOG_toomanystripclus53X;
     Bool_t flag_trkPOG_logErrorTooManyClusters,flag_METFilters;
