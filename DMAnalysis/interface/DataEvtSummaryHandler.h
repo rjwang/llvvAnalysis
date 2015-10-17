@@ -68,7 +68,9 @@ struct DataEvtSummary_t {
     Float_t en_pileupIso[MAXPARTICLES],en_chargedIso[MAXPARTICLES],en_photonIso[MAXPARTICLES],en_neutralHadIso[MAXPARTICLES];
     Float_t en_relIsoWithEA[MAXPARTICLES],en_relIsoWithDBeta[MAXPARTICLES],en_MissingHits[MAXPARTICLES],en_passConversionVeto[MAXPARTICLES];
     Bool_t en_passVeto[MAXPARTICLES],en_passLoose[MAXPARTICLES],en_passMedium[MAXPARTICLES],en_passTight[MAXPARTICLES],en_passHEEP[MAXPARTICLES];
-    Float_t en_IDMVATrig[MAXPARTICLES],en_IDMVANonTrig[MAXPARTICLES];
+    Bool_t en_passMVATrigMedium[MAXPARTICLES], en_passMVATrigTight[MAXPARTICLES];
+    Float_t en_IDMVATrigValue[MAXPARTICLES];
+    Int_t   en_IDMVATrigCategory[MAXPARTICLES];
     Int_t en_istrue[MAXPARTICLES];
 
 
@@ -86,6 +88,7 @@ struct DataEvtSummary_t {
     Float_t jet_px[MAXPARTICLES],jet_py[MAXPARTICLES],jet_pz[MAXPARTICLES],jet_en[MAXPARTICLES];
     Float_t jet_btag0[MAXPARTICLES],jet_btag1[MAXPARTICLES],jet_btag2[MAXPARTICLES],jet_btag3[MAXPARTICLES];
     Float_t jet_btag4[MAXPARTICLES],jet_btag5[MAXPARTICLES],jet_btag6[MAXPARTICLES],jet_btag7[MAXPARTICLES];
+    Float_t jet_btag8[MAXPARTICLES],jet_btag9[MAXPARTICLES],jet_btag10[MAXPARTICLES];
     Float_t jet_mass[MAXPARTICLES],jet_area[MAXPARTICLES],jet_pu[MAXPARTICLES],jet_puId[MAXPARTICLES];
     Bool_t jet_PFLoose[MAXPARTICLES], jet_PFTight[MAXPARTICLES];
     Int_t jet_partonFlavour[MAXPARTICLES], jet_hadronFlavour[MAXPARTICLES];
@@ -100,6 +103,7 @@ struct DataEvtSummary_t {
 
     //met
     Float_t met_pt,met_phi,met_sumMET;
+    Float_t metNoHF_pt,metNoHF_phi,metNoHF_sumMET;
     Float_t rawpfmet_pt,rawpfmet_phi,rawpfmet_sumMET;
     Float_t rawcalomet_pt,rawcalomet_phi,rawcalomet_sumMET;
     Bool_t flag_HBHENoiseFilter,flag_CSCTightHaloFilter,flag_hcalLaserEventFilter,flag_EcalDeadCellTriggerPrimitiveFilter,flag_goodVertices;

@@ -34,6 +34,7 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
 #include "DataFormats/PatCandidates/interface/Photon.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -54,6 +55,10 @@
 #include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 #include "SimDataFormats/TrackingAnalysis/interface/TrackingVertexContainer.h"
 
+#include "DataFormats/EgammaCandidates/interface/ConversionFwd.h"
+#include "DataFormats/EgammaCandidates/interface/Conversion.h"
+#include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
+
 
 //
 #include "FWCore/Common/interface/TriggerNames.h"
@@ -69,7 +74,7 @@
 
 
 #include "DataFormats/Common/interface/ValueMap.h"
-#include "llvvAnalysis/DMAnalysis/interface/EGammaMvaEleEstimatorCSA14.h"
+//#include "llvvAnalysis/DMAnalysis/interface/EGammaMvaEleEstimatorCSA14.h"
 
 
 //
@@ -112,6 +117,7 @@ private:
     edm::EDGetTokenT<pat::JetCollection> jetTag_;
     edm::EDGetTokenT<pat::JetCollection> fatjetTag_;
     edm::EDGetTokenT<pat::METCollection> metTag_;
+    edm::EDGetTokenT<pat::METCollection> metNoHFTag_;
     edm::EDGetTokenT<edm::TriggerResults> metFilterBitsTag_;
 
     edm::EDGetTokenT<edm::View<reco::GenParticle> > prunedGenTag_;
@@ -144,9 +150,18 @@ private:
 //    std::map<std::string, edm::ParameterSet> objConfig_;
 
     //MVAs for triggering and non-triggering electron ID
-    EGammaMvaEleEstimatorCSA14* myMVATrig;
-    EGammaMvaEleEstimatorCSA14* myMVANonTrig;
+    //EGammaMvaEleEstimatorCSA14* myMVATrig;
+    //EGammaMvaEleEstimatorCSA14* myMVANonTrig;
 
+
+
+    // ID decisions objects
+    edm::EDGetTokenT<edm::ValueMap<bool> > eleMediumIdMapTokenTrig_;
+    edm::EDGetTokenT<edm::ValueMap<bool> > eleTightIdMapTokenTrig_;
+
+    // MVA values and categories (optional)
+    edm::EDGetTokenT<edm::ValueMap<float> > mvaValuesMapTokenTrig_;
+    edm::EDGetTokenT<edm::ValueMap<int> >mvaCategoriesMapTokenTrig_;
 
 
     virtual void beginJob() override;
@@ -212,6 +227,7 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
     jetTag_(		consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jetsTag"))			),
     fatjetTag_(		consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("fatjetsTag"))			),
     metTag_(		consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("metsTag"))			),
+    metNoHFTag_(        consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("metsNoHFTag"))                ),
     metFilterBitsTag_(	consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("metFilterBitsTag"))		),
     prunedGenTag_(	consumes<edm::View<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("prunedTag"))	),
     packedGenTag_(	consumes<edm::View<pat::PackedGenParticle> >(iConfig.getParameter<edm::InputTag>("packedTag"))	),
@@ -235,6 +251,10 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
     rhoFastjetCentralCaloTag_(  consumes<double>(iConfig.getParameter<edm::InputTag>("rhoFastjetCentralCalo")) 		),
     rhoFastjetCentralChargedPileUpTag_(  consumes<double>(iConfig.getParameter<edm::InputTag>("rhoFastjetCentralChargedPileUp")) ),
     rhoFastjetCentralNeutralTag_(  	consumes<double>(iConfig.getParameter<edm::InputTag>("rhoFastjetCentralNeutral"))	 ),
+    eleMediumIdMapTokenTrig_(	consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("eleMediumIdMapTrig"))	),
+    eleTightIdMapTokenTrig_(	consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("eleTightIdMapTrig"))	),
+    mvaValuesMapTokenTrig_(	consumes<edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("mvaValuesMapTrig"))	),
+    mvaCategoriesMapTokenTrig_(	consumes<edm::ValueMap<int> >(iConfig.getParameter<edm::InputTag>("mvaCategoriesMapTrig"))	),
     curAvgInstLumi_(0),
     curIntegLumi_(0)
 
@@ -268,41 +288,41 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
 
 
     //set up electron MVA ID
-
-    //twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2
-    //twiki.cern.ch/twiki/bin/viewauth/CMS/MultivariateElectronIdentificationRun2
-    //twiki.cern.ch/twiki/bin/viewauth/CMS/HEEPElectronIdentificationRun2
-    std::vector<std::string> myTrigWeights;
-//    myTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/TrigIDMVA_25ns_EB_BDT.weights.xml").fullPath().c_str());
-//    myTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/TrigIDMVA_25ns_EE_BDT.weights.xml").fullPath().c_str());
-    myTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/TrigIDMVA_50ns_EB_BDT.weights.xml").fullPath().c_str());
-    myTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/TrigIDMVA_50ns_EE_BDT.weights.xml").fullPath().c_str());
-
-
-    myMVATrig = new EGammaMvaEleEstimatorCSA14();
-    myMVATrig->initialize("BDT",
-                          EGammaMvaEleEstimatorCSA14::kTrig,
-                          true,
-                          myTrigWeights);
-
-    std::vector<std::string> myNonTrigWeights;
-//    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EB_5_25ns_BDT.weights.xml").fullPath().c_str());
-//    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EE_5_25ns_BDT.weights.xml").fullPath().c_str());
-//    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EB_10_25ns_BDT.weights.xml").fullPath().c_str());
-//    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EE_10_25ns_BDT.weights.xml").fullPath().c_str());
-    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EB_5_50ns_BDT.weights.xml").fullPath().c_str());
-    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EE_5_50ns_BDT.weights.xml").fullPath().c_str());
-    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EB_10_50ns_BDT.weights.xml").fullPath().c_str());
-    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EE_10_50ns_BDT.weights.xml").fullPath().c_str());
+    /*
+        //twiki.cern.ch/twiki/bin/viewauth/CMS/CutBasedElectronIdentificationRun2
+        //twiki.cern.ch/twiki/bin/viewauth/CMS/MultivariateElectronIdentificationRun2
+        //twiki.cern.ch/twiki/bin/viewauth/CMS/HEEPElectronIdentificationRun2
+        std::vector<std::string> myTrigWeights;
+    //    myTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/TrigIDMVA_25ns_EB_BDT.weights.xml").fullPath().c_str());
+    //    myTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/TrigIDMVA_25ns_EE_BDT.weights.xml").fullPath().c_str());
+        myTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/TrigIDMVA_50ns_EB_BDT.weights.xml").fullPath().c_str());
+        myTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/TrigIDMVA_50ns_EE_BDT.weights.xml").fullPath().c_str());
 
 
-    myMVANonTrig = new EGammaMvaEleEstimatorCSA14();
-    myMVANonTrig->initialize("BDT",
-                             EGammaMvaEleEstimatorCSA14::kNonTrig,
-                             true,
-                             myNonTrigWeights);
+        myMVATrig = new EGammaMvaEleEstimatorCSA14();
+        myMVATrig->initialize("BDT",
+                              EGammaMvaEleEstimatorCSA14::kTrig,
+                              true,
+                              myTrigWeights);
+
+        std::vector<std::string> myNonTrigWeights;
+    //    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EB_5_25ns_BDT.weights.xml").fullPath().c_str());
+    //    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EE_5_25ns_BDT.weights.xml").fullPath().c_str());
+    //    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EB_10_25ns_BDT.weights.xml").fullPath().c_str());
+    //    myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EE_10_25ns_BDT.weights.xml").fullPath().c_str());
+        myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EB_5_50ns_BDT.weights.xml").fullPath().c_str());
+        myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EE_5_50ns_BDT.weights.xml").fullPath().c_str());
+        myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EB_10_50ns_BDT.weights.xml").fullPath().c_str());
+        myNonTrigWeights.push_back(edm::FileInPath("llvvAnalysis/DMAnalysis/data/CSA14/EIDmva_EE_10_50ns_BDT.weights.xml").fullPath().c_str());
 
 
+        myMVANonTrig = new EGammaMvaEleEstimatorCSA14();
+        myMVANonTrig->initialize("BDT",
+                                 EGammaMvaEleEstimatorCSA14::kNonTrig,
+                                 true,
+                                 myNonTrigWeights);
+
+    */
 
 
 }
@@ -566,6 +586,22 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
     event.getByToken(electronTightIdTag_,tight_id_decisions);
     event.getByToken(electronHEEPIdTag_,heep_id_decisions);
 
+
+    // Get the electron ID data from the event stream.
+    // Note: this implies that the VID ID modules have been run upstream.
+    // If you need more info, check with the EGM group.
+    edm::Handle<edm::ValueMap<bool> > mvaTrig_medium_id_decisions;
+    edm::Handle<edm::ValueMap<bool> > mvaTrig_tight_id_decisions;
+    event.getByToken(eleMediumIdMapTokenTrig_,mvaTrig_medium_id_decisions);
+    event.getByToken(eleTightIdMapTokenTrig_,mvaTrig_tight_id_decisions);
+
+    // Get MVA values and categories (optional)
+    edm::Handle<edm::ValueMap<float> > mvaTrigValues;
+    edm::Handle<edm::ValueMap<int> > mvaTrigCategories;
+    event.getByToken(mvaValuesMapTokenTrig_,mvaTrigValues);
+    event.getByToken(mvaCategoriesMapTokenTrig_,mvaTrigCategories);
+
+
     ev.en=0;
     //for (const pat::Electron &el : *electrons) {
     for( View<pat::Electron>::const_iterator el = electrons->begin(); el != electrons->end(); el++ ) {
@@ -650,8 +686,13 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
 
         //ID MVA
         //https://twiki.cern.ch/twiki/bin/viewauth/CMS/MultivariateElectronIdentificationRun2
-        ev.en_IDMVATrig[ev.en] = myMVATrig->mvaValue(*el,false);
-        ev.en_IDMVANonTrig[ev.en] = myMVANonTrig->mvaValue(*el,false);
+        ev.en_passMVATrigMedium[ev.en] 	= (*mvaTrig_medium_id_decisions)[ elPtr ];
+        ev.en_passMVATrigTight[ev.en] 	= (*mvaTrig_tight_id_decisions) [ elPtr ];
+        ev.en_IDMVATrigValue[ev.en] 	= (*mvaTrigValues)	        [ elPtr ];
+        ev.en_IDMVATrigCategory[ev.en] 	= (*mvaTrigCategories)		[ elPtr ];
+
+        //ev.en_IDMVATrig[ev.en] = myMVATrig->mvaValue(*el,false);
+        //ev.en_IDMVANonTrig[ev.en] = myMVANonTrig->mvaValue(*el,false);
 
         //
         // Explicit loop over gen candidates method
@@ -731,14 +772,17 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
         ev.jet_pz[ev.jet] = j.correctedP4(0).pz();
         ev.jet_en[ev.jet] = j.correctedP4(0).energy();
 
-        ev.jet_btag0[ev.jet] = j.bDiscriminator("combinedInclusiveSecondaryVertexV2BJetTags");
-        ev.jet_btag1[ev.jet] = j.bDiscriminator("jetBProbabilityBJetTags");
-        ev.jet_btag2[ev.jet] = j.bDiscriminator("jetProbabilityBJetTags");
-        ev.jet_btag3[ev.jet] = j.bDiscriminator("trackCountingHighPurBJetTags");
-        ev.jet_btag4[ev.jet] = j.bDiscriminator("trackCountingHighEffBJetTags");
-        ev.jet_btag5[ev.jet] = j.bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
-        ev.jet_btag6[ev.jet] = j.bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
-        ev.jet_btag7[ev.jet] = j.bDiscriminator("combinedInclusiveSecondaryVertexBJetTags");
+        ev.jet_btag0[ev.jet] = j.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
+        ev.jet_btag1[ev.jet] = j.bDiscriminator("pfJetBProbabilityBJetTags");
+        ev.jet_btag2[ev.jet] = j.bDiscriminator("pfJetProbabilityBJetTags");
+        ev.jet_btag3[ev.jet] = j.bDiscriminator("pfTrackCountingHighPurBJetTags");
+        ev.jet_btag4[ev.jet] = j.bDiscriminator("pfTrackCountingHighEffBJetTags");
+        ev.jet_btag5[ev.jet] = j.bDiscriminator("pfSimpleSecondaryVertexHighEffBJetTags");
+        ev.jet_btag6[ev.jet] = j.bDiscriminator("pfSimpleSecondaryVertexHighPurBJetTags");
+        ev.jet_btag7[ev.jet] = j.bDiscriminator("combinedSecondaryVertexBJetTags");
+        ev.jet_btag8[ev.jet] = j.bDiscriminator("pfCombinedSecondaryVertexV2BJetTags");
+        ev.jet_btag9[ev.jet] = j.bDiscriminator("pfCombinedSecondaryVertexSoftLeptonBJetTags");
+        ev.jet_btag10[ev.jet] = j.bDiscriminator("pfCombinedMVABJetTags");
 
         ev.jet_mass[ev.jet] = j.correctedP4(0).M();
         ev.jet_area[ev.jet] = j.jetArea();
@@ -788,15 +832,25 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
     ev.met_sumMET = met.sumEt();
 
     // raw PF ETmiss
-    ev.rawpfmet_pt = met.uncorrectedPt();
-    ev.rawpfmet_phi = met.uncorrectedPhi();
-    ev.rawpfmet_sumMET = met.uncorrectedSumEt();
+    ev.rawpfmet_pt = met.uncorPt();
+    ev.rawpfmet_phi = met.uncorPhi();
+    ev.rawpfmet_sumMET = met.uncorSumEt();
 
     // raw calo ETmiss
     ev.rawcalomet_pt = met.caloMETPt();
     ev.rawcalomet_phi = met.caloMETPhi();
     ev.rawcalomet_sumMET = met.caloMETSumEt();
 
+
+    // type1 PF MET but excluding HF
+    edm::Handle<pat::METCollection> metsNoHF;
+    event.getByToken(metNoHFTag_, metsNoHF);
+    if(metsNoHF.isValid()) {
+        const pat::MET &metNoHF = metsNoHF->front();
+        ev.metNoHF_pt = metNoHF.pt();
+        ev.metNoHF_phi = metNoHF.phi();
+        ev.metNoHF_sumMET = metNoHF.sumEt();
+    }
 
     //met filters
     edm::Handle<edm::TriggerResults> metFilterBits;

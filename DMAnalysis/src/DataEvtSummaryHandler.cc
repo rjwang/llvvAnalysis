@@ -129,8 +129,10 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("en_passMedium",         evSummary_.en_passMedium,           "en_passMedium[en]/O");
     t_->Branch("en_passTight",          evSummary_.en_passTight,            "en_passTight[en]/O");
     t_->Branch("en_passHEEP",           evSummary_.en_passHEEP,             "en_passHEEP[en]/O");
-    t_->Branch("en_IDMVATrig",          evSummary_.en_IDMVATrig,            "en_IDMVATrig[en]/F");
-    t_->Branch("en_IDMVANonTrig",       evSummary_.en_IDMVANonTrig,         "en_IDMVANonTrig[en]/F");
+    t_->Branch("en_passMVATrigMedium",  evSummary_.en_passMVATrigMedium,             "en_passMVATrigMedium[en]/O");
+    t_->Branch("en_passMVATrigTight",   evSummary_.en_passMVATrigTight,             "en_passMVATrigTight[en]/O");
+    t_->Branch("en_IDMVATrigValue",     evSummary_.en_IDMVATrigValue,            "en_IDMVATrigValue[en]/F");
+    t_->Branch("en_IDMVATrigCategory",  evSummary_.en_IDMVATrigCategory,         "en_IDMVATrigCategory[en]/I");
     t_->Branch("en_istrue",             evSummary_.en_istrue,               "en_istrue[en]/I");
 
 
@@ -173,6 +175,9 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("jet_btag5",             evSummary_.jet_btag5,               "jet_btag5[jet]/F");
     t_->Branch("jet_btag6",             evSummary_.jet_btag6,               "jet_btag6[jet]/F");
     t_->Branch("jet_btag7",             evSummary_.jet_btag7,               "jet_btag7[jet]/F");
+    t_->Branch("jet_btag8",             evSummary_.jet_btag8,               "jet_btag8[jet]/F");
+    t_->Branch("jet_btag9",             evSummary_.jet_btag9,               "jet_btag9[jet]/F");
+    t_->Branch("jet_btag10",             evSummary_.jet_btag10,               "jet_btag10[jet]/F");
     t_->Branch("jet_mass",              evSummary_.jet_mass,                "jet_mass[jet]/F");
     t_->Branch("jet_area",              evSummary_.jet_area,                "jet_area[jet]/F");
     t_->Branch("jet_pu",                evSummary_.jet_pu,                  "jet_pu[jet]/F");
@@ -207,7 +212,9 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("rawcalomet_pt",               	&evSummary_.rawcalomet_pt,                 "rawcalomet_pt/F");
     t_->Branch("rawcalomet_phi",               &evSummary_.rawcalomet_phi,                "rawcalomet_phi/F");
     t_->Branch("rawcalomet_sumMET",            &evSummary_.rawcalomet_sumMET,             "rawcalomet_sumMET/F");
-
+    t_->Branch("metNoHF_pt",                &evSummary_.metNoHF_pt,                 "metNoHF_pt/F");
+    t_->Branch("metNoHF_phi",               &evSummary_.metNoHF_phi,                "metNoHF_phi/F");
+    t_->Branch("metNoHF_sumMET",            &evSummary_.metNoHF_sumMET,             "metNoHF_sumMET/F");
 
     t_->Branch("flag_HBHENoiseFilter",                      &evSummary_.flag_HBHENoiseFilter,                       "flag_HBHENoiseFilter/O");
     t_->Branch("flag_CSCTightHaloFilter",                   &evSummary_.flag_CSCTightHaloFilter,                    "flag_CSCTightHaloFilter/O");
@@ -350,8 +357,10 @@ bool DataEvtSummaryHandler::attachToTree(TTree *t)
     t_->SetBranchAddress("en_passMedium",           evSummary_.en_passMedium);
     t_->SetBranchAddress("en_passTight",            evSummary_.en_passTight);
     t_->SetBranchAddress("en_passHEEP",             evSummary_.en_passHEEP);
-    t_->SetBranchAddress("en_IDMVATrig",            evSummary_.en_IDMVATrig);
-    t_->SetBranchAddress("en_IDMVANonTrig",         evSummary_.en_IDMVANonTrig);
+    t_->SetBranchAddress("en_passMVATrigMedium",    evSummary_.en_passMVATrigMedium);
+    t_->SetBranchAddress("en_passMVATrigTight",     evSummary_.en_passMVATrigTight);
+    t_->SetBranchAddress("en_IDMVATrigValue",       evSummary_.en_IDMVATrigValue);
+    t_->SetBranchAddress("en_IDMVATrigCategory",    evSummary_.en_IDMVATrigCategory);
     t_->SetBranchAddress("en_istrue",               evSummary_.en_istrue);
 
 
@@ -394,6 +403,9 @@ bool DataEvtSummaryHandler::attachToTree(TTree *t)
     t_->SetBranchAddress("jet_btag5",               evSummary_.jet_btag5);
     t_->SetBranchAddress("jet_btag6",               evSummary_.jet_btag6);
     t_->SetBranchAddress("jet_btag7",               evSummary_.jet_btag7);
+    t_->SetBranchAddress("jet_btag8",               evSummary_.jet_btag8);
+    t_->SetBranchAddress("jet_btag9",               evSummary_.jet_btag9);
+    t_->SetBranchAddress("jet_btag10",               evSummary_.jet_btag10);
     t_->SetBranchAddress("jet_mass",                evSummary_.jet_mass);
     t_->SetBranchAddress("jet_area",                evSummary_.jet_area);
     t_->SetBranchAddress("jet_pu",                  evSummary_.jet_pu);
@@ -422,14 +434,15 @@ bool DataEvtSummaryHandler::attachToTree(TTree *t)
     t_->SetBranchAddress("met_pt",                  &evSummary_.met_pt);
     t_->SetBranchAddress("met_phi",                 &evSummary_.met_phi);
     t_->SetBranchAddress("met_sumMET",              &evSummary_.met_sumMET);
-
     t_->SetBranchAddress("rawpfmet_pt",                  &evSummary_.rawpfmet_pt);
     t_->SetBranchAddress("rawpfmet_phi",                 &evSummary_.rawpfmet_phi);
     t_->SetBranchAddress("rawpfmet_sumMET",              &evSummary_.rawpfmet_sumMET);
-
     t_->SetBranchAddress("rawcalomet_pt",                  &evSummary_.rawcalomet_pt);
     t_->SetBranchAddress("rawcalomet_phi",                 &evSummary_.rawcalomet_phi);
     t_->SetBranchAddress("rawcalomet_sumMET",              &evSummary_.rawcalomet_sumMET);
+    t_->SetBranchAddress("metNoHF_pt",                  &evSummary_.metNoHF_pt);
+    t_->SetBranchAddress("metNoHF_phi",                 &evSummary_.metNoHF_phi);
+    t_->SetBranchAddress("metNoHF_sumMET",              &evSummary_.metNoHF_sumMET);
 
 
 

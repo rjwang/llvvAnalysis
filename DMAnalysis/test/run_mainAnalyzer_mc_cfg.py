@@ -13,22 +13,13 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 
 #load run conditions
-process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+#process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.Geometry.GeometryIdeal_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 
 #------ Declare the correct global tag ------#
-
-#global tag for CSA14 25ns 20 PU (asymptotic alignment and calibration) scenario
-#process.GlobalTag.globaltag = 'PLS170_V7AN1::All'
-#global tag for CSA14 50ns 40 PU (more pessimistic alignment and calibration) scenario
-#process.GlobalTag.globaltag = 'PLS170_V6AN1::All'
-#global tag for PHYS14 asymptotic 25ns scenario
-#process.GlobalTag.globaltag = 'PHYS14_25_V3::All'
-#process.GlobalTag.globaltag = 'MCRUN2_74_V9A::All'
-
-process.GlobalTag.globaltag = 'MCRUN2_74_V9'
-
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
+process.GlobalTag.globaltag = '74X_mcRun2_asymptotic_v2'
 
 
 #
@@ -51,7 +42,9 @@ switchOnVIDElectronIdProducer(process, dataFormat)
 #my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_PHYS14_PU20bx25_V2_cff',
 #                 'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV51_cff']
 my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_Spring15_25ns_V1_cff',
-                 'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV60_cff']
+                 'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV60_cff',
+                 #'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring15_25ns_nonTrig_V1_cff',
+                 'RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring15_25ns_Trig_V1_cff']
 ## 50ns
 #my_id_modules = ['RecoEgamma.ElectronIdentification.Identification.cutBasedElectronID_CSA14_50ns_V1_cff',
 #                 'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV51_cff']

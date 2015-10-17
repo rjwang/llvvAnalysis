@@ -35,6 +35,17 @@ process.mainAnalyzer = cms.EDAnalyzer('MainAnalyzer',
 	electronMediumIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-medium"),
     	electronTightIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-Spring15-25ns-V1-standalone-tight"),
 	electronHEEPIdTag = cms.InputTag("egmGsfElectronIDs:heepElectronID-HEEPV60"),
+	#
+	# ID decisions (common to all formats)
+	#
+	eleMediumIdMapTrig = cms.InputTag("egmGsfElectronIDs:mvaEleID-Spring15-25ns-Trig-V1-wp80"),
+	eleTightIdMapTrig  = cms.InputTag("egmGsfElectronIDs:mvaEleID-Spring15-25ns-Trig-V1-wp90"),
+	#
+	# ValueMaps with MVA results
+	#
+	mvaValuesMapTrig     = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring15Trig25nsV1Values"),
+	mvaCategoriesMapTrig = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring15Trig25nsV1Categories"),
+
 	## 50ns
 #    	electronVetoIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-CSA14-50ns-V1-standalone-veto"),
 #	electronLooseIdTag = cms.InputTag("egmGsfElectronIDs:cutBasedElectronID-CSA14-50ns-V1-standalone-loose"),
@@ -50,6 +61,7 @@ process.mainAnalyzer = cms.EDAnalyzer('MainAnalyzer',
     jetsTag = cms.InputTag("slimmedJets"),
     fatjetsTag = cms.InputTag("slimmedJetsAK8"),
     metsTag = cms.InputTag("slimmedMETs"),
+    metsNoHFTag = cms.InputTag("slimmedMETsNoHF"),
     metsPuppiTag = cms.InputTag("slimmedMETsPuppi"),
     metFilterBitsTag = cms.InputTag("TriggerResults"),
     packedTag = cms.InputTag("packedGenParticles"),
@@ -63,8 +75,9 @@ process.mainAnalyzer = cms.EDAnalyzer('MainAnalyzer',
     objects = cms.InputTag("selectedPatTrigger"),
 
     	DoubleMuTrigs = cms.vstring("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v",
-					"HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v",
-					"HLT_Mu27_TkMu8_v"),
+					"HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v"
+					#"HLT_Mu27_TkMu8_v"
+				   ),
 
     	DoubleEleTrigs = cms.vstring("HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v",
 					"HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v",
