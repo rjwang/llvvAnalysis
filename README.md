@@ -9,8 +9,8 @@ General:
 Prepare:
 
 	setenv SCRAM_ARCH slc6_amd64_gcc491
-	scramv1 project CMSSW CMSSW_7_4_12
-	cd CMSSW_7_4_12/src
+	scramv1 project CMSSW CMSSW_7_4_14
+	cd CMSSW_7_4_14/src
 	cmsenv
 	git cms-merge-topic ikrav:egm_id_7.4.12_v1
 

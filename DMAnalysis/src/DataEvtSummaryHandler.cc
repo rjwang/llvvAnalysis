@@ -177,7 +177,7 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("jet_btag7",             evSummary_.jet_btag7,               "jet_btag7[jet]/F");
     t_->Branch("jet_btag8",             evSummary_.jet_btag8,               "jet_btag8[jet]/F");
     t_->Branch("jet_btag9",             evSummary_.jet_btag9,               "jet_btag9[jet]/F");
-    t_->Branch("jet_btag10",             evSummary_.jet_btag10,               "jet_btag10[jet]/F");
+    t_->Branch("jet_btag10",            evSummary_.jet_btag10,              "jet_btag10[jet]/F");
     t_->Branch("jet_mass",              evSummary_.jet_mass,                "jet_mass[jet]/F");
     t_->Branch("jet_area",              evSummary_.jet_area,                "jet_area[jet]/F");
     t_->Branch("jet_pu",                evSummary_.jet_pu,                  "jet_pu[jet]/F");
@@ -186,6 +186,26 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("jet_PFTight",           evSummary_.jet_PFTight,             "jet_PFTight[jet]/O");
     t_->Branch("jet_partonFlavour",     evSummary_.jet_partonFlavour,       "jet_partonFlavour[jet]/I");
     t_->Branch("jet_hadronFlavour",     evSummary_.jet_hadronFlavour,       "jet_hadronFlavour[jet]/I");
+    t_->Branch("jet_genpt",             evSummary_.jet_genpt,               "jet_genpt[jet]/F");
+
+    //jet (slimmedJetsPuppi)
+    t_->Branch("pjet",                   &evSummary_.pjet,                    "pjet/I");
+    t_->Branch("pjet_px",                evSummary_.pjet_px,                  "pjet_px[pjet]/F");
+    t_->Branch("pjet_py",                evSummary_.pjet_py,                  "pjet_py[pjet]/F");
+    t_->Branch("pjet_pz",                evSummary_.pjet_pz,                  "pjet_pz[pjet]/F");
+    t_->Branch("pjet_en",                evSummary_.pjet_en,                  "pjet_en[pjet]/F");
+    t_->Branch("pjet_genpt",             evSummary_.pjet_genpt,               "pjet_genpt[pjet]/F");
+    t_->Branch("pjet_btag0",             evSummary_.pjet_btag0,               "pjet_btag0[pjet]/F");
+    t_->Branch("pjet_btag1",             evSummary_.pjet_btag1,               "pjet_btag1[pjet]/F");
+    t_->Branch("pjet_btag2",             evSummary_.pjet_btag2,               "pjet_btag2[pjet]/F");
+    t_->Branch("pjet_btag3",             evSummary_.pjet_btag3,               "pjet_btag3[pjet]/F");
+    t_->Branch("pjet_btag4",             evSummary_.pjet_btag4,               "pjet_btag4[pjet]/F");
+    t_->Branch("pjet_btag5",             evSummary_.pjet_btag5,               "pjet_btag5[pjet]/F");
+    t_->Branch("pjet_btag6",             evSummary_.pjet_btag6,               "pjet_btag6[pjet]/F");
+    t_->Branch("pjet_btag7",             evSummary_.pjet_btag7,               "pjet_btag7[pjet]/F");
+    t_->Branch("pjet_btag8",             evSummary_.pjet_btag8,               "pjet_btag8[pjet]/F");
+    t_->Branch("pjet_btag9",             evSummary_.pjet_btag9,               "pjet_btag9[pjet]/F");
+    t_->Branch("pjet_btag10",            evSummary_.pjet_btag10,              "pjet_btag10[pjet]/F");
 
 
     //fjet (ak8PFJetsCHS)
@@ -194,6 +214,7 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("fjet_py",               evSummary_.fjet_py,                 "fjet_py[fjet]/F");
     t_->Branch("fjet_pz",               evSummary_.fjet_pz,                 "fjet_pz[fjet]/F");
     t_->Branch("fjet_en",               evSummary_.fjet_en,                 "fjet_en[fjet]/F");
+    t_->Branch("fjet_genpt",            evSummary_.fjet_genpt,              "fjet_genpt[fjet]/F");
     t_->Branch("fjet_prunedM",          evSummary_.fjet_prunedM,            "fjet_prunedM[fjet]/F");
     t_->Branch("fjet_trimmedM",         evSummary_.fjet_trimmedM,           "fjet_trimmedM[fjet]/F");
     t_->Branch("fjet_filteredM",        evSummary_.fjet_filteredM,          "fjet_filteredM[fjet]/F");
@@ -215,21 +236,27 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("metNoHF_pt",                &evSummary_.metNoHF_pt,                 "metNoHF_pt/F");
     t_->Branch("metNoHF_phi",               &evSummary_.metNoHF_phi,                "metNoHF_phi/F");
     t_->Branch("metNoHF_sumMET",            &evSummary_.metNoHF_sumMET,             "metNoHF_sumMET/F");
+    t_->Branch("metPuppi_pt",                &evSummary_.metPuppi_pt,                 "metPuppi_pt/F");
+    t_->Branch("metPuppi_phi",               &evSummary_.metPuppi_phi,                "metPuppi_phi/F");
+    t_->Branch("metPuppi_sumMET",            &evSummary_.metPuppi_sumMET,             "metPuppi_sumMET/F");
 
-    t_->Branch("flag_HBHENoiseFilter",                      &evSummary_.flag_HBHENoiseFilter,                       "flag_HBHENoiseFilter/O");
-    t_->Branch("flag_CSCTightHaloFilter",                   &evSummary_.flag_CSCTightHaloFilter,                    "flag_CSCTightHaloFilter/O");
-    t_->Branch("flag_hcalLaserEventFilter",                 &evSummary_.flag_hcalLaserEventFilter,                  "flag_hcalLaserEventFilter/O");
-    t_->Branch("flag_EcalDeadCellTriggerPrimitiveFilter",   &evSummary_.flag_EcalDeadCellTriggerPrimitiveFilter,    "flag_EcalDeadCellTriggerPrimitiveFilter/O");
-    t_->Branch("flag_goodVertices",                         &evSummary_.flag_goodVertices,                          "flag_goodVertices/O");
-    t_->Branch("flag_trackingFailureFilter",                &evSummary_.flag_trackingFailureFilter,                 "flag_trackingFailureFilter/O");
-    t_->Branch("flag_eeBadScFilter",                        &evSummary_.flag_eeBadScFilter,                         "flag_eeBadScFilter/O");
-    t_->Branch("flag_ecalLaserCorrFilter",                  &evSummary_.flag_ecalLaserCorrFilter,                   "flag_ecalLaserCorrFilter/O");
-    t_->Branch("flag_trkPOGFilters",                        &evSummary_.flag_trkPOGFilters,                         "flag_trkPOGFilters/O");
-    t_->Branch("flag_trkPOG_manystripclus53X",              &evSummary_.flag_trkPOG_manystripclus53X,               "flag_trkPOG_manystripclus53X/O");
-    t_->Branch("flag_trkPOG_toomanystripclus53X",           &evSummary_.flag_trkPOG_toomanystripclus53X,            "flag_trkPOG_toomanystripclus53X/O");
-    t_->Branch("flag_trkPOG_logErrorTooManyClusters",       &evSummary_.flag_trkPOG_logErrorTooManyClusters,        "flag_trkPOG_logErrorTooManyClusters/O");
-    t_->Branch("flag_METFilters",                           &evSummary_.flag_METFilters,                            "flag_METFilters/O");
-
+    /*
+        t_->Branch("flag_HBHENoiseFilter",                      &evSummary_.flag_HBHENoiseFilter,                       "flag_HBHENoiseFilter/O");
+        t_->Branch("flag_HBHENoiseIsoFilter",                   &evSummary_.flag_HBHENoiseIsoFilter,                    "flag_HBHENoiseIsoFilter/O");
+        t_->Branch("flag_EcalDeadCellBoundaryEnergyFilter",     &evSummary_.flag_EcalDeadCellBoundaryEnergyFilter,      "flag_EcalDeadCellBoundaryEnergyFilter/O");
+        t_->Branch("flag_CSCTightHaloFilter",                   &evSummary_.flag_CSCTightHaloFilter,                    "flag_CSCTightHaloFilter/O");
+        t_->Branch("flag_hcalLaserEventFilter",                 &evSummary_.flag_hcalLaserEventFilter,                  "flag_hcalLaserEventFilter/O");
+        t_->Branch("flag_EcalDeadCellTriggerPrimitiveFilter",   &evSummary_.flag_EcalDeadCellTriggerPrimitiveFilter,    "flag_EcalDeadCellTriggerPrimitiveFilter/O");
+        t_->Branch("flag_goodVertices",                         &evSummary_.flag_goodVertices,                          "flag_goodVertices/O");
+        t_->Branch("flag_trackingFailureFilter",                &evSummary_.flag_trackingFailureFilter,                 "flag_trackingFailureFilter/O");
+        t_->Branch("flag_eeBadScFilter",                        &evSummary_.flag_eeBadScFilter,                         "flag_eeBadScFilter/O");
+        t_->Branch("flag_ecalLaserCorrFilter",                  &evSummary_.flag_ecalLaserCorrFilter,                   "flag_ecalLaserCorrFilter/O");
+        t_->Branch("flag_trkPOGFilters",                        &evSummary_.flag_trkPOGFilters,                         "flag_trkPOGFilters/O");
+        t_->Branch("flag_trkPOG_manystripclus53X",              &evSummary_.flag_trkPOG_manystripclus53X,               "flag_trkPOG_manystripclus53X/O");
+        t_->Branch("flag_trkPOG_toomanystripclus53X",           &evSummary_.flag_trkPOG_toomanystripclus53X,            "flag_trkPOG_toomanystripclus53X/O");
+        t_->Branch("flag_trkPOG_logErrorTooManyClusters",       &evSummary_.flag_trkPOG_logErrorTooManyClusters,        "flag_trkPOG_logErrorTooManyClusters/O");
+        t_->Branch("flag_METFilters",                           &evSummary_.flag_METFilters,                            "flag_METFilters/O");
+    */
 
     return true;
 }
@@ -414,6 +441,28 @@ bool DataEvtSummaryHandler::attachToTree(TTree *t)
     t_->SetBranchAddress("jet_PFTight",             evSummary_.jet_PFTight);
     t_->SetBranchAddress("jet_partonFlavour",       evSummary_.jet_partonFlavour);
     t_->SetBranchAddress("jet_hadronFlavour",       evSummary_.jet_hadronFlavour);
+    t_->SetBranchAddress("jet_genpt",               evSummary_.jet_genpt);
+
+
+    //pjet: slimmedJetsPuppi
+    t_->SetBranchAddress("pjet",                     &evSummary_.pjet);
+    t_->SetBranchAddress("pjet_px",                  evSummary_.pjet_px);
+    t_->SetBranchAddress("pjet_py",                  evSummary_.pjet_py);
+    t_->SetBranchAddress("pjet_pz",                  evSummary_.pjet_pz);
+    t_->SetBranchAddress("pjet_en",                  evSummary_.pjet_en);
+    t_->SetBranchAddress("pjet_genpt",               evSummary_.pjet_genpt);
+    t_->SetBranchAddress("pjet_btag0",               evSummary_.pjet_btag0);
+    t_->SetBranchAddress("pjet_btag1",               evSummary_.pjet_btag1);
+    t_->SetBranchAddress("pjet_btag2",               evSummary_.pjet_btag2);
+    t_->SetBranchAddress("pjet_btag3",               evSummary_.pjet_btag3);
+    t_->SetBranchAddress("pjet_btag4",               evSummary_.pjet_btag4);
+    t_->SetBranchAddress("pjet_btag5",               evSummary_.pjet_btag5);
+    t_->SetBranchAddress("pjet_btag6",               evSummary_.pjet_btag6);
+    t_->SetBranchAddress("pjet_btag7",               evSummary_.pjet_btag7);
+    t_->SetBranchAddress("pjet_btag8",               evSummary_.pjet_btag8);
+    t_->SetBranchAddress("pjet_btag9",               evSummary_.pjet_btag9);
+    t_->SetBranchAddress("pjet_btag10",               evSummary_.pjet_btag10);
+
 
 
     //fjet (ak8PFJetsCHS)
@@ -422,6 +471,7 @@ bool DataEvtSummaryHandler::attachToTree(TTree *t)
     t_->SetBranchAddress("fjet_py",                 evSummary_.fjet_py);
     t_->SetBranchAddress("fjet_pz",                 evSummary_.fjet_pz);
     t_->SetBranchAddress("fjet_en",                 evSummary_.fjet_en);
+    t_->SetBranchAddress("fjet_genpt",              evSummary_.fjet_genpt);
     t_->SetBranchAddress("fjet_prunedM",            evSummary_.fjet_prunedM);
     t_->SetBranchAddress("fjet_trimmedM",           evSummary_.fjet_trimmedM);
     t_->SetBranchAddress("fjet_filteredM",          evSummary_.fjet_filteredM);
@@ -443,22 +493,28 @@ bool DataEvtSummaryHandler::attachToTree(TTree *t)
     t_->SetBranchAddress("metNoHF_pt",                  &evSummary_.metNoHF_pt);
     t_->SetBranchAddress("metNoHF_phi",                 &evSummary_.metNoHF_phi);
     t_->SetBranchAddress("metNoHF_sumMET",              &evSummary_.metNoHF_sumMET);
+    t_->SetBranchAddress("metPuppi_pt",                  &evSummary_.metPuppi_pt);
+    t_->SetBranchAddress("metPuppi_phi",                 &evSummary_.metPuppi_phi);
+    t_->SetBranchAddress("metPuppi_sumMET",              &evSummary_.metPuppi_sumMET);
 
 
-
-    t_->SetBranchAddress("flag_HBHENoiseFilter",                      &evSummary_.flag_HBHENoiseFilter);
-    t_->SetBranchAddress("flag_CSCTightHaloFilter",                   &evSummary_.flag_CSCTightHaloFilter);
-    t_->SetBranchAddress("flag_hcalLaserEventFilter",                 &evSummary_.flag_hcalLaserEventFilter);
-    t_->SetBranchAddress("flag_EcalDeadCellTriggerPrimitiveFilter",   &evSummary_.flag_EcalDeadCellTriggerPrimitiveFilter);
-    t_->SetBranchAddress("flag_goodVertices",                         &evSummary_.flag_goodVertices);
-    t_->SetBranchAddress("flag_trackingFailureFilter",                &evSummary_.flag_trackingFailureFilter);
-    t_->SetBranchAddress("flag_eeBadScFilter",                        &evSummary_.flag_eeBadScFilter);
-    t_->SetBranchAddress("flag_ecalLaserCorrFilter",                  &evSummary_.flag_ecalLaserCorrFilter);
-    t_->SetBranchAddress("flag_trkPOGFilters",                        &evSummary_.flag_trkPOGFilters);
-    t_->SetBranchAddress("flag_trkPOG_manystripclus53X",              &evSummary_.flag_trkPOG_manystripclus53X);
-    t_->SetBranchAddress("flag_trkPOG_toomanystripclus53X",           &evSummary_.flag_trkPOG_toomanystripclus53X);
-    t_->SetBranchAddress("flag_trkPOG_logErrorTooManyClusters",       &evSummary_.flag_trkPOG_logErrorTooManyClusters);
-    t_->SetBranchAddress("flag_METFilters",                           &evSummary_.flag_METFilters);
+    /*
+        t_->SetBranchAddress("flag_HBHENoiseFilter",                      &evSummary_.flag_HBHENoiseFilter);
+        t_->SetBranchAddress("flag_HBHENoiseIsoFilter",                   &evSummary_.flag_HBHENoiseIsoFilter);
+        t_->SetBranchAddress("flag_EcalDeadCellBoundaryEnergyFilter",     &evSummary_.flag_EcalDeadCellBoundaryEnergyFilter);
+        t_->SetBranchAddress("flag_CSCTightHaloFilter",                   &evSummary_.flag_CSCTightHaloFilter);
+        t_->SetBranchAddress("flag_hcalLaserEventFilter",                 &evSummary_.flag_hcalLaserEventFilter);
+        t_->SetBranchAddress("flag_EcalDeadCellTriggerPrimitiveFilter",   &evSummary_.flag_EcalDeadCellTriggerPrimitiveFilter);
+        t_->SetBranchAddress("flag_goodVertices",                         &evSummary_.flag_goodVertices);
+        t_->SetBranchAddress("flag_trackingFailureFilter",                &evSummary_.flag_trackingFailureFilter);
+        t_->SetBranchAddress("flag_eeBadScFilter",                        &evSummary_.flag_eeBadScFilter);
+        t_->SetBranchAddress("flag_ecalLaserCorrFilter",                  &evSummary_.flag_ecalLaserCorrFilter);
+        t_->SetBranchAddress("flag_trkPOGFilters",                        &evSummary_.flag_trkPOGFilters);
+        t_->SetBranchAddress("flag_trkPOG_manystripclus53X",              &evSummary_.flag_trkPOG_manystripclus53X);
+        t_->SetBranchAddress("flag_trkPOG_toomanystripclus53X",           &evSummary_.flag_trkPOG_toomanystripclus53X);
+        t_->SetBranchAddress("flag_trkPOG_logErrorTooManyClusters",       &evSummary_.flag_trkPOG_logErrorTooManyClusters);
+        t_->SetBranchAddress("flag_METFilters",                           &evSummary_.flag_METFilters);
+    */
 
 
     return true;
@@ -476,6 +532,7 @@ void DataEvtSummaryHandler::resetStruct()
     evSummary_.en=0;
     evSummary_.ta=0;
     evSummary_.jet=0;
+    evSummary_.pjet=0;
     evSummary_.fjet=0;
 }
 

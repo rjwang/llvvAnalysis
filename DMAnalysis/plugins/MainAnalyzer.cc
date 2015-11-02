@@ -115,9 +115,12 @@ private:
     edm::EDGetTokenT<pat::TauCollection> tauTag_;
     edm::EDGetTokenT<pat::PhotonCollection> photonTag_;
     edm::EDGetTokenT<pat::JetCollection> jetTag_;
+    edm::EDGetTokenT<pat::JetCollection> jetPuppiTag_;
     edm::EDGetTokenT<pat::JetCollection> fatjetTag_;
     edm::EDGetTokenT<pat::METCollection> metTag_;
     edm::EDGetTokenT<pat::METCollection> metNoHFTag_;
+    edm::EDGetTokenT<pat::METCollection> metPuppiTag_;
+
     edm::EDGetTokenT<edm::TriggerResults> metFilterBitsTag_;
 
     edm::EDGetTokenT<edm::View<reco::GenParticle> > prunedGenTag_;
@@ -221,13 +224,15 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
     electronLooseIdTag_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronLooseIdTag"))       ),
     electronMediumIdTag_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronMediumIdTag"))     ),
     electronTightIdTag_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronTightIdTag"))	),
-    electronHEEPIdTag_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronHEEPIdTag"))       ),
+    electronHEEPIdTag_(consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("electronHEEPIdTag"))         ),
     tauTag_(		consumes<pat::TauCollection>(iConfig.getParameter<edm::InputTag>("tausTag"))			),
     photonTag_(		consumes<pat::PhotonCollection>(iConfig.getParameter<edm::InputTag>("photonsTag"))		),
     jetTag_(		consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jetsTag"))			),
+    jetPuppiTag_(       consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jetsPuppiTag"))               ),
     fatjetTag_(		consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("fatjetsTag"))			),
     metTag_(		consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("metsTag"))			),
     metNoHFTag_(        consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("metsNoHFTag"))                ),
+    metPuppiTag_(       consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("metsPuppiTag"))               ),
     metFilterBitsTag_(	consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("metFilterBitsTag"))		),
     prunedGenTag_(	consumes<edm::View<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("prunedTag"))	),
     packedGenTag_(	consumes<edm::View<pat::PackedGenParticle> >(iConfig.getParameter<edm::InputTag>("packedTag"))	),
@@ -478,6 +483,22 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
     ev.fixedGridRhoFastjetCentralCalo = *rhoFastjetCentralCalo;
     ev.fixedGridRhoFastjetCentralChargedPileUp = *rhoFastjetCentralChargedPileUp;
     ev.fixedGridRhoFastjetCentralNeutral = *rhoFastjetCentralNeutral;
+
+
+
+    //met filters
+    edm::Handle<edm::TriggerResults> metFilterBits;
+    event.getByToken(metFilterBitsTag_, metFilterBits);
+    const edm::TriggerNames &metNames = event.triggerNames(*metFilterBits);
+    bool passMETFilters(true);
+    for(unsigned int i = 0, n = metFilterBits->size(); i < n; ++i) {
+        if(strcmp(metNames.triggerName(i).c_str(), "Flag_goodVertices") == 0)
+            passMETFilters &= metFilterBits->accept(i);
+        else if(strcmp(metNames.triggerName(i).c_str(), "Flag_eeBadScFilter") == 0)
+            passMETFilters &= metFilterBits->accept(i);
+    }
+    if(!passMETFilters) return;
+
 
 
     //
@@ -790,10 +811,47 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
         ev.jet_puId[ev.jet] = j.userFloat("pileupJetId:fullDiscriminant");
         ev.jet_partonFlavour[ev.jet] = j.partonFlavour();
         ev.jet_hadronFlavour[ev.jet] = j.hadronFlavour();
+        const reco::GenJet *gJet=j.genJet();
+        if(gJet) ev.jet_genpt[ev.jet] = gJet->pt();
+	else     ev.jet_genpt[ev.jet] = 0;
 
         ev.jet++;
     }
 
+
+    //
+    // slimmedJetsPuppi
+    //
+    edm::Handle<pat::JetCollection> puppijets;
+    event.getByToken(jetPuppiTag_, puppijets);
+
+    ev.pjet=0;
+    if(puppijets.isValid()) {
+        for (const pat::Jet &j : *puppijets) {
+            if(j.pt() < 20) continue;
+            ev.pjet_px[ev.pjet] = j.correctedP4(0).px();
+            ev.pjet_py[ev.pjet] = j.correctedP4(0).py();
+            ev.pjet_pz[ev.pjet] = j.correctedP4(0).pz();
+            ev.pjet_en[ev.pjet] = j.correctedP4(0).energy();
+
+            const reco::GenJet *gJet=j.genJet();
+            if(gJet) ev.pjet_genpt[ev.pjet] = gJet->pt();
+	    else     ev.pjet_genpt[ev.pjet] = 0;
+
+            ev.pjet_btag0[ev.pjet] = j.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
+            ev.pjet_btag1[ev.pjet] = j.bDiscriminator("pfJetBProbabilityBJetTags");
+            ev.pjet_btag2[ev.pjet] = j.bDiscriminator("pfJetProbabilityBJetTags");
+            ev.pjet_btag3[ev.pjet] = j.bDiscriminator("pfTrackCountingHighPurBJetTags");
+            ev.pjet_btag4[ev.pjet] = j.bDiscriminator("pfTrackCountingHighEffBJetTags");
+            ev.pjet_btag5[ev.pjet] = j.bDiscriminator("pfSimpleSecondaryVertexHighEffBJetTags");
+            ev.pjet_btag6[ev.pjet] = j.bDiscriminator("pfSimpleSecondaryVertexHighPurBJetTags");
+            ev.pjet_btag7[ev.pjet] = j.bDiscriminator("combinedSecondaryVertexBJetTags");
+            ev.pjet_btag8[ev.pjet] = j.bDiscriminator("pfCombinedSecondaryVertexV2BJetTags");
+            ev.pjet_btag9[ev.pjet] = j.bDiscriminator("pfCombinedSecondaryVertexSoftLeptonBJetTags");
+            ev.pjet_btag10[ev.pjet] = j.bDiscriminator("pfCombinedMVABJetTags");
+            ev.pjet++;
+        }
+    }
 
     //
     // fat jet selection (ak8PFJetsCHS)
@@ -806,6 +864,12 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
         ev.fjet_py[ev.fjet] = j.correctedP4(0).py();
         ev.fjet_pz[ev.fjet] = j.correctedP4(0).pz();
         ev.fjet_en[ev.fjet] = j.correctedP4(0).energy();
+
+        const reco::GenJet *gJet=j.genJet();
+        if(gJet) ev.fjet_genpt[ev.fjet] = gJet->pt();
+	else     ev.fjet_genpt[ev.fjet] = 0;
+
+
         ev.fjet_prunedM[ev.fjet] = (float) j.userFloat("ak8PFJetsCHSPrunedLinks");
         ev.fjet_trimmedM[ev.fjet] = (float) j.userFloat("ak8PFJetsCHSTrimmedLinks");
         ev.fjet_filteredM[ev.fjet] = (float) j.userFloat("ak8PFJetsCHSFilteredLinks");
@@ -841,7 +905,6 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
     ev.rawcalomet_phi = met.caloMETPhi();
     ev.rawcalomet_sumMET = met.caloMETSumEt();
 
-
     // type1 PF MET but excluding HF
     edm::Handle<pat::METCollection> metsNoHF;
     event.getByToken(metNoHFTag_, metsNoHF);
@@ -852,39 +915,56 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
         ev.metNoHF_sumMET = metNoHF.sumEt();
     }
 
-    //met filters
-    edm::Handle<edm::TriggerResults> metFilterBits;
-    event.getByToken(metFilterBitsTag_, metFilterBits);
-    const edm::TriggerNames &metNames = event.triggerNames(*metFilterBits);
-    for(unsigned int i = 0, n = metFilterBits->size(); i < n; ++i) {
-        if(strcmp(metNames.triggerName(i).c_str(), "Flag_trackingFailureFilter") == 0)
-            ev.flag_trackingFailureFilter = metFilterBits->accept(i);
-        else if(strcmp(metNames.triggerName(i).c_str(), "Flag_goodVertices") == 0)
-            ev.flag_goodVertices = metFilterBits->accept(i);
-        else if(strcmp(metNames.triggerName(i).c_str(), "Flag_CSCTightHaloFilter") == 0)
-            ev.flag_CSCTightHaloFilter = metFilterBits->accept(i);
-        else if(strcmp(metNames.triggerName(i).c_str(), "Flag_trkPOGFilters") == 0)
-            ev.flag_trkPOGFilters = metFilterBits->accept(i);
-        else if(strcmp(metNames.triggerName(i).c_str(), "Flag_trkPOG_logErrorTooManyClusters") == 0)
-            ev.flag_trkPOG_logErrorTooManyClusters = metFilterBits->accept(i);
-        else if(strcmp(metNames.triggerName(i).c_str(), "Flag_EcalDeadCellTriggerPrimitiveFilter") == 0)
-            ev.flag_EcalDeadCellTriggerPrimitiveFilter = metFilterBits->accept(i);
-        else if(strcmp(metNames.triggerName(i).c_str(), "Flag_ecalLaserCorrFilter") == 0)
-            ev.flag_ecalLaserCorrFilter = metFilterBits->accept(i);
-        else if(strcmp(metNames.triggerName(i).c_str(), "Flag_trkPOG_manystripclus53X") == 0)
-            ev.flag_trkPOG_manystripclus53X = metFilterBits->accept(i);
-        else if(strcmp(metNames.triggerName(i).c_str(), "Flag_eeBadScFilter") == 0)
-            ev.flag_eeBadScFilter = metFilterBits->accept(i);
-        else if(strcmp(metNames.triggerName(i).c_str(), "Flag_METFilters") == 0)
-            ev.flag_METFilters = metFilterBits->accept(i);
-        else if(strcmp(metNames.triggerName(i).c_str(), "Flag_HBHENoiseFilter") == 0)
-            ev.flag_HBHENoiseFilter = metFilterBits->accept(i);
-        else if(strcmp(metNames.triggerName(i).c_str(), "Flag_trkPOG_toomanystripclus53X") == 0)
-            ev.flag_trkPOG_toomanystripclus53X = metFilterBits->accept(i);
-        else if(strcmp(metNames.triggerName(i).c_str(), "Flag_hcalLaserEventFilter") == 0)
-            ev.flag_hcalLaserEventFilter = metFilterBits->accept(i);
+    // puppi-corrected MET
+    edm::Handle<pat::METCollection> metsPuppi;
+    event.getByToken(metPuppiTag_, metsPuppi);
+    if(metsPuppi.isValid()) {
+        const pat::MET &metPuppi = metsPuppi->front();
+        ev.metPuppi_pt = metPuppi.pt();
+        ev.metPuppi_phi = metPuppi.phi();
+        ev.metPuppi_sumMET = metPuppi.sumEt();
     }
 
+
+
+    /*
+        //met filters
+        edm::Handle<edm::TriggerResults> metFilterBits;
+        event.getByToken(metFilterBitsTag_, metFilterBits);
+        const edm::TriggerNames &metNames = event.triggerNames(*metFilterBits);
+        for(unsigned int i = 0, n = metFilterBits->size(); i < n; ++i) {
+            if(strcmp(metNames.triggerName(i).c_str(), "Flag_HBHENoiseFilter") == 0)
+                ev.flag_HBHENoiseFilter = metFilterBits->accept(i);
+            else if(strcmp(metNames.triggerName(i).c_str(), "Flag_HBHENoiseIsoFilter") == 0)
+                ev.flag_HBHENoiseIsoFilter = metFilterBits->accept(i);
+            else if(strcmp(metNames.triggerName(i).c_str(), "Flag_CSCTightHaloFilter") == 0)
+                ev.flag_CSCTightHaloFilter = metFilterBits->accept(i);
+            else if(strcmp(metNames.triggerName(i).c_str(), "Flag_hcalLaserEventFilter") == 0)
+                ev.flag_hcalLaserEventFilter = metFilterBits->accept(i);
+            else if(strcmp(metNames.triggerName(i).c_str(), "Flag_EcalDeadCellTriggerPrimitiveFilter") == 0)
+                ev.flag_EcalDeadCellTriggerPrimitiveFilter = metFilterBits->accept(i);
+            else if(strcmp(metNames.triggerName(i).c_str(), "Flag_EcalDeadCellBoundaryEnergyFilter") == 0)
+                ev.flag_EcalDeadCellBoundaryEnergyFilter = metFilterBits->accept(i);
+            else if(strcmp(metNames.triggerName(i).c_str(), "Flag_goodVertices") == 0)
+                ev.flag_goodVertices = metFilterBits->accept(i);
+            else if(strcmp(metNames.triggerName(i).c_str(), "Flag_trackingFailureFilter") == 0)
+                ev.flag_trackingFailureFilter = metFilterBits->accept(i);
+            else if(strcmp(metNames.triggerName(i).c_str(), "Flag_eeBadScFilter") == 0)
+                ev.flag_eeBadScFilter = metFilterBits->accept(i);
+            else if(strcmp(metNames.triggerName(i).c_str(), "Flag_ecalLaserCorrFilter") == 0)
+                ev.flag_ecalLaserCorrFilter = metFilterBits->accept(i);
+            else if(strcmp(metNames.triggerName(i).c_str(), "Flag_trkPOGFilters") == 0)
+                ev.flag_trkPOGFilters = metFilterBits->accept(i);
+            else if(strcmp(metNames.triggerName(i).c_str(), "Flag_trkPOG_manystripclus53X") == 0)
+                ev.flag_trkPOG_manystripclus53X = metFilterBits->accept(i);
+            else if(strcmp(metNames.triggerName(i).c_str(), "Flag_trkPOG_toomanystripclus53X") == 0)
+                ev.flag_trkPOG_toomanystripclus53X = metFilterBits->accept(i);
+            else if(strcmp(metNames.triggerName(i).c_str(), "Flag_trkPOG_logErrorTooManyClusters") == 0)
+                ev.flag_trkPOG_logErrorTooManyClusters = metFilterBits->accept(i);
+            else if(strcmp(metNames.triggerName(i).c_str(), "Flag_METFilters") == 0)
+                ev.flag_METFilters = metFilterBits->accept(i);
+        }
+    */
 
     /*
         edm::Handle<pat::PhotonCollection> photons;
@@ -897,6 +977,7 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
 
 
     */
+
     summaryHandler_.fillTree();
 }
 
@@ -932,7 +1013,8 @@ MainAnalyzer::getMCtruth(const edm::Event& event, const edm::EventSetup& iSetup)
     //if(event.isRealData()) return;
 
     edm::Handle<std::vector<PileupSummaryInfo> > puInfoH;
-    event.getByLabel("addPileupInfo", puInfoH);
+    //event.getByLabel("addPileupInfo", puInfoH);
+    event.getByLabel("slimmedAddPileupInfo", puInfoH);
     int npuOOT(0),npuIT(0),npuOOTm1(0);
     float truePU(0);
     if(puInfoH.isValid()) {
@@ -1007,6 +1089,7 @@ MainAnalyzer::getMCtruth(const edm::Event& event, const edm::EventSetup& iSetup)
                 //|| ( abs(pid) == 21 && status < 30 )
                 || ( abs(pid) >= 23 && abs(pid) <= 25 && status < 30 )
                 || ( abs(pid) == 1008 )
+		|| ( abs(pid) >= 1  && abs(pid) <= 6 && status < 30 )
                 //|| ( abs(pid) >= 32 && abs(pid) <= 42 )
             ) {
 //		cout << "pid: " << pid << " status: " << status << endl;
@@ -1020,11 +1103,13 @@ MainAnalyzer::getMCtruth(const edm::Event& event, const edm::EventSetup& iSetup)
                 //find the ID of the first mother that has a different ID than the particle itself
                 const reco::Candidate* mom = findFirstMotherWithDifferentID(prunedV[i]);
                 if(mom) {
-                    int pid=prunedV[i]->pdgId();
+                    int pid    = prunedV[i]->pdgId();
                     int mompid = mom->pdgId();
-                    //cout << "pid: " << pid << " mom: " << mompid << endl;
-                    if(abs(pid) !=2000012 && abs(pid)!=5000039 && abs(mompid)!=23 && abs(mompid)!=24 && abs(mompid)!=25) continue;
-                    if(prunedV[i]->status()!=1 && prunedV[i]->status()!=2) continue;
+		    int status = prunedV[i]->status();
+
+                    if( !(abs(pid)>=1 && abs(pid)<=6) && abs(pid)!=23 && abs(pid)!=2000012 && abs(pid)!=5000039 && abs(mompid)!=23 && abs(mompid)!=24 && abs(mompid)!=25) continue;
+                    if(status!=1 && status!=2 && status!=22  && status!=23) continue;
+		    //cout << "saving --> pid: " << pid << " mom: " << mompid << " status: " << status << endl;
 
                     ev.mc_px[ev.nmcparticles] = prunedV[i]->px();
                     ev.mc_py[ev.nmcparticles] = prunedV[i]->py();
@@ -1045,6 +1130,7 @@ MainAnalyzer::getMCtruth(const edm::Event& event, const edm::EventSetup& iSetup)
 
     } else {
 
+	// for PYTHIA 6 based
         for(size_t i=0; i<pruned->size(); i++) {
             const Candidate * genParticle = &(*pruned)[i];
             int status=genParticle->status();

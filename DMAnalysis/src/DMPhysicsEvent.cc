@@ -56,7 +56,10 @@ PhysicsEvent_t getPhysicsEventFrom(DataEvtSummary_t &ev)
 
 
     // MET
-    phys.met = LorentzVector( ev.met_pt*cos(ev.met_phi), ev.met_pt*sin(ev.met_phi), 0, ev.met_pt );
+    phys.met 	 = LorentzVector( ev.met_pt*cos(ev.met_phi), ev.met_pt*sin(ev.met_phi), 0, ev.met_pt );
+    phys.metNoHF = LorentzVector( ev.metNoHF_pt*cos(ev.metNoHF_phi), ev.metNoHF_pt*sin(ev.metNoHF_phi), 0, ev.metNoHF_pt );
+
+
 
 
     // Jet
@@ -66,7 +69,7 @@ PhysicsEvent_t getPhysicsEventFrom(DataEvtSummary_t &ev)
         if(P4.pt()>0) {
             phys.jets.push_back( PhysicsObject_Jet( P4,ev.jet_puId[i],ev.jet_PFLoose[i],ev.jet_PFTight[i] ) );
             phys.jets[i].setBtagInfo(ev.jet_btag0[i],ev.jet_btag1[i],ev.jet_btag2[i],ev.jet_btag3[i],ev.jet_btag4[i],ev.jet_btag5[i],ev.jet_btag6[i],ev.jet_btag7[i]);
-            phys.jets[i].setGenInfo(ev.jet_partonFlavour[i]);
+            phys.jets[i].setGenInfo(ev.jet_partonFlavour[i], 0 /*ev.jet_genpt[i]*/);
 
             njet++;
         }
@@ -87,9 +90,14 @@ PhysicsEvent_t getPhysicsEventFrom(DataEvtSummary_t &ev)
             phys.genneutrinos.push_back( PhysicsObject(p4,ev.mc_id[ipart]) );
         }
         break;
-        case 1009:
-        case -1009: {
+        case 2000012:
+        case -2000012: {
             phys.genWIMPs.push_back( PhysicsObject(p4,ev.mc_id[ipart]) );
+        }
+        break;
+        case 5000039:
+        case -5000039: {
+            phys.genGravitons.push_back( PhysicsObject(p4,ev.mc_id[ipart]) );
         }
         break;
         case 11:

@@ -96,15 +96,17 @@ public :
         btag7=btag7_;
     }
 
-    void setGenInfo(Int_t flavid_)
+    void setGenInfo(Int_t flavid_, Float_t genPt_)
     {
 	flavid=flavid_;
+	genPt=genPt_;
     }
 
     Float_t btag0, btag1, btag2, btag3, btag4, btag5, btag6, btag7;
     Float_t pumva;
     Bool_t isPFLoose,isPFTight;
     Int_t flavid;
+    Float_t genPt;
 
 };
 
@@ -120,9 +122,9 @@ struct PhysicsEvent_t {
 
     PhysicsObjectLeptonCollection leptons;
     PhysicsObjectJetCollection jets;
-    LorentzVector met;
+    LorentzVector met, metNoHF;
 
-    PhysicsObjectCollection genneutrinos,genleptons,genWIMPs;
+    PhysicsObjectCollection genneutrinos,genleptons,genWIMPs,genGravitons;
     PhysicsObjectCollection genjets;
 };
 

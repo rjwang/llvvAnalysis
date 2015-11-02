@@ -148,8 +148,9 @@ for proc in procList :
                 else:
                         eventsFile=inputdir + '/' + origdtag + '_' + str(segment) + '.root'
 
-                if(eventsFile.find('/store/')==0)  : eventsFile = commands.getstatusoutput('cmsPfn ' + eventsFile)[1]
+                if(eventsFile.find('/store/')==0)  : eventsFile = commands.getstatusoutput('/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select find ' + eventsFile)[1]
 		if(eventsFile.find('?')>=0)  : eventsFile = eventsFile[:eventsFile.find('?')]
+		eventsFile = 'root://eoscms/'+eventsFile
 
             	sedcmd = 'sed \"s%@input%' + eventsFile +'%;s%@outdir%' + outdir +'%;s%@isMC%' + str(not isdata) + '%;s%@mctruthmode%'+str(mctruthmode)+'%;s%@xsec%'+str(xsec)+'%;'
                 sedcmd += 's%@cprime%'+str(getByLabel(d,'cprime',-1))+'%;'
@@ -177,6 +178,7 @@ for proc in procList :
 		else:
                         cfgfile=outdir +'/'+ dtag + suffix + '_' + str(segment) + '_cfg.py'
             	os.system('cat ' + cfg_file + ' | ' + sedcmd + ' > ' + cfgfile)
+
             	if(not subtoBatch) :
                 	os.system(theExecutable + ' ' + cfgfile)
             	else :

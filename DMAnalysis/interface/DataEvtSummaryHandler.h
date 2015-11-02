@@ -89,9 +89,17 @@ struct DataEvtSummary_t {
     Float_t jet_btag0[MAXPARTICLES],jet_btag1[MAXPARTICLES],jet_btag2[MAXPARTICLES],jet_btag3[MAXPARTICLES];
     Float_t jet_btag4[MAXPARTICLES],jet_btag5[MAXPARTICLES],jet_btag6[MAXPARTICLES],jet_btag7[MAXPARTICLES];
     Float_t jet_btag8[MAXPARTICLES],jet_btag9[MAXPARTICLES],jet_btag10[MAXPARTICLES];
-    Float_t jet_mass[MAXPARTICLES],jet_area[MAXPARTICLES],jet_pu[MAXPARTICLES],jet_puId[MAXPARTICLES];
+    Float_t jet_mass[MAXPARTICLES],jet_area[MAXPARTICLES],jet_pu[MAXPARTICLES],jet_puId[MAXPARTICLES],jet_genpt[MAXPARTICLES];
     Bool_t jet_PFLoose[MAXPARTICLES], jet_PFTight[MAXPARTICLES];
     Int_t jet_partonFlavour[MAXPARTICLES], jet_hadronFlavour[MAXPARTICLES];
+
+    //jet (slimmedJetsPuppi)
+    Int_t pjet;
+    Float_t pjet_px[MAXPARTICLES],pjet_py[MAXPARTICLES],pjet_pz[MAXPARTICLES],pjet_en[MAXPARTICLES];
+    Float_t pjet_btag0[MAXPARTICLES],pjet_btag1[MAXPARTICLES],pjet_btag2[MAXPARTICLES],pjet_btag3[MAXPARTICLES];
+    Float_t pjet_btag4[MAXPARTICLES],pjet_btag5[MAXPARTICLES],pjet_btag6[MAXPARTICLES],pjet_btag7[MAXPARTICLES];
+    Float_t pjet_btag8[MAXPARTICLES],pjet_btag9[MAXPARTICLES],pjet_btag10[MAXPARTICLES];
+    Float_t pjet_genpt[MAXPARTICLES];
 
 
     //fjet (ak8PFJetsCHS)
@@ -99,16 +107,22 @@ struct DataEvtSummary_t {
     Float_t fjet_px[MAXPARTICLES],fjet_py[MAXPARTICLES],fjet_pz[MAXPARTICLES],fjet_en[MAXPARTICLES];
     Float_t fjet_prunedM[MAXPARTICLES],fjet_trimmedM[MAXPARTICLES],fjet_filteredM[MAXPARTICLES];
     Float_t fjet_tau1[MAXPARTICLES],fjet_tau2[MAXPARTICLES],fjet_tau3[MAXPARTICLES];
+    Float_t fjet_genpt[MAXPARTICLES];
 
 
     //met
     Float_t met_pt,met_phi,met_sumMET;
     Float_t metNoHF_pt,metNoHF_phi,metNoHF_sumMET;
+    Float_t metPuppi_pt,metPuppi_phi,metPuppi_sumMET;
     Float_t rawpfmet_pt,rawpfmet_phi,rawpfmet_sumMET;
     Float_t rawcalomet_pt,rawcalomet_phi,rawcalomet_sumMET;
+/*
     Bool_t flag_HBHENoiseFilter,flag_CSCTightHaloFilter,flag_hcalLaserEventFilter,flag_EcalDeadCellTriggerPrimitiveFilter,flag_goodVertices;
+    Bool_t flag_HBHENoiseIsoFilter;
+    Bool_t flag_EcalDeadCellBoundaryEnergyFilter;
     Bool_t flag_trackingFailureFilter,flag_eeBadScFilter,flag_ecalLaserCorrFilter,flag_trkPOGFilters,flag_trkPOG_manystripclus53X,flag_trkPOG_toomanystripclus53X;
     Bool_t flag_trkPOG_logErrorTooManyClusters,flag_METFilters;
+*/
 
 };
 
