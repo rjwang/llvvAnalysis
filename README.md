@@ -14,6 +14,15 @@ Prepare:
 	cmsenv
 	git cms-merge-topic ikrav:egm_id_7.4.12_v1
 
+	## set up the RooStats-based statistics tools for Higgs PAG
+	## https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideHiggsAnalysisCombinedLimit
+	git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
+	cd HiggsAnalysis/CombinedLimit
+	git checkout 74x-root6
+	git fetch origin
+	git checkout v6.0.0
+	scramv1 b vclean; scramv1 b # always make a clean build, as scram doesn't always see updates to src/LinkDef.h
+
 MiniAOD PHYS14:
 
 	source /afs/cern.ch/cms/cmsset_default.csh

@@ -6,6 +6,7 @@
  <bin name="run2015_WIMPAnalysis" file="run2015_WIMPAnalysis.cc"></bin>
  <bin name="runPlotter"           file="runPlotter.cc"          ></bin>
  <bin name="runPDFvariations"     file="runPDFvariations.cc"    ></bin>
+ <bin name="runLimits"		  file="runLimits.cc"           ></bin>
 
 </environment>
 <Flags CXXFLAGS="-g -std=c++0x"/>
