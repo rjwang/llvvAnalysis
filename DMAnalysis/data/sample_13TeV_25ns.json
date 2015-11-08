@@ -471,7 +471,7 @@
           "split": 1
         }, 
         {
-          "dtag": "Data13TeV_DoubleEG2015C_05Oct2015", 
+          "dtag": "Data13TeV_MuonEG2015C_05Oct2015", 
           "split": 1
         }, 
         {
@@ -524,6 +524,36 @@
         }
       ], 
       "fill": 0
+    }, 
+    {
+      "isdata": false, 
+      "color": "90", 
+      "issignal": true, 
+      "tag": "ZH(125)", 
+      "lwidth": 2, 
+      "marker": 90, 
+      "data": [
+        {
+          "dtag": "MC13TeV_ZH_ZToEE_HToInv_M125", 
+          "xsec": 0.8696, 
+          "split": 1, 
+          "br": [
+            0.033658
+          ]
+        }, 
+        {
+          "dtag": "MC13TeV_ZH_ZToMM_HToInv_M125", 
+          "xsec": 0.8696, 
+          "split": 1, 
+          "br": [
+            0.033658
+          ]
+        }
+      ], 
+      "fill": 0, 
+      "spimpose": true, 
+      "lcolor": "90", 
+      "lstyle": 1
     }, 
     {
       "isdata": false, 
@@ -2570,6 +2600,30 @@
       "spimpose": true, 
       "lcolor": "6", 
       "lstyle": 7
+    }, 
+    {
+      "isdata": false, 
+      "color": "809", 
+      "issignal": true, 
+      "tag": "DM(5)MV(50)", 
+      "lwidth": 2, 
+      "marker": 809, 
+      "data": [
+        {
+          "dtag": "MC13TeV_DM_V_Mx5Mv50", 
+          "xsec": 2.4724, 
+          "split": 1, 
+          "br": [
+            1.0
+          ], 
+          "genwimpweights": "${CMSSW_BASE}/src/llvvAnalysis/DMAnalysis/data/weights/weights_V_Mx5_Mv50_gDMgQ1.root"
+        }
+      ], 
+      "fill": 0, 
+      "spimpose": true, 
+      "lcolor": "809", 
+      "lstyle": 8, 
+      "doWIMPreweighting": true
     }
   ]
 }
