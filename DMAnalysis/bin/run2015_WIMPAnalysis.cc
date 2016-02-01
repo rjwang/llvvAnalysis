@@ -888,7 +888,10 @@ int main(int argc, char* argv[])
                 nCSVMtags += (corrJets[ijet].btag0>0.89);
                 nCSVTtags += (corrJets[ijet].btag0>0.97);
 
+
+		if(!isMC) continue;
                 bool isCSVLtagged(corrJets[ijet].btag0>0.605);
+
                 if(abs(corrJets[ijet].flavid)==5) {
                     //BTagScaleFactor *= myBtagUtils.getBTagWeight(isCSVLtagged,corrJets[ijet].pt(),corrJets[ijet].eta(),abs(corrJets[ijet].flavid),"CSVL","CSVL/b_eff").first;
                     if(isCSVLtagged) BTagScaleFactor *= btag_reader.eval( BTagEntry::FLAV_B, corrJets[ijet].eta(), (corrJets[ijet].pt()<670. ? corrJets[ijet].pt() : 670.) );
