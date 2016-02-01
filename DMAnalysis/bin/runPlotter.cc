@@ -48,6 +48,7 @@ bool showUnc=false;
 double baseRelUnc=0.044;
 bool noLog=false;
 bool isSim=false;
+bool isinProgress=false;
 bool isDataBlind=false;
 bool do2D  = true;
 bool do1D  = true;
@@ -744,7 +745,6 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
       if(Process[i].isTag("fill"  ) )hist->SetFillColor  ((int)Process[i]["fill"  ].toDouble());
       if(Process[i].isTag("marker") )hist->SetMarkerStyle((int)Process[i]["marker"].toDouble());// else hist->SetMarkerStyle(1);
 
-      //cout <<hist->GetNbinsX() << endl;
       //fixExtremities(hist,true,true);
       hist->SetTitle("");
       hist->SetStats(kFALSE);
@@ -852,7 +852,14 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 	 	else 			stack->GetYaxis()->SetTitle("Events / "+binSize);
 	 }
 
-	 stack->SetMinimum(hist->GetMinimum());
+
+	 double minimumFound = hist->GetMinimum();
+	 stack->SetMinimum(minimumFound);
+
+	 if(tSaveName.Contains("njets_raw")) maximumFound*= 50;
+	 if(tSaveName.Contains("dphiZMET_presel")) maximumFound*= 50;
+	 if(tSaveName.Contains("balancedif_presel")) maximumFound*= 50;
+         if(tSaveName.Contains("axialpfmet_presel")) maximumFound*= 100;
 
       	 if(tSaveName.Contains("nvtx")) maximumFound*= 50;
       	 if(tSaveName.Contains("nleptons")) maximumFound*= 50;
@@ -872,10 +879,16 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 
 	 stack->SetMaximum(maximumFound);
 
+/*
          if(tSaveName.Contains("pfmet")){
-                stack->SetMinimum(5e-3);
+                stack->SetMinimum(5e-5);
                 //if(tSaveName.Contains("eq0jets")) stack->SetMaximum(1e3);
                 //if(tSaveName.Contains("eq1jets")) stack->SetMaximum(2e4);
+         }
+
+*/
+         if(tSaveName.Contains("mt_final")){
+                stack->SetMaximum(100);
          }
 
 
@@ -886,6 +899,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
        }
      ObjectToDelete.push_back(stack);
      canvasIsFilled=true;
+
 
      if(showUnc && mc)
        {
@@ -949,21 +963,24 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
      }
 
    TPaveText* T = new TPaveText(0.7,0.994,0.95,0.94, "NDC");
-   if(isDataBlind || noratio) T = new TPaveText(0.2,0.994,0.87,0.95, "NDC");
+   if(isDataBlind || noratio) T = new TPaveText(0.7,0.994,0.95,0.95, "NDC");
    T->SetFillColor(0);
    T->SetFillStyle(0);  T->SetLineColor(0);
    T->SetTextAlign(22);
    char Buffer[1024];
-   if(iLumi>1000) sprintf(Buffer, "%.1f fb^{-1} (%.1f TeV)", iLumi/1000,iEcm);
-   else		  sprintf(Buffer, "%.1f pb^{-1} (%.1f TeV)", iLumi, iEcm);
+   if(iLumi>1000) sprintf(Buffer, "%.1f fb^{-1} (%.0f TeV)", iLumi/1000,iEcm);
+   else		  sprintf(Buffer, "%.1f pb^{-1} (%.0f TeV)", iLumi, iEcm);
 
    T->AddText(Buffer);
    T->Draw("same");
    T->SetBorderSize(0);
 
-   T = new TPaveText(0.05,0.994,0.45, 0.935, "NDC");
+   T = new TPaveText(0.06,0.994,0.58, 0.935, "NDC");
+   if(isDataBlind || noratio) T = new TPaveText(0.05,0.994,0.45, 0.95, "NDC");
    if(isSim) T->AddText("#bf{CMS} #it{Simulation}");
+   else if(isinProgress) T->AddText("#bf{CMS} #it{Work in Progress}");
    else      T->AddText("#bf{CMS} #it{Preliminary}");
+
    T->Draw("same");
    T->SetBorderSize(0);
 
@@ -1033,7 +1050,6 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
   }
 
 
-
    legA->SetFillColor(0); legA->SetFillStyle(0); legA->SetLineColor(0);
    legA->SetHeader("");
    legA->Draw("same");
@@ -1085,6 +1101,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
           	icutgRJ++;
        } //RJ
 
+
        denRelUnc->SetLineColor(1);
        denRelUnc->SetFillStyle(3254);
        denRelUnc->SetFillColor(kRed);
@@ -1122,6 +1139,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
        denRelUncH->GetYaxis()->SetNdivisions(5);
        denRelUncH->GetYaxis()->SetLabelSize(0.03*yscale);
        denRelUncH->GetYaxis()->SetTitleSize(0.03*yscale);
+
 
        //add comparisons
        for(size_t icd=0; icd<compDists.size(); icd++)
@@ -1510,6 +1528,7 @@ int main(int argc, char* argv[]){
        printf("Uncertainty band will be included for MC with base relative uncertainty of: %3.2f",baseRelUnc);
      }
      if(arg.find("--isSim")!=string::npos){ isSim = true;    }
+     if(arg.find("--isinProgress")!=string::npos){ isinProgress = true;    }
      if(arg.find("--isDataBlind")!=string::npos){ isDataBlind = true; printf("isDataBlind\n");} //RJ
      if(arg.find("--noratio")!=string::npos){ noratio = true; printf("noratio\n");}
      if(arg.find("--nosig")!=string::npos){nosig = true; printf("noSig plot=1\n");}//RJ

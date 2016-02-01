@@ -15,10 +15,10 @@
 <use name="PhysicsTools/UtilAlgos"/>
 <use name="PhysicsTools/Utilities"/>
 <use name="DataFormats/HepMCCandidate"/>
+<use name="CondFormats/BTauObjects"/>
 <use name="roottmva"/>
 <use name="roofit"/>
 <use name="fastjet"/>
 <export>
   <lib name="1"/>
 </export>
-<Flags CPPDEFINES="IS44x=0"/>

@@ -472,7 +472,7 @@
         }, 
         {
           "dtag": "Data13TeV_MuonEG2015D_PromptRecov4", 
-          "split": 9
+          "split": 10
         }, 
         {
           "dtag": "Data13TeV_SingleElectron2015D_PromptRecov4", 
@@ -495,7 +495,7 @@
       "data": [
         {
           "dtag": "MC13TeV_DM_V_Mx50Mv200", 
-          "xsec": 0.142017, 
+          "xsec": 0.22546, 
           "split": 1, 
           "br": [
             1.0
@@ -517,7 +517,7 @@
       "data": [
         {
           "dtag": "MC13TeV_DM_A_Mx50Mv200", 
-          "xsec": 0.100452, 
+          "xsec": 0.1581, 
           "split": 1, 
           "br": [
             1.0
@@ -531,40 +531,18 @@
     }, 
     {
       "isdata": false, 
-      "color": "90", 
-      "issignal": true, 
-      "tag": "Unpart(1.5)", 
-      "lwidth": 2, 
-      "marker": 90, 
-      "data": [
-        {
-          "dtag": "MC13TeV_Unpart_1p50", 
-          "xsec": 0.2928, 
-          "split": 1, 
-          "br": [
-            1.0
-          ]
-        }
-      ], 
-      "fill": 0, 
-      "spimpose": true, 
-      "lcolor": "90", 
-      "lstyle": 1
-    }, 
-    {
-      "isdata": false, 
       "color": "6", 
       "issignal": true, 
-      "tag": "ADD(3)", 
+      "tag": "EWK_S_DM(1)_K1(1)_K2(1)", 
       "lwidth": 2, 
       "marker": 6, 
       "data": [
         {
-          "dtag": "MC13TeV_ADD_D3", 
-          "xsec": 0.03323, 
+          "dtag": "MC13TeV_EWKDM_S_Mx_1_K1_1_K2_1", 
+          "xsec": 1.121410811E-7, 
           "split": 1, 
           "br": [
-            1.0
+            1000000
           ]
         }
       ], 

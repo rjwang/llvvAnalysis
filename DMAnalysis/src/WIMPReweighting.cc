@@ -13,7 +13,9 @@ using namespace std;
 //
 WIMPReweighting::WIMPReweighting(const edm::ParameterSet &runProcess)
 {
-    std::vector<std::string> WIMPFiles = runProcess.getParameter<std::vector<std::string> >("wimpweights");
+    std::vector<std::string> WIMPFiles = runProcess.getParameter<std::vector<std::string> >("genwimpweights");
+    std::vector<std::string> MCFiles = runProcess.getParameter<std::vector<std::string> >("MCweights");
+
     for(size_t ifile=0; ifile<WIMPFiles.size(); ifile++) {
 
         TString File(WIMPFiles[ifile].c_str());
@@ -24,8 +26,9 @@ WIMPReweighting::WIMPReweighting(const edm::ParameterSet &runProcess)
         if(wimpFile) {
             cout << "[WIMPReweighting] retrieving WIMP weights from: " << File << endl;
             std::vector<TString> WimpKeys1D;
-            WimpKeys1D.push_back("wimps_pt");
-	    WimpKeys1D.push_back("pileup_weights");
+            WimpKeys1D.push_back("genmet");
+	    WimpKeys1D.push_back("pt_chichi");
+	    //WimpKeys1D.push_back("pileup_weights");
             for(size_t itag=0; itag<WimpKeys1D.size(); itag++) {
                     TString key = WimpKeys1D[itag];
                     cout << "key: " << key << endl;
@@ -51,8 +54,40 @@ WIMPReweighting::WIMPReweighting(const edm::ParameterSet &runProcess)
 	    cout << "[WIMPReweighting] close file: " << File << endl;
         }
         wimpFile->Close();
-
     }
+
+
+    for(size_t ifile=0; ifile<MCFiles.size(); ifile++) {
+
+        TString File(MCFiles[ifile].c_str());
+	if(!File.Contains(".root")) continue;
+        gSystem->ExpandPathName(File);
+        TFile *wimpFile=TFile::Open(File);
+
+        if(wimpFile) {
+            cout << "[WIMPReweighting] retrieving MC weights from: " << File << endl;
+            std::vector<TString> WimpKeys1D;
+	    WimpKeys1D.push_back("pileup_weights");
+            for(size_t itag=0; itag<WimpKeys1D.size(); itag++) {
+                    TString key = WimpKeys1D[itag];
+                    cout << "key: " << key << endl;
+                    TH1F *h = (TH1F *) wimpFile->Get(key);
+		    if(h==0) continue;
+                    h->SetDirectory(0); //THIS IS IMPORTANT FOR TH1 Weight File!!!
+                    wimpWeights1DH_[key] = h;
+            }//itag
+
+	    cout << "[WIMPReweighting] close file: " << File << endl;
+        }
+        wimpFile->Close();
+    }
+
+
+
+
+
+
+
 }
 
 

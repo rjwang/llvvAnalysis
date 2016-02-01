@@ -32,6 +32,7 @@ typedef std::vector<LorentzVector> LorentzVectorCollection;
 namespace METUtils {
 
   double transverseMass(LorentzVector &visible, LorentzVector &invisible, bool assumeSameMass);
+  double response(LorentzVector &Z, LorentzVector &MET);
   PhysicsObject_Jet smearedJet(const LorentzVector &origJet, double genJetPt, int mode=0);
 
 
@@ -42,5 +43,6 @@ namespace METUtils {
                         std::vector<PhysicsObjectJetCollection>& jetsVar,
                         LorentzVectorCollection& metsVar,
                         JetCorrectionUncertainty *jecUnc);
+  LorentzVector applyMETXYCorr(LorentzVector met, bool isMC, int nvtx);
 }
 #endif /* defined(____METUtils__) */

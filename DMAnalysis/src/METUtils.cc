@@ -32,8 +32,20 @@ double transverseMass(LorentzVector &visible, LorentzVector &invisible, bool ass
     return -1;
 }
 
+double response(LorentzVector &Z, LorentzVector &MET)
+{
+        TVector2 z(Z.px(),Z.py());
+        TVector2 met(MET.px(),MET.py());
+        TVector2 sum = z+met;
+        sum *= -1;
+        double cos_ = (sum*z)/(sum.Mod()*z.Mod());
+        return cos_*sum.Mod()/z.Mod();
+}
 
-//Jet energy resoltuion, 8TeV scale factors, to be updated
+
+
+
+//Jet energy resoltuion, 13TeV scale factors, updated on 12/18/2015
 PhysicsObject_Jet smearedJet(const PhysicsObject_Jet &origJet, double genJetPt, int mode)
 {
     if(genJetPt<=0) return origJet;
@@ -43,34 +55,34 @@ PhysicsObject_Jet smearedJet(const PhysicsObject_Jet &origJet, double genJetPt, 
 
     //https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution#JER_Scaling_factors_and_Uncertai
     double ptSF(1.0), ptSF_up(1.0), ptSF_down(1.0);
-    if(eta<0.5)                  {
-        ptSF=1.079;
-        ptSF_up=1.105;
-        ptSF_down=1.053;
-    } else if(eta>=0.5 && eta<1.1) {
-        ptSF=1.099;
-        ptSF_up=1.127;
-        ptSF_down=1.071;
-    } else if(eta>=1.1 && eta<1.7) {
-        ptSF=1.121;
-        ptSF_up=1.150;
-        ptSF_down=1.092;
-    } else if(eta>=1.7 && eta<2.3) {
-        ptSF=1.208;
-        ptSF_up=1.254;
-        ptSF_down=1.162;
-    } else if(eta>=2.3 && eta<2.8) {
-        ptSF=1.254;
-        ptSF_up=1.316;
-        ptSF_down=1.192;
-    } else if(eta>=2.8 && eta<3.2) {
-        ptSF=1.395;
-        ptSF_up=1.458;
-        ptSF_down=1.332;
+    if(eta<0.8)                    {
+        ptSF=1.061;
+        ptSF_up=ptSF+0.023;
+        ptSF_down=ptSF-0.023;
+    } else if(eta>=0.8 && eta<1.3) {
+        ptSF=1.088;
+        ptSF_up=ptSF+0.029;
+        ptSF_down=ptSF-0.029;
+    } else if(eta>=1.3 && eta<1.9) {
+        ptSF=1.106;
+        ptSF_up=ptSF+0.030;
+        ptSF_down=ptSF-0.030;
+    } else if(eta>=1.9 && eta<2.5) {
+        ptSF=1.126;
+        ptSF_up=ptSF+0.094;
+        ptSF_down=ptSF-0.094;
+    } else if(eta>=2.5 && eta<3.0) {
+        ptSF=1.343;
+        ptSF_up=ptSF+0.123;
+        ptSF_down=ptSF-0.123;
+    } else if(eta>=3.0 && eta<3.2) {
+        ptSF=1.303;
+        ptSF_up=ptSF+0.111;
+        ptSF_down=ptSF-0.111;
     } else if(eta>=3.2 && eta<5.0) {
-        ptSF=1.056;
-        ptSF_up=1.247;
-        ptSF_down=0.865;
+        ptSF=1.320;
+        ptSF_up=ptSF+0.286;
+        ptSF_down=ptSF-0.286;
     }
 
     if(mode==1) ptSF = ptSF_up;
@@ -165,6 +177,26 @@ void computeVariation(PhysicsObjectJetCollection& jets,
 }
 
 
+//
+LorentzVector applyMETXYCorr(LorentzVector met, bool isMC, int nvtx)
+{
+    double corX = 0.;
+    double corY = 0.;
+
+
+if(isMC){
+  corX = -0.5091044 + (-0.0600439*nvtx);
+  corY = 0.2873434 + (0.0183584*nvtx);
+}
+else{
+  corX = -1.7325953 + (-0.1804222*nvtx);
+  corY = 0.9452573 + (0.1277629*nvtx);
+}
+
+    double px = met.px()-corX;
+    double py = met.py()-corY;
+    return LorentzVector(px,py,0,sqrt(px*px+py*py));
+}
 
 
 

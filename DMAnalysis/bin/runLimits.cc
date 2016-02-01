@@ -207,6 +207,7 @@ int indexvbf = -1;
 int indexcut   = -1, indexcutL=-1, indexcutR=-1;
 int mass=-1, massL=-1, massR=-1;
 int MV=-1, MA=-1;
+float K1=-1, K2=-1;
 TString atgcpar="", atgcpar2="";
 bool runSystematics = false;
 bool shape = false;
@@ -449,6 +450,14 @@ int main(int argc, char* argv[])
             sscanf(argv[i+1],"%i",&MA );
             i++;
             printf("MA = %i\n", MA);
+        } else if(arg.find("--K1")       !=string::npos && i+1<argc)  {
+            sscanf(argv[i+1],"%f",&K1 );
+            i++;
+            printf("K1 = %f\n", K1);
+        } else if(arg.find("--K2")       !=string::npos && i+1<argc)  {
+            sscanf(argv[i+1],"%f",&K2 );
+            i++;
+            printf("K2 = %f\n", K2);
         } else if(arg.find("--m")        !=string::npos && i+1<argc)  {
             sscanf(argv[i+1],"%i",&mass );
             i++;
@@ -1632,8 +1641,24 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
     TString MVStr("");
     if(MV>0)MVStr += MV;
 
+
     TString MAStr("");
     if(MA>0)MAStr += MA;
+
+
+
+    TString K1Str("");
+    std::ostringstream K1out;
+    K1out << std::setprecision(2) << K1;
+    std::string K1str = K1out.str();
+    if(K1>0) K1Str = K1str;
+
+    TString K2Str("");
+    std::ostringstream K2out;
+    K2out << std::setprecision(2) << K2;
+    std::string K2str = K2out.str();
+    if(K2>0) K2Str = K2str;
+
 
 
     YIELDS_T ee0jet_Yields;
@@ -1735,6 +1760,15 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
                     if(mass>0 && !procTitle.Contains("Unpart("+massStr+")"))continue;
                 }
 
+                if(procTitle.Contains("ADD")) {
+		    if(MV>0 || MA>0) continue;
+                    if(mass>0 && !procTitle.Contains("ADD("+massStr+")"))continue;
+                }
+
+                if(procTitle.Contains("EWK_S_DM")) {
+		    if(MV>0 || MA>0) continue;
+                    if(mass>0 && !procTitle.Contains("EWK_S_DM("+massStr+")_K1("+K1Str+")_K2("+K2Str+")"))continue;
+                }
 
 
                 if(procTitle.Contains("DM") && procTitle.Contains("MV")) {
@@ -2658,6 +2692,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 } else if(dci.procs[j-1].BeginsWith("D5") || dci.procs[j-1].BeginsWith("D8")
                           || dci.procs[j-1].BeginsWith("C3") || dci.procs[j-1].BeginsWith("D9")
                           || dci.procs[j-1].BeginsWith("UnPart")
+			  || dci.procs[j-1].BeginsWith("ewk_s_dm")
                           || dci.procs[j-1].BeginsWith("dm") ) {
                     fprintf(pFile,"%6f ",normSysts["CMS_zllwimps_pdf"]); //convert shape -> normalization
                 } else {
@@ -2720,6 +2755,22 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
 
     TString MAStr("");
     if(MA>0)MAStr += MA;
+
+
+    TString K1Str("");
+    std::ostringstream K1out;
+    K1out << std::setprecision(2) << K1;
+    std::string K1str = K1out.str();
+    if(K1>0) K1Str = K1str;
+
+    TString K2Str("");
+    std::ostringstream K2out;
+    K2out << std::setprecision(2) << K2;
+    std::string K2str = K2out.str();
+    if(K2>0) K2Str = K2str;
+
+
+
 
     //open input file
     TFile* inF = TFile::Open(url);
@@ -2884,6 +2935,16 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
                 }
                 if(proc.Contains("Unpart")) {
                     if(mass>0 && !proc.Contains("Unpart("+massStr+")"))continue;
+                }
+
+                if(proc.Contains("ADD")) {
+		    if(MV>0 || MA>0) continue;
+                    if(mass>0 && !proc.Contains("ADD("+massStr+")"))continue;
+                }
+
+                if(proc.Contains("EWK_S_DM")) {
+                    if(MV>0 || MA>0) continue;
+                    if(mass>0 && !proc.Contains("EWK_S_DM("+massStr+")_K1("+K1Str+")_K2("+K2Str+")"))continue;
                 }
 
                 if(proc.Contains("DM") && proc.Contains("MV")) {

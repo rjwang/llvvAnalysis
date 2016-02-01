@@ -49,7 +49,8 @@ public :
     }
 
     void setLeptonIsoInfo(float mn_pileupIso_, float mn_chargedIso_, float mn_photonIso_, float mn_neutralHadIso_,
-                          float en_pileupIso_, float en_chargedIso_, float en_photonIso_, float en_neutralHadIso_) {
+                          float en_pileupIso_, float en_chargedIso_, float en_photonIso_, float en_neutralHadIso_,
+			  float en_relIsoWithEA_) {
 
         mn_pileupIso = mn_pileupIso_;
         mn_chargedIso = mn_chargedIso_;
@@ -60,10 +61,16 @@ public :
         en_chargedIso = en_chargedIso_;
         en_photonIso = en_photonIso_;
         en_neutralHadIso = en_neutralHadIso_;
+
+        en_relIsoWithEA = en_relIsoWithEA_;
     }
 
     float e_pfRelIsoDbeta() {
         return (en_chargedIso + TMath::Max(0., en_neutralHadIso + en_photonIso - 0.5 * en_pileupIso) )/pt();
+    }
+
+    float e_relIsoWithEA() {
+	return en_relIsoWithEA;
     }
 
     float m_pfRelIsoDbeta() {
@@ -75,6 +82,7 @@ public :
     bool isElpassVeto, isElpassLoose, isElpassMedium, isElpassTight;
     float mn_pileupIso, mn_chargedIso, mn_photonIso, mn_neutralHadIso;
     float en_pileupIso, en_chargedIso, en_photonIso, en_neutralHadIso;
+    float en_relIsoWithEA;
 };
 
 

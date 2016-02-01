@@ -95,6 +95,7 @@ for proc in procList :
 
         #run over items in process
         isdata=getByLabel(desc,'isdata',False)
+        doWIMPreweighting=getByLabel(desc,'doWIMPreweighting',False)
         mctruthmode=getByLabel(desc,'mctruthmode',0)
 	tag = getByLabel(desc,'tag','') #RJ
 	print tag
@@ -148,22 +149,25 @@ for proc in procList :
                 else:
                         eventsFile=inputdir + '/' + origdtag + '_' + str(segment) + '.root'
 
-                if(eventsFile.find('/store/')==0)  : eventsFile = commands.getstatusoutput('/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select find ' + eventsFile)[1]
-		if(eventsFile.find('?')>=0)  : eventsFile = eventsFile[:eventsFile.find('?')]
-		eventsFile = 'root://eoscms/'+eventsFile
+		#print eventsFile
+                #if(eventsFile.find('/store/')==0)  : eventsFile = commands.getstatusoutput('/afs/cern.ch/project/eos/installation/0.3.84-aquamarine/bin/eos.select find ' + eventsFile)[1]
+		#if(eventsFile.find('?')>=0)  : eventsFile = eventsFile[:eventsFile.find('?')]
+		eventsFile = 'root://eoscms//eos/cms'+eventsFile
 
             	sedcmd = 'sed \"s%@input%' + eventsFile +'%;s%@outdir%' + outdir +'%;s%@isMC%' + str(not isdata) + '%;s%@mctruthmode%'+str(mctruthmode)+'%;s%@xsec%'+str(xsec)+'%;'
                 sedcmd += 's%@cprime%'+str(getByLabel(d,'cprime',-1))+'%;'
                 sedcmd += 's%@brnew%' +str(getByLabel(d,'brnew' ,-1))+'%;'
                 sedcmd += 's%@suffix%' +suffix+'%;'
 		sedcmd += 's%@tag%' +str(getByLabel(desc,'tag',-1))+'%;'#RJ
-		#sedcmd += 's%@wimpweights%' +str(getByLabel(d,'wimpweights',-1))+'%;'#RJ
+		sedcmd += 's%@genwimpweights%' +str(getByLabel(d,'genwimpweights',-1))+'%;'#RJ
+		sedcmd += 's%@doWIMPreweighting%' + str(doWIMPreweighting)+'%;'#RJ
             	if(params.find('@useMVA')<0) :          params = '@useMVA=False ' + params
                 if(params.find('@weightsFile')<0) :     params = '@weightsFile= ' + params
                 if(params.find('@evStart')<0) :         params = '@evStart=0 ' + params
                 if(params.find('@evEnd')<0) :           params = '@evEnd=-1 ' + params
             	if(params.find('@saveSummaryTree')<0) : params = '@saveSummaryTree=False ' + params
             	if(params.find('@runSystematics')<0) :  params = '@runSystematics=False ' + params
+		if(params.find('@usemetNoHF')<0) :  	params = '@usemetNoHF=False ' + params
             	if(len(params)>0) :
                     extracfgs = params.split(' ')
                     for icfg in extracfgs :

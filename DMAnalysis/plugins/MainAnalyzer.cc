@@ -243,7 +243,7 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
     DoubleMuTrigs_(	iConfig.getParameter<std::vector<std::string> >("DoubleMuTrigs")				),
     DoubleEleTrigs_(    iConfig.getParameter<std::vector<std::string> >("DoubleEleTrigs")                               ),
     SingleMuTrigs_(	iConfig.getParameter<std::vector<std::string> >("SingleMuTrigs")				),
-    SingleEleTrigs_(    iConfig.getParameter<std::vector<std::string> >("SingleMuTrigs")				),
+    SingleEleTrigs_(    iConfig.getParameter<std::vector<std::string> >("SingleEleTrigs")				),
     MuEGTrigs_(		iConfig.getParameter<std::vector<std::string> >("MuEGTrigs")					),
 //    DoubleTauTrigs_(     iConfig.getParameter<std::vector<std::string> >("DoubleTauTrigs")                                ),
     controlHistos_(	iConfig.getParameter<std::string>("dtag")							),
@@ -509,7 +509,7 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
     event.getByToken(muonTag_, muons);
     ev.mn=0;
     for(const pat::Muon &mu : *muons) {
-        if(mu.pt() < 5) continue;
+        if(mu.pt() < 3) continue;
         ev.mn_px[ev.mn] = mu.px();
         ev.mn_py[ev.mn] = mu.py();
         ev.mn_pz[ev.mn] = mu.pz();
