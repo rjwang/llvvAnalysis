@@ -462,7 +462,7 @@ int main(int argc, char* argv[])
         //if(cutflowH) cnorm=cutflowH->GetBinContent(1);
         TH1F* posH = (TH1F *) file->Get("mainAnalyzer/llvv/n_posevents");
         TH1F* negH = (TH1F *) file->Get("mainAnalyzer/llvv/n_negevents");
-        if(posH && negH) cnorm = posH->GetBinContent(1) + negH->GetBinContent(1);
+        if(posH && negH) cnorm = posH->GetBinContent(1) - negH->GetBinContent(1);
         if(rescaleFactor>0) cnorm /= rescaleFactor;
         printf("cnorm = %f\n",cnorm);
     }
@@ -532,8 +532,9 @@ int main(int argc, char* argv[])
         //systematical weight
         float weight = 1.0;
         if(isMC) weight *= genWeight;
-        double TotalWeight_plus = weight;
-        double TotalWeight_minus = weight;
+        //only take up and down from pileup effect
+        double TotalWeight_plus = 1.0;
+        double TotalWeight_minus = 1.0;
 
         if(isMC) mon.fillHisto("pileup", "all", ev.ngenTruepu, 1.0);
 
@@ -550,7 +551,7 @@ int main(int argc, char* argv[])
             TotalWeight_minus *= weight_pileup_Down->GetBinContent(binx);
         }
 
-        Hcutflow->Fill(1,1);
+        Hcutflow->Fill(1,genWeight);
         Hcutflow->Fill(2,weight);
         Hcutflow->Fill(3,weight*TotalWeight_minus);
         Hcutflow->Fill(4,weight*TotalWeight_plus);
@@ -720,8 +721,8 @@ int main(int argc, char* argv[])
 
         //split inclusive DY sample into DYToLL and DYToTauTau
         if(isMC && mctruthmode==1){
-		if(phys.genleptons.size()!=2) continue;
-		if(!isDYToLL(phys.genleptons[0].id, phys.genleptons[1].id) ) continue;
+		//if(phys.genleptons.size()!=2) continue;
+		if(phys.genleptons.size()==2 && isDYToTauTau(phys.genleptons[0].id, phys.genleptons[1].id) ) continue;
 	}
 
         if(isMC && mctruthmode==2){
@@ -810,6 +811,8 @@ int main(int argc, char* argv[])
             int lepid = phys.leptons[ilep].id;
             if(abs(lepid)==13 && fabs(lep.eta())> 2.4) continue;
             if(abs(lepid)==11 && fabs(lep.eta())> 2.5) continue;
+	    //tau veto
+	    if(abs(lepid)==15 && fabs(lep.eta())> 2.4) continue;
 
             bool isMatched(false);
             isMatched |= (deltaR(lep1,lep) < 0.01);
@@ -828,7 +831,13 @@ int main(int argc, char* argv[])
                 //
                 hasTightIdandIso &= ( phys.leptons[ilep].isElpassMedium && phys.leptons[ilep].pt()>10 );
 
-            } else continue;
+            } else if(abs(lepid)==15) { //muon
+		hasLooseIdandIso &= ( phys.leptons[ilep].isTauDM && phys.leptons[ilep].ta_IsLooseIso && phys.leptons[ilep].pt()>20 );
+		//
+		hasTightIdandIso &= ( phys.leptons[ilep].isTauDM && phys.leptons[ilep].ta_IsTightIso && phys.leptons[ilep].pt()>20 );
+
+	    } else continue;
+
 
 
             if(!hasLooseIdandIso) continue;
