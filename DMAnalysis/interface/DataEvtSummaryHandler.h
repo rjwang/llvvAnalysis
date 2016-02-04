@@ -41,6 +41,18 @@ struct DataEvtSummary_t {
     Float_t puWeight, hptWeights[5];
     Float_t pthat,genWeight, qscale, x1,x2;
     Int_t id1,id2;
+    Float_t weight_QCDscale_muR1_muF1;
+    Float_t weight_QCDscale_muR1_muF2;
+    Float_t weight_QCDscale_muR1_muF0p5;
+    Float_t weight_QCDscale_muR2_muF1;
+    Float_t weight_QCDscale_muR2_muF2;
+    Float_t weight_QCDscale_muR2_muF0p5;
+    Float_t weight_QCDscale_muR0p5_muF1;
+    Float_t weight_QCDscale_muR0p5_muF2;
+    Float_t weight_QCDscale_muR0p5_muF0p5;
+
+
+
 
     //gen level event
     Int_t nmcparticles;
@@ -52,7 +64,7 @@ struct DataEvtSummary_t {
     Float_t mn_px[MAXPARTICLES],mn_py[MAXPARTICLES],mn_pz[MAXPARTICLES],mn_en[MAXPARTICLES];
     Int_t mn_id[MAXPARTICLES], mn_type[MAXPARTICLES];
     Float_t mn_d0[MAXPARTICLES],mn_dZ[MAXPARTICLES],mn_ip3d[MAXPARTICLES],mn_ip3dsig[MAXPARTICLES];
-    Bool_t mn_IsLoose[MAXPARTICLES],mn_IsTight[MAXPARTICLES],mn_IsSoft[MAXPARTICLES],mn_IsHighPt[MAXPARTICLES];
+    Bool_t mn_IsLoose[MAXPARTICLES],mn_IsMedium[MAXPARTICLES],mn_IsTight[MAXPARTICLES],mn_IsSoft[MAXPARTICLES],mn_IsHighPt[MAXPARTICLES];
     Float_t mn_pileupIsoR03[MAXPARTICLES],mn_chargedIsoR03[MAXPARTICLES],mn_photonIsoR03[MAXPARTICLES],mn_neutralHadIsoR03[MAXPARTICLES];
     Float_t mn_pileupIsoR04[MAXPARTICLES],mn_chargedIsoR04[MAXPARTICLES],mn_photonIsoR04[MAXPARTICLES],mn_neutralHadIsoR04[MAXPARTICLES];
 

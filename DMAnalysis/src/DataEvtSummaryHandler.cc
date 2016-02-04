@@ -50,6 +50,25 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("x2",         	&evSummary_.x2,             "x2/F");
     t_->Branch("id1",        	&evSummary_.id1,            "id1/I");
     t_->Branch("id2",        	&evSummary_.id2,            "id2/I");
+    t_->Branch("weight_QCDscale_muR1_muF1",     &evSummary_.weight_QCDscale_muR1_muF1,      "weight_QCDscale_muR1_muF1/F");
+    t_->Branch("weight_QCDscale_muR1_muF2",     &evSummary_.weight_QCDscale_muR1_muF2,      "weight_QCDscale_muR1_muF2/F");
+    t_->Branch("weight_QCDscale_muR1_muF0p5",     &evSummary_.weight_QCDscale_muR1_muF0p5,      "weight_QCDscale_muR1_muF0p5/F");
+    t_->Branch("weight_QCDscale_muR2_muF1",     &evSummary_.weight_QCDscale_muR2_muF1,      "weight_QCDscale_muR2_muF1/F");
+    t_->Branch("weight_QCDscale_muR2_muF2",     &evSummary_.weight_QCDscale_muR2_muF2,      "weight_QCDscale_muR2_muF2/F");
+    t_->Branch("weight_QCDscale_muR2_muF0p5",     &evSummary_.weight_QCDscale_muR2_muF0p5,      "weight_QCDscale_muR2_muF0p5/F");
+    t_->Branch("weight_QCDscale_muR0p5_muF1",     &evSummary_.weight_QCDscale_muR0p5_muF1,      "weight_QCDscale_muR0p5_muF1/F");
+    t_->Branch("weight_QCDscale_muR0p5_muF2",     &evSummary_.weight_QCDscale_muR0p5_muF2,      "weight_QCDscale_muR0p5_muF2/F");
+    t_->Branch("weight_QCDscale_muR0p5_muF0p5",     &evSummary_.weight_QCDscale_muR0p5_muF0p5,      "weight_QCDscale_muR0p5_muF0p5/F");
+
+
+
+
+
+
+
+
+
+
 
 
     //mc truth
@@ -76,6 +95,7 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("mn_ip3d",               evSummary_.mn_ip3d,                 "mn_ip3d[mn]/F");
     t_->Branch("mn_ip3dsig",            evSummary_.mn_ip3dsig,              "mn_ip3dsig[mn]/F");
     t_->Branch("mn_IsLoose",            evSummary_.mn_IsLoose,              "mn_IsLoose[mn]/O");
+    t_->Branch("mn_IsMedium",            evSummary_.mn_IsMedium,              "mn_IsMedium[mn]/O");
     t_->Branch("mn_IsTight",            evSummary_.mn_IsTight,              "mn_IsTight[mn]/O");
     t_->Branch("mn_IsSoft",            	evSummary_.mn_IsSoft,               "mn_IsSoft[mn]/O");
     t_->Branch("mn_IsHighPt",           evSummary_.mn_IsHighPt,             "mn_IsHighPt[mn]/O");
@@ -305,6 +325,16 @@ bool DataEvtSummaryHandler::attachToTree(TTree *t)
     t_->SetBranchAddress("x2",              &evSummary_.x2);
     t_->SetBranchAddress("id1",             &evSummary_.id1);
     t_->SetBranchAddress("id2",             &evSummary_.id2);
+    t_->SetBranchAddress("weight_QCDscale_muR1_muF1",       &evSummary_.weight_QCDscale_muR1_muF1);
+    t_->SetBranchAddress("weight_QCDscale_muR1_muF2",       &evSummary_.weight_QCDscale_muR1_muF2);
+    t_->SetBranchAddress("weight_QCDscale_muR1_muF0p5",       &evSummary_.weight_QCDscale_muR1_muF0p5);
+    t_->SetBranchAddress("weight_QCDscale_muR2_muF1",       &evSummary_.weight_QCDscale_muR2_muF1);
+    t_->SetBranchAddress("weight_QCDscale_muR2_muF2",       &evSummary_.weight_QCDscale_muR2_muF2);
+    t_->SetBranchAddress("weight_QCDscale_muR2_muF0p5",       &evSummary_.weight_QCDscale_muR2_muF0p5);
+    t_->SetBranchAddress("weight_QCDscale_muR0p5_muF1",       &evSummary_.weight_QCDscale_muR0p5_muF1);
+    t_->SetBranchAddress("weight_QCDscale_muR0p5_muF2",       &evSummary_.weight_QCDscale_muR0p5_muF2);
+    t_->SetBranchAddress("weight_QCDscale_muR0p5_muF0p5",       &evSummary_.weight_QCDscale_muR0p5_muF0p5);
+
 
 
     //mc truth
@@ -331,6 +361,7 @@ bool DataEvtSummaryHandler::attachToTree(TTree *t)
     t_->SetBranchAddress("mn_ip3d",                 evSummary_.mn_ip3d);
     t_->SetBranchAddress("mn_ip3dsig",              evSummary_.mn_ip3dsig);
     t_->SetBranchAddress("mn_IsLoose",              evSummary_.mn_IsLoose);
+    t_->SetBranchAddress("mn_IsMedium",              evSummary_.mn_IsMedium);
     t_->SetBranchAddress("mn_IsTight",              evSummary_.mn_IsTight);
     t_->SetBranchAddress("mn_IsSoft",               evSummary_.mn_IsSoft);
     t_->SetBranchAddress("mn_IsHighPt",             evSummary_.mn_IsHighPt);

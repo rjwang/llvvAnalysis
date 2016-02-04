@@ -522,6 +522,7 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
         ev.mn_ip3dsig[ev.mn] = mu.dB(pat::Muon::PV3D)/mu.edB(pat::Muon::PV3D);
 
         ev.mn_IsLoose[ev.mn] = mu.isLooseMuon();
+        ev.mn_IsMedium[ev.mn] = mu.isMediumMuon();
         ev.mn_IsTight[ev.mn] = mu.isTightMuon(PV);
         ev.mn_IsSoft[ev.mn] = mu.isSoftMuon(PV);
         ev.mn_IsHighPt[ev.mn] = mu.isHighPtMuon(PV);
@@ -550,35 +551,6 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
                               | (	mu.isCaloMuon() 	<< 4)
                               | (	mu.isPFMuon() 		<< 5)
                               | (	mu.isRPCMuon()		<< 6);
-        /*
-                    ev.mn_quality[ev.mn] = ( 	muon::isGoodMuon(mu,muon::All) 					<< 0)
-                    			 | (	muon::isGoodMuon(mu,muon::AllGlobalMuons) 			<< 1)
-                    			 | (	muon::isGoodMuon(mu,muon::AllStandAloneMuons)			<< 2)
-                    			 | (	muon::isGoodMuon(mu,muon::AllTrackerMuons)			<< 3)
-                    			 | (	muon::isGoodMuon(mu,muon::TrackerMuonArbitrated)		<< 4)
-                   			 | (	muon::isGoodMuon(mu,muon::AllArbitrated)			<< 5)
-                    			 | (	muon::isGoodMuon(mu,muon::GlobalMuonPromptTight)		<< 6)
-                    			 | (	muon::isGoodMuon(mu,muon::TMLastStationLoose)			<< 7)
-                    			 | (	muon::isGoodMuon(mu,muon::TMLastStationTight)			<< 8)
-                    			 | (	muon::isGoodMuon(mu,muon::TM2DCompatibilityLoose)		<< 9)
-                   			 | (	muon::isGoodMuon(mu,muon::TM2DCompatibilityTight)		<< 10)
-                   			 | (	muon::isGoodMuon(mu,muon::TMOneStationLoose)			<< 11)
-                    			 | (	muon::isGoodMuon(mu,muon::TMOneStationTight)			<< 12)
-                  		 	 | (	muon::isGoodMuon(mu,muon::TMLastStationOptimizedLowPtLoose)	<< 13)
-                   			 | (	muon::isGoodMuon(mu,muon::TMLastStationOptimizedLowPtTight)	<< 14)
-                   			 | (	muon::isGoodMuon(mu,muon::GMTkChiCompatibility)			<< 15)
-                   			 | (	muon::isGoodMuon(mu,muon::GMStaChiCompatibility)		<< 16)
-                   			 | (	muon::isGoodMuon(mu,muon::GMTkKinkTight)			<< 17)
-                    			 | (	muon::isGoodMuon(mu,muon::TMLastStationAngLoose)		<< 18)
-                   			 | (	muon::isGoodMuon(mu,muon::TMLastStationAngTight)		<< 19)
-                   			 | (	muon::isGoodMuon(mu,muon::TMOneStationAngLoose)			<< 20)
-                   			 | (	muon::isGoodMuon(mu,muon::TMOneStationAngTight)			<< 21)
-                   			 | (	muon::isGoodMuon(mu,muon::TMLastStationOptimizedBarrelLowPtLoose)<< 22)
-                   			 | (	muon::isGoodMuon(mu,muon::TMLastStationOptimizedBarrelLowPtTight)<< 23)
-                   			 | (	muon::isGoodMuon(mu,muon::RPCMuLoose)				<< 24);
-
-        */
-
         ev.mn++;
     }
 
@@ -732,7 +704,7 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
     event.getByToken(tauTag_, taus);
     ev.ta=0;
     for (const pat::Tau &tau : *taus) {
-        if (tau.pt() < 20) continue;
+        if(tau.pt() < 20) continue;
 
         ev.ta_px[ev.ta] = tau.px();
         ev.ta_py[ev.ta] = tau.py();
@@ -741,6 +713,8 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
         ev.ta_id[ev.ta] = 15*tau.charge();
 
         //Decay Mode Reconstruction
+        //https://twiki.cern.ch/twiki/bin/viewauth/CMS/TauIDRecommendation13TeV
+        //ev.ta_dm[ev.ta] = bool(tau.tauID("decayModeFindingOldDMs"));
         ev.ta_dm[ev.ta] = bool(tau.tauID("decayModeFinding"));
         ev.ta_newdm[ev.ta] = bool(tau.tauID("decayModeFindingNewDMs"));
 
@@ -813,7 +787,7 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
         ev.jet_hadronFlavour[ev.jet] = j.hadronFlavour();
         const reco::GenJet *gJet=j.genJet();
         if(gJet) ev.jet_genpt[ev.jet] = gJet->pt();
-	else     ev.jet_genpt[ev.jet] = 0;
+        else     ev.jet_genpt[ev.jet] = 0;
 
         ev.jet++;
     }
@@ -836,7 +810,7 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
 
             const reco::GenJet *gJet=j.genJet();
             if(gJet) ev.pjet_genpt[ev.pjet] = gJet->pt();
-	    else     ev.pjet_genpt[ev.pjet] = 0;
+            else     ev.pjet_genpt[ev.pjet] = 0;
 
             ev.pjet_btag0[ev.pjet] = j.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
             ev.pjet_btag1[ev.pjet] = j.bDiscriminator("pfJetBProbabilityBJetTags");
@@ -867,7 +841,7 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
 
         const reco::GenJet *gJet=j.genJet();
         if(gJet) ev.fjet_genpt[ev.fjet] = gJet->pt();
-	else     ev.fjet_genpt[ev.fjet] = 0;
+        else     ev.fjet_genpt[ev.fjet] = 0;
 
 
         ev.fjet_prunedM[ev.fjet] = (float) j.userFloat("ak8PFJetsCHSPrunedLinks");
@@ -1052,6 +1026,31 @@ MainAnalyzer::getMCtruth(const edm::Event& event, const edm::EventSetup& iSetup)
     if(ev.genWeight<0) controlHistos_.fillHisto("n_negevents","all",0); //increment negative event count
     if(ev.genWeight>0) controlHistos_.fillHisto("n_posevents","all",0); //increment positive event count
 
+
+    //scale variations
+    //https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW
+    vector<edm::Handle<LHEEventProduct> > EvtHandles;
+    event.getManyByType(EvtHandles);
+    if(EvtHandles.size()>0) {
+        edm::Handle<LHEEventProduct> EvtHandle = EvtHandles.front();
+        if(EvtHandle.isValid() && EvtHandle->weights().size()>=9) {
+            ev.weight_QCDscale_muR1_muF1 		= EvtHandle->weights()[0].wgt/EvtHandle->originalXWGTUP();
+            ev.weight_QCDscale_muR1_muF2 		= EvtHandle->weights()[1].wgt/EvtHandle->originalXWGTUP();
+            ev.weight_QCDscale_muR1_muF0p5 		= EvtHandle->weights()[2].wgt/EvtHandle->originalXWGTUP();
+            ev.weight_QCDscale_muR2_muF1 		= EvtHandle->weights()[3].wgt/EvtHandle->originalXWGTUP();
+            ev.weight_QCDscale_muR2_muF2 		= EvtHandle->weights()[4].wgt/EvtHandle->originalXWGTUP();
+            ev.weight_QCDscale_muR2_muF0p5 		= EvtHandle->weights()[5].wgt/EvtHandle->originalXWGTUP();
+            ev.weight_QCDscale_muR0p5_muF1 		= EvtHandle->weights()[6].wgt/EvtHandle->originalXWGTUP();
+            ev.weight_QCDscale_muR0p5_muF2 		= EvtHandle->weights()[7].wgt/EvtHandle->originalXWGTUP();
+            ev.weight_QCDscale_muR0p5_muF0p5 		= EvtHandle->weights()[8].wgt/EvtHandle->originalXWGTUP();
+        }
+    }
+
+
+
+
+
+
     //
     // gen particles
     //
@@ -1089,7 +1088,7 @@ MainAnalyzer::getMCtruth(const edm::Event& event, const edm::EventSetup& iSetup)
                 //|| ( abs(pid) == 21 && status < 30 )
                 || ( abs(pid) >= 23 && abs(pid) <= 25 && status < 30 )
                 || ( abs(pid) == 1008 )
-		|| ( abs(pid) >= 1  && abs(pid) <= 6 && status < 30 )
+                || ( abs(pid) >= 1  && abs(pid) <= 6 && status < 30 )
                 //|| ( abs(pid) >= 32 && abs(pid) <= 42 )
             ) {
 //		cout << "pid: " << pid << " status: " << status << endl;
@@ -1105,11 +1104,12 @@ MainAnalyzer::getMCtruth(const edm::Event& event, const edm::EventSetup& iSetup)
                 if(mom) {
                     int pid    = prunedV[i]->pdgId();
                     int mompid = mom->pdgId();
-		    int status = prunedV[i]->status();
+                    int status = prunedV[i]->status();
 
                     if( !(abs(pid)>=1 && abs(pid)<=6) && abs(pid)!=23 && abs(pid)!=2000012 && abs(pid)!=5000039 && abs(mompid)!=23 && abs(mompid)!=24 && abs(mompid)!=25) continue;
-                    if(status!=1 && status!=2 && status!=22  && status!=23) continue;
-		    //cout << "saving --> pid: " << pid << " mom: " << mompid << " status: " << status << endl;
+                    if( status!=1 && status!=2 && status!=22  && status!=23 ) continue;
+
+                    //cout << "saving --> pid: " << pid << " mom: " << mompid << " status: " << status << endl;
 
                     ev.mc_px[ev.nmcparticles] = prunedV[i]->px();
                     ev.mc_py[ev.nmcparticles] = prunedV[i]->py();
@@ -1130,7 +1130,7 @@ MainAnalyzer::getMCtruth(const edm::Event& event, const edm::EventSetup& iSetup)
 
     } else {
 
-	// for PYTHIA 6 based
+        // for PYTHIA 6 based
         for(size_t i=0; i<pruned->size(); i++) {
             const Candidate * genParticle = &(*pruned)[i];
             int status=genParticle->status();
