@@ -279,19 +279,19 @@ int main(int argc, char* argv[])
     mon.addHistogram( new TH1F( "balancedif_presel", ";|E_{T}^{miss}-#it{q}_{T}|/#it{q}_{T};Events", 5,0,1.0) );
     mon.addHistogram( new TH1F( "mt_presel",         ";#it{m}_{T} [GeV];Events", 12,0,1200) );
     mon.addHistogram( new TH1F( "mt2_presel",         ";#it{m}_{T} [GeV];Events", nBinsMT,MTBins) );
-    mon.addHistogram( new TH1F( "axialpfmet_presel", ";Axial E_{T}^{miss} [GeV];Events", 200,-150,150) );
+    mon.addHistogram( new TH1F( "axialpfmet_presel", ";Axial E_{T}^{miss} [GeV];Events", 50,-150,150) );
 
     //adding N-1 plots
 
 
     //MET X-Y shift correction
-    mon.addHistogram( new TH2F( "pfmetx_vs_nvtx_presel",";Vertices;E_{X}^{miss} [GeV];Events",50,0,50, 200,-75,75) );
-    mon.addHistogram( new TH2F( "pfmety_vs_nvtx_presel",";Vertices;E_{Y}^{miss} [GeV];Events",50,0,50, 200,-75,75) );
-    mon.addHistogram( new TH1F( "pfmetphi_wocorr_presel",";#it{#phi}(E_{T}^{miss});Events", 50,-1.*TMath::Pi(),TMath::Pi()) );
-    mon.addHistogram( new TH1F( "pfmetphi_wicorr_presel",";#it{#phi}(E_{T}^{miss});Events", 50,-1.*TMath::Pi(),TMath::Pi()) );
+    mon.addHistogram( new TH2F( "pfmetx_vs_nvtx",";Vertices;E_{X}^{miss} [GeV];Events",50,0,50, 200,-75,75) );
+    mon.addHistogram( new TH2F( "pfmety_vs_nvtx",";Vertices;E_{Y}^{miss} [GeV];Events",50,0,50, 200,-75,75) );
+    mon.addHistogram( new TH1F( "pfmetphi_wocorr",";#it{#phi}(E_{T}^{miss});Events", 50,-1.*TMath::Pi(),TMath::Pi()) );
+    mon.addHistogram( new TH1F( "pfmetphi_wicorr",";#it{#phi}(E_{T}^{miss});Events", 50,-1.*TMath::Pi(),TMath::Pi()) );
 
-    mon.addHistogram( new TH1F( "pfmet_wicorr_presel",      ";E_{T}^{miss} [GeV];Events / 1 GeV", nBinsMET, METBins));
-    mon.addHistogram( new TH1F( "pfmet2_wicorr_presel",     ";E_{T}^{miss} [GeV];Events / 1 GeV", nBinsMET2, METBins2));
+    mon.addHistogram( new TH1F( "pfmet_wicorr",      ";E_{T}^{miss} [GeV];Events / 1 GeV", nBinsMET, METBins));
+    mon.addHistogram( new TH1F( "pfmet2_wicorr",     ";E_{T}^{miss} [GeV];Events / 1 GeV", nBinsMET2, METBins2));
 
 
     // generator level plots
@@ -470,45 +470,24 @@ int main(int argc, char* argv[])
 
 
 
-    //pileup weighting: based on vtx for now...
-    std::vector<float> dataPileupDistribution;
+    //pileup weighting
     TString PU_Central = runProcess.getParameter<std::string>("PU_Central");
     gSystem->ExpandPathName(PU_Central);
-    cout << "Loading PU weights: " << PU_Central << endl;
+    cout << "Loading PU weights Central: " << PU_Central << endl;
     TFile *PU_Central_File = TFile::Open(PU_Central);
-    TH1F* histo = (TH1F *) PU_Central_File->Get("pileup");
-    if(!histo)std::cout<<"pileup histogram is null!!!\n";
-    for(int i=1; i<=histo->GetNbinsX(); i++) {
-        dataPileupDistribution.push_back(histo->GetBinContent(i)/histo->Integral());
-    }
-    delete histo;
-    PU_Central_File->Close();
+    TH1F* weight_pileup_Central = (TH1F *) PU_Central_File->Get("pileup");
 
-    std::vector<float> mcPileupDistribution;
-    bool useObservedPU(false);
-    if(isMC) {
-        TString puDist("mainAnalyzer/llvv/pileuptrue");
-        if(useObservedPU) puDist="mainAnalyzer/llvv/pileup";
-        TH1F* histo = (TH1F *) file->Get(puDist);
-        if(!histo)std::cout<<"pileup histogram is null!!!\n";
-        for(int i=1; i<=histo->GetNbinsX(); i++) {
-            mcPileupDistribution.push_back(histo->GetBinContent(i)/histo->Integral());
-        }
-        delete histo;
-        if(dataPileupDistribution.size()==0) dataPileupDistribution=mcPileupDistribution;
-    }
+    TString PU_Up = runProcess.getParameter<std::string>("PU_Up");
+    gSystem->ExpandPathName(PU_Up);
+    cout << "Loading PU weights Up: " << PU_Up << endl;
+    TFile *PU_Up_File = TFile::Open(PU_Up);
+    TH1F* weight_pileup_Up = (TH1F *) PU_Up_File->Get("pileup");
 
-    while(mcPileupDistribution.size()<dataPileupDistribution.size())  mcPileupDistribution.push_back(0.0);
-    while(mcPileupDistribution.size()>dataPileupDistribution.size())  dataPileupDistribution.push_back(0.0);
-
-    gROOT->cd();  //THIS LINE IS NEEDED TO MAKE SURE THAT HISTOGRAM INTERNALLY PRODUCED IN LumiReWeighting ARE NOT DESTROYED WHEN CLOSING THE FILE
-    edm::LumiReWeighting *LumiWeights=0;
-    PuShifter_t PuShifters;
-    if(isMC) {
-        LumiWeights = new edm::LumiReWeighting(mcPileupDistribution,dataPileupDistribution);
-        PuShifters=getPUshifters(dataPileupDistribution,0.05);
-    }
-
+    TString PU_Down = runProcess.getParameter<std::string>("PU_Down");
+    gSystem->ExpandPathName(PU_Down);
+    cout << "Loading PU weights Down: " << PU_Down << endl;
+    TFile *PU_Down_File = TFile::Open(PU_Down);
+    TH1F* weight_pileup_Down = (TH1F *) PU_Down_File->Get("pileup");
 
 
     // event categorizer
@@ -550,18 +529,25 @@ int main(int argc, char* argv[])
         float genWeight = 1.0;
         if(isMC && ev.genWeight<0) genWeight = -1.0;
 
-        //pileup weight
+        //systematical weight
         float weight = 1.0;
         if(isMC) weight *= genWeight;
-        double TotalWeight_plus = 1.0;
-        double TotalWeight_minus = 1.0;
+        double TotalWeight_plus = weight;
+        double TotalWeight_minus = weight;
 
-        if(isMC) mon.fillHisto("pileup", "all", ev.ngenTruepu, weight);
+        if(isMC) mon.fillHisto("pileup", "all", ev.ngenTruepu, 1.0);
 
         if(isMC) {
-            weight            *= LumiWeights->weight(useObservedPU ? ev.ngenITpu : ev.ngenTruepu);
-            TotalWeight_plus  *= PuShifters[PUUP]->Eval(useObservedPU ? ev.ngenITpu : ev.ngenTruepu);
-            TotalWeight_minus *= PuShifters[PUDOWN]->Eval(useObservedPU ? ev.ngenITpu : ev.ngenTruepu);
+            float xval = ev.ngenTruepu;
+            int xbins = weight_pileup_Central->GetXaxis()->GetNbins();
+            if     (xval > weight_pileup_Central->GetXaxis()->GetBinUpEdge(xbins)    ) xval = weight_pileup_Central->GetXaxis()->GetBinUpEdge(xbins);
+            else if(xval < weight_pileup_Central->GetXaxis()->GetBinLowEdge(1)       ) xval = weight_pileup_Central->GetXaxis()->GetBinLowEdge(1);
+
+            int binx = weight_pileup_Central->GetXaxis()->FindBin(xval);
+
+            weight            *= weight_pileup_Central->GetBinContent(binx);
+            TotalWeight_plus  *= weight_pileup_Up->GetBinContent(binx);
+            TotalWeight_minus *= weight_pileup_Down->GetBinContent(binx);
         }
 
         Hcutflow->Fill(1,1);
@@ -732,6 +718,17 @@ int main(int argc, char* argv[])
             continue;
         }
 
+        //split inclusive DY sample into DYToLL and DYToTauTau
+        if(isMC && mctruthmode==1){
+		if(phys.genleptons.size()!=2) continue;
+		if(!isDYToLL(phys.genleptons[0].id, phys.genleptons[1].id) ) continue;
+	}
+
+        if(isMC && mctruthmode==2){
+		if(phys.genleptons.size()!=2) continue;
+		if(!isDYToTauTau(phys.genleptons[0].id, phys.genleptons[1].id) ) continue;
+	}
+
 
         bool hasTrigger(false);
 
@@ -889,7 +886,7 @@ int main(int argc, char* argv[])
                 nCSVTtags += (corrJets[ijet].btag0>0.97);
 
 
-		if(!isMC) continue;
+                if(!isMC) continue;
                 bool isCSVLtagged(corrJets[ijet].btag0>0.605);
 
                 if(abs(corrJets[ijet].flavid)==5) {
@@ -1055,14 +1052,14 @@ int main(int argc, char* argv[])
         //##############################################
 
         //for MET X-Y shift correction
-        mon.fillHisto("pfmetx_vs_nvtx_presel",tags,phys.nvtx,metP4.px(), weight);
-        mon.fillHisto("pfmety_vs_nvtx_presel",tags,phys.nvtx,metP4.py(), weight);
+        mon.fillHisto("pfmetx_vs_nvtx",tags,phys.nvtx,metP4.px(), weight);
+        mon.fillHisto("pfmety_vs_nvtx",tags,phys.nvtx,metP4.py(), weight);
         LorentzVector metP4_XYCorr = METUtils::applyMETXYCorr(metP4,isMC,phys.nvtx);
-        mon.fillHisto("pfmetphi_wocorr_presel",tags, metP4.phi(), weight);
-        mon.fillHisto("pfmetphi_wicorr_presel",tags, metP4_XYCorr.phi(), weight);
+        mon.fillHisto("pfmetphi_wocorr",tags, metP4.phi(), weight);
+        mon.fillHisto("pfmetphi_wicorr",tags, metP4_XYCorr.phi(), weight);
 
-        mon.fillHisto("pfmet_wicorr_presel",tags, metP4_XYCorr.pt(), weight, true);
-        mon.fillHisto("pfmet2_wicorr_presel",tags, metP4_XYCorr.pt(), weight, true);
+        mon.fillHisto("pfmet_wicorr",tags, metP4_XYCorr.pt(), weight, true);
+        mon.fillHisto("pfmet2_wicorr",tags, metP4_XYCorr.pt(), weight, true);
 
 
         if(passZmass) {
@@ -1208,12 +1205,12 @@ int main(int argc, char* argv[])
                     bool isLocalCSVLtagged(vJets[ijet].btag0>0.605);
 
                     //double val=1., valerr=0.;
-		    double BTagWeights_Up=1., BTagWeights_Down=1.;
+                    double BTagWeights_Up=1., BTagWeights_Down=1.;
                     if(abs(vJets[ijet].flavid)==5) {
                         //val = myBtagUtils.getBTagWeight(isLocalCSVLtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/b_eff").first;
                         //valerr = myBtagUtils.getBTagWeight(isLocalCSVLtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/b_eff").second;
-			if(isLocalCSVLtagged) BTagWeights_Up *= btag_reader_up.eval( BTagEntry::FLAV_B, vJets[ijet].eta(), (vJets[ijet].pt()<670. ? vJets[ijet].pt() : 670.) );
-			if(isLocalCSVLtagged) BTagWeights_Down *= btag_reader_down.eval( BTagEntry::FLAV_B, vJets[ijet].eta(), (vJets[ijet].pt()<670. ? vJets[ijet].pt() : 670.) );
+                        if(isLocalCSVLtagged) BTagWeights_Up *= btag_reader_up.eval( BTagEntry::FLAV_B, vJets[ijet].eta(), (vJets[ijet].pt()<670. ? vJets[ijet].pt() : 670.) );
+                        if(isLocalCSVLtagged) BTagWeights_Down *= btag_reader_down.eval( BTagEntry::FLAV_B, vJets[ijet].eta(), (vJets[ijet].pt()<670. ? vJets[ijet].pt() : 670.) );
 
                     } else if(abs(vJets[ijet].flavid)==4) {
                         //val = myBtagUtils.getBTagWeight(isLocalCSVLtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/c_eff").first;
@@ -1312,6 +1309,10 @@ int main(int argc, char* argv[])
     mon.Write();
 
     ofile->Close();
+
+    PU_Central_File->Close();
+    PU_Up_File->Close();
+    PU_Down_File->Close();
 
     if(outTxtFile_final)fclose(outTxtFile_final);
 }
