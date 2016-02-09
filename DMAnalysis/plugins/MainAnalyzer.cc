@@ -116,7 +116,7 @@ private:
     edm::EDGetTokenT<pat::PhotonCollection> photonTag_;
     edm::EDGetTokenT<pat::JetCollection> jetTag_;
     edm::EDGetTokenT<pat::JetCollection> jetPuppiTag_;
-    edm::EDGetTokenT<pat::JetCollection> fatjetTag_;
+//    edm::EDGetTokenT<pat::JetCollection> fatjetTag_;
     edm::EDGetTokenT<pat::METCollection> metTag_;
     edm::EDGetTokenT<pat::METCollection> metNoHFTag_;
     edm::EDGetTokenT<pat::METCollection> metPuppiTag_;
@@ -124,6 +124,8 @@ private:
     edm::EDGetTokenT<edm::TriggerResults> metFilterBitsTag_;
 
     edm::EDGetTokenT<edm::View<reco::GenParticle> > prunedGenTag_;
+    edm::EDGetTokenT<std::vector<PileupSummaryInfo> > puInfoTag_;
+    edm::EDGetTokenT<GenEventInfoProduct> genInfoTag_;
     edm::EDGetTokenT<edm::View<pat::PackedGenParticle> > packedGenTag_;
     edm::EDGetTokenT<edm::View<reco::GenJet> > genjetTag_;
 
@@ -142,12 +144,12 @@ private:
     bool verbose_;
 
 
-    edm::EDGetTokenT<double> rhoAllTag_;
+    //edm::EDGetTokenT<double> rhoAllTag_;
     edm::EDGetTokenT<double> rhoFastjetAllTag_;
-    edm::EDGetTokenT<double> rhoFastjetAllCaloTag_;
-    edm::EDGetTokenT<double> rhoFastjetCentralCaloTag_;
-    edm::EDGetTokenT<double> rhoFastjetCentralChargedPileUpTag_;
-    edm::EDGetTokenT<double> rhoFastjetCentralNeutralTag_;
+    //edm::EDGetTokenT<double> rhoFastjetAllCaloTag_;
+    //edm::EDGetTokenT<double> rhoFastjetCentralCaloTag_;
+    //edm::EDGetTokenT<double> rhoFastjetCentralChargedPileUpTag_;
+    //edm::EDGetTokenT<double> rhoFastjetCentralNeutralTag_;
 
 
 //    std::map<std::string, edm::ParameterSet> objConfig_;
@@ -229,12 +231,14 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
     photonTag_(		consumes<pat::PhotonCollection>(iConfig.getParameter<edm::InputTag>("photonsTag"))		),
     jetTag_(		consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jetsTag"))			),
     jetPuppiTag_(       consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jetsPuppiTag"))               ),
-    fatjetTag_(		consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("fatjetsTag"))			),
+//    fatjetTag_(		consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("fatjetsTag"))			),
     metTag_(		consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("metsTag"))			),
     metNoHFTag_(        consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("metsNoHFTag"))                ),
     metPuppiTag_(       consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("metsPuppiTag"))               ),
     metFilterBitsTag_(	consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("metFilterBitsTag"))		),
     prunedGenTag_(	consumes<edm::View<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("prunedTag"))	),
+    puInfoTag_(         consumes<std::vector<PileupSummaryInfo> >(iConfig.getParameter<edm::InputTag>("puInfoTag"))     ),
+    genInfoTag_(        consumes<GenEventInfoProduct>(iConfig.getParameter<edm::InputTag>("genInfoTag"))                ),
     packedGenTag_(	consumes<edm::View<pat::PackedGenParticle> >(iConfig.getParameter<edm::InputTag>("packedTag"))	),
     genjetTag_(		consumes<edm::View<reco::GenJet> >(iConfig.getParameter<edm::InputTag>("genJetsTag"))		),
     triggerBits_(	consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("bits"))			),
@@ -250,12 +254,12 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
     isPythia8_(		iConfig.getParameter<bool>("isPythia8")								),
     isMC_(		iConfig.getParameter<bool>("isMC")								),
     verbose_(		iConfig.getParameter<bool>("verbose")								),
-    rhoAllTag_(			consumes<double>(iConfig.getParameter<edm::InputTag>("rhoAll"))				),
+    //rhoAllTag_(			consumes<double>(iConfig.getParameter<edm::InputTag>("rhoAll"))				),
     rhoFastjetAllTag_(  	consumes<double>(iConfig.getParameter<edm::InputTag>("rhoFastjetAll")) 			),
-    rhoFastjetAllCaloTag_( 	consumes<double>(iConfig.getParameter<edm::InputTag>("rhoFastjetAllCalo")) 		),
-    rhoFastjetCentralCaloTag_(  consumes<double>(iConfig.getParameter<edm::InputTag>("rhoFastjetCentralCalo")) 		),
-    rhoFastjetCentralChargedPileUpTag_(  consumes<double>(iConfig.getParameter<edm::InputTag>("rhoFastjetCentralChargedPileUp")) ),
-    rhoFastjetCentralNeutralTag_(  	consumes<double>(iConfig.getParameter<edm::InputTag>("rhoFastjetCentralNeutral"))	 ),
+    //rhoFastjetAllCaloTag_( 	consumes<double>(iConfig.getParameter<edm::InputTag>("rhoFastjetAllCalo")) 		),
+    //rhoFastjetCentralCaloTag_(  consumes<double>(iConfig.getParameter<edm::InputTag>("rhoFastjetCentralCalo")) 		),
+    //rhoFastjetCentralChargedPileUpTag_(  consumes<double>(iConfig.getParameter<edm::InputTag>("rhoFastjetCentralChargedPileUp")) ),
+    //rhoFastjetCentralNeutralTag_(  	consumes<double>(iConfig.getParameter<edm::InputTag>("rhoFastjetCentralNeutral"))	 ),
     eleMediumIdMapTokenTrig_(	consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("eleMediumIdMapTrig"))	),
     eleTightIdMapTokenTrig_(	consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("eleTightIdMapTrig"))	),
     mvaValuesMapTokenTrig_(	consumes<edm::ValueMap<float> >(iConfig.getParameter<edm::InputTag>("mvaValuesMapTrig"))	),
@@ -270,6 +274,7 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
 //    for(size_t iobj=0; iobj<sizeof(objs)/sizeof(string); iobj++)
 //        objConfig_[ objs[iobj] ] = iConfig.getParameter<edm::ParameterSet>( objs[iobj] );
 
+    consumesMany<LHEEventProduct>();
 
     //now do what ever initialization is needed
     edm::Service<TFileService> fs;
@@ -462,27 +467,27 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
     if(ev.nvtx == 0) return;
 
 
-    edm::Handle<double> rhoAll;
+    //edm::Handle<double> rhoAll;
     edm::Handle<double> rhoFastjetAll;
-    edm::Handle<double> rhoFastjetAllCalo;
-    edm::Handle<double> rhoFastjetCentralCalo;
-    edm::Handle<double> rhoFastjetCentralChargedPileUp;
-    edm::Handle<double> rhoFastjetCentralNeutral;
+    //edm::Handle<double> rhoFastjetAllCalo;
+    //edm::Handle<double> rhoFastjetCentralCalo;
+    //edm::Handle<double> rhoFastjetCentralChargedPileUp;
+    //edm::Handle<double> rhoFastjetCentralNeutral;
 
-    event.getByToken(rhoAllTag_,rhoAll);
+    //event.getByToken(rhoAllTag_,rhoAll);
     event.getByToken(rhoFastjetAllTag_,rhoFastjetAll);
-    event.getByToken(rhoFastjetAllCaloTag_,rhoFastjetAllCalo);
-    event.getByToken(rhoFastjetCentralCaloTag_,rhoFastjetCentralCalo);
-    event.getByToken(rhoFastjetCentralChargedPileUpTag_,rhoFastjetCentralChargedPileUp);
-    event.getByToken(rhoFastjetCentralNeutralTag_,rhoFastjetCentralNeutral);
+    //event.getByToken(rhoFastjetAllCaloTag_,rhoFastjetAllCalo);
+    //event.getByToken(rhoFastjetCentralCaloTag_,rhoFastjetCentralCalo);
+    //event.getByToken(rhoFastjetCentralChargedPileUpTag_,rhoFastjetCentralChargedPileUp);
+    //event.getByToken(rhoFastjetCentralNeutralTag_,rhoFastjetCentralNeutral);
 
     //get rho
-    ev.fixedGridRhoAll = *rhoAll;
-    ev.fixedGridRhoFastjetAll = *rhoFastjetAll;
-    ev.fixedGridRhoFastjetAllCalo = *rhoFastjetAllCalo;
-    ev.fixedGridRhoFastjetCentralCalo = *rhoFastjetCentralCalo;
-    ev.fixedGridRhoFastjetCentralChargedPileUp = *rhoFastjetCentralChargedPileUp;
-    ev.fixedGridRhoFastjetCentralNeutral = *rhoFastjetCentralNeutral;
+    //ev.fixedGridRhoAll = *rhoAll;
+    float fixedGridRhoFastjetAll = *rhoFastjetAll;
+    //ev.fixedGridRhoFastjetAllCalo = *rhoFastjetAllCalo;
+    //ev.fixedGridRhoFastjetCentralCalo = *rhoFastjetCentralCalo;
+    //ev.fixedGridRhoFastjetCentralChargedPileUp = *rhoFastjetCentralChargedPileUp;
+    //ev.fixedGridRhoFastjetCentralNeutral = *rhoFastjetCentralNeutral;
 
 
 
@@ -608,36 +613,36 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
         ev.en_en[ev.en] = el->energy();
         ev.en_id[ev.en] = 11*el->charge();
 
+        /*
+                ev.en_EtaSC[ev.en] = el->superCluster()->eta();
+                ev.en_PhiSC[ev.en] = el->superCluster()->phi();
+                ev.en_EnSC[ev.en] = el->superCluster()->energy();
 
-        ev.en_EtaSC[ev.en] = el->superCluster()->eta();
-        ev.en_PhiSC[ev.en] = el->superCluster()->phi();
-        ev.en_EnSC[ev.en] = el->superCluster()->energy();
+                // ID and matching
+                ev.en_dEtaIn[ev.en] = el->deltaEtaSuperClusterTrackAtVtx();
+                ev.en_dPhiIn[ev.en] = el->deltaPhiSuperClusterTrackAtVtx();
+                ev.en_hOverE[ev.en] = el->hcalOverEcal();
+                ev.en_R9[ev.en] = el->r9();
+                ev.en_sigmaIetaIeta[ev.en] = el->sigmaIetaIeta();
+                ev.en_sigmaIetaIeta5x5[ev.en] = el->full5x5_sigmaIetaIeta();
 
-        // ID and matching
-        ev.en_dEtaIn[ev.en] = el->deltaEtaSuperClusterTrackAtVtx();
-        ev.en_dPhiIn[ev.en] = el->deltaPhiSuperClusterTrackAtVtx();
-        ev.en_hOverE[ev.en] = el->hcalOverEcal();
-        ev.en_R9[ev.en] = el->r9();
-        ev.en_sigmaIetaIeta[ev.en] = el->sigmaIetaIeta();
-        ev.en_sigmaIetaIeta5x5[ev.en] = el->full5x5_sigmaIetaIeta();
+                // |1/E-1/p| = |1/E - EoverPinner/E| is computed below
+                // The if protects against ecalEnergy == inf or zero (always
+                // the case for electrons below 5 GeV in miniAOD)
+                if( el->ecalEnergy() == 0 ) {
+                    //printf("Electron energy is zero!\n");
+                    ev.en_ooEmooP[ev.en] = 1e30;
+                } else if( !std::isfinite(el->ecalEnergy())) {
+                    //printf("Electron energy is not finite!\n");
+                    ev.en_ooEmooP[ev.en] = 1e30;
+                } else {
+                    ev.en_ooEmooP[ev.en] = fabs(1.0/el->ecalEnergy() - el->eSuperClusterOverP()/el->ecalEnergy() );
+                }
 
-        // |1/E-1/p| = |1/E - EoverPinner/E| is computed below
-        // The if protects against ecalEnergy == inf or zero (always
-        // the case for electrons below 5 GeV in miniAOD)
-        if( el->ecalEnergy() == 0 ) {
-            //printf("Electron energy is zero!\n");
-            ev.en_ooEmooP[ev.en] = 1e30;
-        } else if( !std::isfinite(el->ecalEnergy())) {
-            //printf("Electron energy is not finite!\n");
-            ev.en_ooEmooP[ev.en] = 1e30;
-        } else {
-            ev.en_ooEmooP[ev.en] = fabs(1.0/el->ecalEnergy() - el->eSuperClusterOverP()/el->ecalEnergy() );
-        }
-
-        // Impact parameter
-        ev.en_d0[ev.en] = (-1) * el->gsfTrack()->dxy(PV.position());
-        ev.en_dZ[ev.en] = el->gsfTrack()->dz(PV.position());
-
+                // Impact parameter
+                ev.en_d0[ev.en] = (-1) * el->gsfTrack()->dxy(PV.position());
+                ev.en_dZ[ev.en] = el->gsfTrack()->dz(PV.position());
+        */
         //Isolation
         GsfElectron::PflowIsolationVariables pfIso = el->pfIsolationVariables();
         ev.en_pileupIso[ev.en] = pfIso.sumPUPt;
@@ -654,7 +659,7 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
         };
 
         double area = EffectiveAreas::effectiveAreaValues[etaBin];
-        double rho_ = ev.fixedGridRhoFastjetAll;
+        double rho_ = fixedGridRhoFastjetAll;
         ev.en_relIsoWithEA[ev.en] = ( pfIso.sumChargedHadronPt + max(0.0, pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - rho_ * area ) )/pt_;
 
         // Compute isolation with delta beta correction for PU
@@ -830,30 +835,31 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
     //
     // fat jet selection (ak8PFJetsCHS)
     //
-    edm::Handle<pat::JetCollection> fatjets;
-    event.getByToken(fatjetTag_, fatjets);
-    ev.fjet=0;
-    for (const pat::Jet &j : *fatjets) {
-        ev.fjet_px[ev.fjet] = j.correctedP4(0).px();
-        ev.fjet_py[ev.fjet] = j.correctedP4(0).py();
-        ev.fjet_pz[ev.fjet] = j.correctedP4(0).pz();
-        ev.fjet_en[ev.fjet] = j.correctedP4(0).energy();
+    /*
+        edm::Handle<pat::JetCollection> fatjets;
+        event.getByToken(fatjetTag_, fatjets);
+        ev.fjet=0;
+        for (const pat::Jet &j : *fatjets) {
+            ev.fjet_px[ev.fjet] = j.correctedP4(0).px();
+            ev.fjet_py[ev.fjet] = j.correctedP4(0).py();
+            ev.fjet_pz[ev.fjet] = j.correctedP4(0).pz();
+            ev.fjet_en[ev.fjet] = j.correctedP4(0).energy();
 
-        const reco::GenJet *gJet=j.genJet();
-        if(gJet) ev.fjet_genpt[ev.fjet] = gJet->pt();
-        else     ev.fjet_genpt[ev.fjet] = 0;
+            const reco::GenJet *gJet=j.genJet();
+            if(gJet) ev.fjet_genpt[ev.fjet] = gJet->pt();
+            else     ev.fjet_genpt[ev.fjet] = 0;
 
 
-        ev.fjet_prunedM[ev.fjet] = (float) j.userFloat("ak8PFJetsCHSPrunedLinks");
-        ev.fjet_trimmedM[ev.fjet] = (float) j.userFloat("ak8PFJetsCHSTrimmedLinks");
-        ev.fjet_filteredM[ev.fjet] = (float) j.userFloat("ak8PFJetsCHSFilteredLinks");
-        ev.fjet_tau1[ev.fjet] =  (float) j.userFloat("NjettinessAK8:tau1");
-        ev.fjet_tau2[ev.fjet] =  (float) j.userFloat("NjettinessAK8:tau2");
-        ev.fjet_tau3[ev.fjet] =  (float) j.userFloat("NjettinessAK8:tau3");
+            ev.fjet_prunedM[ev.fjet] = (float) j.userFloat("ak8PFJetsCHSPrunedLinks");
+            ev.fjet_trimmedM[ev.fjet] = (float) j.userFloat("ak8PFJetsCHSTrimmedLinks");
+            ev.fjet_filteredM[ev.fjet] = (float) j.userFloat("ak8PFJetsCHSFilteredLinks");
+            ev.fjet_tau1[ev.fjet] =  (float) j.userFloat("NjettinessAK8:tau1");
+            ev.fjet_tau2[ev.fjet] =  (float) j.userFloat("NjettinessAK8:tau2");
+            ev.fjet_tau3[ev.fjet] =  (float) j.userFloat("NjettinessAK8:tau3");
 
-        ev.fjet++;
-    }
-
+            ev.fjet++;
+        }
+    */
 
 
 
@@ -988,7 +994,8 @@ MainAnalyzer::getMCtruth(const edm::Event& event, const edm::EventSetup& iSetup)
 
     edm::Handle<std::vector<PileupSummaryInfo> > puInfoH;
     //event.getByLabel("addPileupInfo", puInfoH);
-    event.getByLabel("slimmedAddPileupInfo", puInfoH);
+    //event.getByLabel("slimmedAddPileupInfo", puInfoH);
+    event.getByToken(puInfoTag_,puInfoH);
     int npuOOT(0),npuIT(0),npuOOTm1(0);
     float truePU(0);
     if(puInfoH.isValid()) {
@@ -1012,7 +1019,8 @@ MainAnalyzer::getMCtruth(const edm::Event& event, const edm::EventSetup& iSetup)
 
     //retrieve pdf info
     edm::Handle<GenEventInfoProduct> genEventInfoProd;
-    event.getByLabel("generator", genEventInfoProd);
+    //event.getByLabel("generator", genEventInfoProd);
+    event.getByToken(genInfoTag_, genEventInfoProd);
     ev.genWeight = genEventInfoProd->weight();
     ev.qscale = genEventInfoProd->qScale();
     if(genEventInfoProd->pdf()) {
