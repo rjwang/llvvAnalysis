@@ -37,6 +37,8 @@
 //https://twiki.cern.ch/twiki/bin/view/CMS/BTagCalibration
 #include "llvvAnalysis/DMAnalysis/interface/BTagCalibrationStandalone.h"
 
+#include "llvvAnalysis/DMAnalysis/interface/LeptonEfficiencySF.h"
+
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -117,9 +119,9 @@ int main(int argc, char* argv[])
     gSystem->ExpandPathName(BtagSF);
     cout << "Loading btag sacle factor: " << BtagSF << endl;
     BTagCalibration btagcalib("csvv2", BtagSF.Data());
-    BTagCalibrationReader btag_reader(&btagcalib, BTagEntry::OP_LOOSE, "mujets", "central");
-    BTagCalibrationReader btag_reader_up(&btagcalib, BTagEntry::OP_LOOSE, "mujets", "up");  // sys up
-    BTagCalibrationReader btag_reader_down(&btagcalib, BTagEntry::OP_LOOSE, "mujets", "down");  // sys down
+    BTagCalibrationReader btag_reader(&btagcalib, BTagEntry::OP_MEDIUM, "mujets", "central");
+    BTagCalibrationReader btag_reader_up(&btagcalib, BTagEntry::OP_MEDIUM, "mujets", "up");  // sys up
+    BTagCalibrationReader btag_reader_down(&btagcalib, BTagEntry::OP_MEDIUM, "mujets", "down");  // sys down
 
 
 
@@ -171,9 +173,8 @@ int main(int argc, char* argv[])
         TString pdfUrl = runProcess.getParameter<std::string>("pdfInput");
         std::string Url = runProcess.getParameter<std::string>("input");
         if(doWIMPreweighting) {
-            if(Url.find("TeV_DM_V_Mx") != string::npos) Url = "root://eoscms//eos/cms/store/group/phys_exotica/monoZ/llvvNtuple_25ns_29Oct2015/MC13TeV_DM_V_Mx1Mv200.root";
-            if(Url.find("TeV_DM_A_Mx") != string::npos) Url = "root://eoscms//eos/cms/store/group/phys_exotica/monoZ/llvvNtuple_25ns_29Oct2015/MC13TeV_DM_A_Mx1Mv200.root";
-
+            if(Url.find("TeV_DM_V_Mx") != string::npos) 	Url = runProcess.getParameter<std::string>("WIMPreweighting_DM_V_Mx");
+            else if(Url.find("TeV_DM_A_Mx") != string::npos) 	Url = runProcess.getParameter<std::string>("WIMPreweighting_DM_A_Mx");
         }
 
         std::size_t found = Url.find_last_of("/\\");
@@ -423,8 +424,8 @@ int main(int argc, char* argv[])
     //open the file and get events tree
     DataEvtSummaryHandler summaryHandler_;
     if(doWIMPreweighting) {
-        if(url.Contains("TeV_DM_V_Mx")) url = "root://eoscms//eos/cms/store/group/phys_exotica/monoZ/llvvNtuple_25ns_29Oct2015/MC13TeV_DM_V_Mx1Mv200.root";
-        if(url.Contains("TeV_DM_A_Mx")) url = "root://eoscms//eos/cms/store/group/phys_exotica/monoZ/llvvNtuple_25ns_29Oct2015/MC13TeV_DM_A_Mx1Mv200.root";
+        if(url.Contains("TeV_DM_V_Mx")) url = runProcess.getParameter<std::string>("WIMPreweighting_DM_V_Mx");
+        if(url.Contains("TeV_DM_A_Mx")) url = runProcess.getParameter<std::string>("WIMPreweighting_DM_A_Mx");
 
         if(url.Contains("K1_0.1_K2_1")) url.ReplaceAll("K1_0.1_K2_1","K1_1_K2_1");
         if(url.Contains("K1_0.2_K2_1")) url.ReplaceAll("K1_0.2_K2_1","K1_1_K2_1");
@@ -434,7 +435,6 @@ int main(int argc, char* argv[])
         if(url.Contains("K1_3_K2_1"))   url.ReplaceAll("K1_3_K2_1","K1_1_K2_1");
         if(url.Contains("K1_5_K2_1"))   url.ReplaceAll("K1_5_K2_1","K1_1_K2_1");
         if(url.Contains("K1_10_K2_1"))  url.ReplaceAll("K1_10_K2_1","K1_1_K2_1");
-
     }
     TFile *file = TFile::Open(url);
     printf("Looping on %s\n",url.Data());
@@ -490,9 +490,29 @@ int main(int argc, char* argv[])
     TH1F* weight_pileup_Down = (TH1F *) PU_Down_File->Get("pileup");
 
 
+
+
+    // muon trigger efficiency SF
+    TString MuonTrigEffSF_ = runProcess.getParameter<std::string>("MuonTrigEffSF");
+    gSystem->ExpandPathName(MuonTrigEffSF_);
+    cout << "Loading Muon Trigger Eff SF: " << MuonTrigEffSF_ << endl;
+    TFile *MuonTrigEffSF_File = TFile::Open(MuonTrigEffSF_);
+    TH2F* h_MuonTrigEffSF = (TH2F *) MuonTrigEffSF_File->Get("muon_trigeff_sf_eta_eta");
+
+    // electron trigger efficiency SF
+    TString ElectronTrigEffSF_ = runProcess.getParameter<std::string>("ElectronTrigEffSF");
+    gSystem->ExpandPathName(ElectronTrigEffSF_);
+    cout << "Loading Electron Trigger Eff SF: " << ElectronTrigEffSF_ << endl;
+    TFile *ElectronTrigEffSF_File = TFile::Open(ElectronTrigEffSF_);
+    TH2F* h_ElectronTrigEffSF = (TH2F *) ElectronTrigEffSF_File->Get("electron_trigeff_sf_abseta_abseta");
+
+
     // event categorizer
     EventCategory eventCategoryInst(1);   //jet(0,1,>=2) binning
 
+
+    // Lepton scale factors
+    LeptonEfficiencySF lsf(2015);
 
     //####################################################################################################################
     //###########################################           EVENT LOOP         ###########################################
@@ -654,7 +674,7 @@ int main(int argc, char* argv[])
 
             bool hasTightIdandIso(true);
             if(abs(lepid)==13) { //muon
-                hasTightIdandIso &= phys.leptons[ilep].isTightMu;
+                hasTightIdandIso &= phys.leptons[ilep].isMediumMu;
                 //https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideMuonIdRun2?sortcol=1;table=7;up=0#Muon_Isolation
                 hasTightIdandIso &= ( phys.leptons[ilep].m_pfRelIsoDbeta() < 0.15 );
             } else if(abs(lepid)==11) { //electron
@@ -687,6 +707,7 @@ int main(int argc, char* argv[])
                 LorentzVector dilepton=lep1_+lep2_;
                 double massdif = fabs(dilepton.mass()-91.);
                 if(massdif < _MASSDIF_) {
+                    _MASSDIF_ = massdif;
                     lep1.SetPxPyPzE(lep1_.px(),lep1_.py(),lep1_.pz(),lep1_.energy());
                     lep2.SetPxPyPzE(lep2_.px(),lep2_.py(),lep2_.pz(),lep2_.energy());
                     id1 = id1_;
@@ -694,6 +715,18 @@ int main(int argc, char* argv[])
                 }
             }
         }
+
+
+
+        // ID + ISO scale factors (only muons for the time being)
+        // Need to implement variations for errors (unused for now)
+        if(isMC) {
+            float llScaleFactor = 1.0;
+            llScaleFactor *= lsf.getLeptonEfficiency( lep1.pt(), lep1.eta(), abs(id1) ).first;
+            llScaleFactor *= lsf.getLeptonEfficiency( lep2.pt(), lep2.eta(), abs(id2) ).first;
+            if(llScaleFactor>0) weight *= llScaleFactor;
+        }
+
 
 
 
@@ -720,15 +753,15 @@ int main(int argc, char* argv[])
         }
 
         //split inclusive DY sample into DYToLL and DYToTauTau
-        if(isMC && mctruthmode==1){
-		//if(phys.genleptons.size()!=2) continue;
-		if(phys.genleptons.size()==2 && isDYToTauTau(phys.genleptons[0].id, phys.genleptons[1].id) ) continue;
-	}
+        if(isMC && mctruthmode==1) {
+            //if(phys.genleptons.size()!=2) continue;
+            if(phys.genleptons.size()==2 && isDYToTauTau(phys.genleptons[0].id, phys.genleptons[1].id) ) continue;
+        }
 
-        if(isMC && mctruthmode==2){
-		if(phys.genleptons.size()!=2) continue;
-		if(!isDYToTauTau(phys.genleptons[0].id, phys.genleptons[1].id) ) continue;
-	}
+        if(isMC && mctruthmode==2) {
+            if(phys.genleptons.size()!=2) continue;
+            if(!isDYToTauTau(phys.genleptons[0].id, phys.genleptons[1].id) ) continue;
+        }
 
 
         bool hasTrigger(false);
@@ -770,11 +803,27 @@ int main(int argc, char* argv[])
 
         tags.push_back(tag_cat); //add ee, mumu, emu category
 
-
         // pielup reweightiing
         mon.fillHisto("nvtx_raw",   tags, phys.nvtx,      1.0);
         //if(isMC) weight *= myWIMPweights.get1DWeights(phys.nvtx,"pileup_weights");
         mon.fillHisto("nvtxwgt_raw",tags, phys.nvtx,      weight);
+
+
+
+        //
+        //apply muon trigger efficiency scale factors
+        //
+        if(isMC) {
+            double trigger_sf(1.0);
+            if(evcat==MUMU) {
+                trigger_sf *= getSFfrom2DHist( lep1.eta(), lep2.eta(), h_MuonTrigEffSF );
+            } else if(evcat==EE) {
+                trigger_sf *= getSFfrom2DHist( fabs(lep1.eta()), fabs(lep2.eta()), h_ElectronTrigEffSF );
+            }
+
+            if(trigger_sf < 0.01) trigger_sf = 1.;
+            weight *= trigger_sf;
+        }
 
 
         mon.fillHisto("eventflow",tags,0,weight);
@@ -811,8 +860,8 @@ int main(int argc, char* argv[])
             int lepid = phys.leptons[ilep].id;
             if(abs(lepid)==13 && fabs(lep.eta())> 2.4) continue;
             if(abs(lepid)==11 && fabs(lep.eta())> 2.5) continue;
-	    //tau veto
-	    if(abs(lepid)==15 && fabs(lep.eta())> 2.4) continue;
+            //tau veto
+            if(abs(lepid)==15 && fabs(lep.eta())> 2.4) continue;
 
             bool isMatched(false);
             isMatched |= (deltaR(lep1,lep) < 0.01);
@@ -825,18 +874,18 @@ int main(int argc, char* argv[])
                 hasLooseIdandIso &= ( phys.leptons[ilep].isLooseMu && phys.leptons[ilep].m_pfRelIsoDbeta()<0.25 && phys.leptons[ilep].pt()>10 );
                 hasLooseIdandIso |= ( phys.leptons[ilep].isSoftMu  && phys.leptons[ilep].pt()>3 );
                 //
-                hasTightIdandIso &= ( phys.leptons[ilep].isTightMu && phys.leptons[ilep].m_pfRelIsoDbeta()<0.15 && phys.leptons[ilep].pt()>10 );
+                hasTightIdandIso &= ( phys.leptons[ilep].isMediumMu && phys.leptons[ilep].m_pfRelIsoDbeta()<0.15 && phys.leptons[ilep].pt()>10 );
             } else if(abs(lepid)==11) { //electron
                 hasLooseIdandIso &= ( phys.leptons[ilep].isElpassVeto && phys.leptons[ilep].pt()>10 );
                 //
                 hasTightIdandIso &= ( phys.leptons[ilep].isElpassMedium && phys.leptons[ilep].pt()>10 );
 
-            } else if(abs(lepid)==15) { //muon
-		hasLooseIdandIso &= ( phys.leptons[ilep].isTauDM && phys.leptons[ilep].ta_IsLooseIso && phys.leptons[ilep].pt()>20 );
-		//
-		hasTightIdandIso &= ( phys.leptons[ilep].isTauDM && phys.leptons[ilep].ta_IsTightIso && phys.leptons[ilep].pt()>20 );
+            //} else if(abs(lepid)==15) { //tau
+            //    hasLooseIdandIso &= ( phys.leptons[ilep].isTauDM && phys.leptons[ilep].ta_IsLooseIso && phys.leptons[ilep].pt()>20 );
+            //    //
+            //    hasTightIdandIso &= ( phys.leptons[ilep].isTauDM && phys.leptons[ilep].ta_IsTightIso && phys.leptons[ilep].pt()>20 );
 
-	    } else continue;
+            } else continue;
 
 
 
@@ -864,7 +913,7 @@ int main(int argc, char* argv[])
         bool passBveto(true);
         int nJetsGood30(0);
         int nCSVLtags(0),nCSVMtags(0),nCSVTtags(0);
-        double BTagScaleFactor(1.0);
+        double BTagWeights(1.0);
         for(size_t ijet=0; ijet<corrJets.size(); ijet++) {
 
             if(corrJets[ijet].pt()<20) continue;
@@ -896,18 +945,21 @@ int main(int argc, char* argv[])
 
 
                 if(!isMC) continue;
-                bool isCSVLtagged(corrJets[ijet].btag0>0.605);
+                bool isCSVtagged(corrJets[ijet].btag0>0.89);
+
 
                 if(abs(corrJets[ijet].flavid)==5) {
-                    //BTagScaleFactor *= myBtagUtils.getBTagWeight(isCSVLtagged,corrJets[ijet].pt(),corrJets[ijet].eta(),abs(corrJets[ijet].flavid),"CSVL","CSVL/b_eff").first;
-                    if(isCSVLtagged) BTagScaleFactor *= btag_reader.eval( BTagEntry::FLAV_B, corrJets[ijet].eta(), (corrJets[ijet].pt()<670. ? corrJets[ijet].pt() : 670.) );
+                    //BTagWeights *= myBtagUtils.getBTagWeight(isCSVtagged,corrJets[ijet].pt(),corrJets[ijet].eta(),abs(corrJets[ijet].flavid),"CSVL","CSVL/b_eff").first;
+                    double btag_sf = btag_reader.eval( BTagEntry::FLAV_B, corrJets[ijet].eta(), (corrJets[ijet].pt()<670. ? corrJets[ijet].pt() : 670.) );
+		    BTagWeights *= myBtagUtils.getNewBTagWeight(isCSVtagged, corrJets[ijet].pt(), btag_sf, "CSVM","CSVM/b_eff");
                 } else if(abs(corrJets[ijet].flavid)==4) {
-                    //BTagScaleFactor *= myBtagUtils.getBTagWeight(isCSVLtagged,corrJets[ijet].pt(),corrJets[ijet].eta(),abs(corrJets[ijet].flavid),"CSVL","CSVL/c_eff").first;
-                    if(isCSVLtagged) BTagScaleFactor *= btag_reader.eval( BTagEntry::FLAV_C, corrJets[ijet].eta(), (corrJets[ijet].pt()<670. ? corrJets[ijet].pt() : 670.) );
+                    //BTagWeights *= myBtagUtils.getBTagWeight(isCSVtagged,corrJets[ijet].pt(),corrJets[ijet].eta(),abs(corrJets[ijet].flavid),"CSVL","CSVL/c_eff").first;
+                    double btag_sf = btag_reader.eval( BTagEntry::FLAV_C, corrJets[ijet].eta(), (corrJets[ijet].pt()<670. ? corrJets[ijet].pt() : 670.) );
+		     BTagWeights *= myBtagUtils.getNewBTagWeight(isCSVtagged, corrJets[ijet].pt(), btag_sf, "CSVM","CSVM/c_eff");
                 } else {
-                    //BTagScaleFactor *= myBtagUtils.getBTagWeight(isCSVLtagged,corrJets[ijet].pt(),corrJets[ijet].eta(),abs(corrJets[ijet].flavid),"CSVL","CSVL/udsg_eff").first;
+                    //BTagWeights *= myBtagUtils.getBTagWeight(isCSVtagged,corrJets[ijet].pt(),corrJets[ijet].eta(),abs(corrJets[ijet].flavid),"CSVL","CSVL/udsg_eff").first;
                     //no SF available yet for light flavor jet (CSVv2.csv)
-                    //BTagScaleFactor *= btag_reader.eval( BTagEntry::FLAV_UDSG, corrJets[ijet].eta(), (corrJets[ijet].pt()<670. ? corrJets[ijet].pt() : 670.) );
+                    //BTagWeights *= btag_reader.eval( BTagEntry::FLAV_UDSG, corrJets[ijet].eta(), (corrJets[ijet].pt()<670. ? corrJets[ijet].pt() : 670.) );
                 }
 
 
@@ -940,8 +992,8 @@ int main(int argc, char* argv[])
 
         }
 
-        //using CSV Loose WP
-        passBveto=(nCSVLtags==0);
+        //using CSV Medium WP
+        passBveto=(nCSVMtags==0);
 
         for(size_t ij=0; ij<GoodIdJets.size(); ij++) {
             mon.fillHisto("jet_pt_raw",   tags, GoodIdJets[ij].pt(),weight);
@@ -988,7 +1040,7 @@ int main(int argc, char* argv[])
 
 
         //apply weights
-        if(isMC) weight *= BTagScaleFactor;
+        if(isMC) weight *= BTagWeights;
 
 
         mon.fillHisto("zpt_raw"                         ,tags, zll.pt(),   weight);
@@ -1210,26 +1262,30 @@ int main(int argc, char* argv[])
 
                 if(vJets[ijet].pt()>30 && fabs(vJets[ijet].eta())<2.4) {
 
-                    passLocalBveto &= (vJets[ijet].btag0<0.605);
-                    bool isLocalCSVLtagged(vJets[ijet].btag0>0.605);
+                    passLocalBveto &= (vJets[ijet].btag0<0.89);
+                    bool isLocalCSVtagged(vJets[ijet].btag0>0.89);
 
                     //double val=1., valerr=0.;
                     double BTagWeights_Up=1., BTagWeights_Down=1.;
                     if(abs(vJets[ijet].flavid)==5) {
-                        //val = myBtagUtils.getBTagWeight(isLocalCSVLtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/b_eff").first;
-                        //valerr = myBtagUtils.getBTagWeight(isLocalCSVLtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/b_eff").second;
-                        if(isLocalCSVLtagged) BTagWeights_Up *= btag_reader_up.eval( BTagEntry::FLAV_B, vJets[ijet].eta(), (vJets[ijet].pt()<670. ? vJets[ijet].pt() : 670.) );
-                        if(isLocalCSVLtagged) BTagWeights_Down *= btag_reader_down.eval( BTagEntry::FLAV_B, vJets[ijet].eta(), (vJets[ijet].pt()<670. ? vJets[ijet].pt() : 670.) );
+                        //val = myBtagUtils.getBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/b_eff").first;
+                        //valerr = myBtagUtils.getBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/b_eff").second;
+                        double BTagSF_Up   = btag_reader_up.eval( BTagEntry::FLAV_B, vJets[ijet].eta(), (vJets[ijet].pt()<670. ? vJets[ijet].pt() : 670.) );
+                        double BTagSF_Down = btag_reader_down.eval( BTagEntry::FLAV_B, vJets[ijet].eta(), (vJets[ijet].pt()<670. ? vJets[ijet].pt() : 670.) );
+			BTagWeights_Up   *= myBtagUtils.getNewBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),BTagSF_Up, "CSVM","CSVM/b_eff");
+			BTagWeights_Down *= myBtagUtils.getNewBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),BTagSF_Down,"CSVM","CSVM/b_eff");
 
                     } else if(abs(vJets[ijet].flavid)==4) {
-                        //val = myBtagUtils.getBTagWeight(isLocalCSVLtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/c_eff").first;
-                        //valerr = myBtagUtils.getBTagWeight(isLocalCSVLtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/c_eff").second;
-                        if(isLocalCSVLtagged) BTagWeights_Up *= btag_reader_up.eval( BTagEntry::FLAV_C, vJets[ijet].eta(), (vJets[ijet].pt()<670. ? vJets[ijet].pt() : 670.) );
-                        if(isLocalCSVLtagged) BTagWeights_Down *= btag_reader_down.eval( BTagEntry::FLAV_C, vJets[ijet].eta(), (vJets[ijet].pt()<670. ? vJets[ijet].pt() : 670.) );
+                        //val = myBtagUtils.getBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/c_eff").first;
+                        //valerr = myBtagUtils.getBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/c_eff").second;
+                        double BTagSF_Up   = btag_reader_up.eval( BTagEntry::FLAV_C, vJets[ijet].eta(), (vJets[ijet].pt()<670. ? vJets[ijet].pt() : 670.) );
+                        double BTagSF_Down = btag_reader_down.eval( BTagEntry::FLAV_C, vJets[ijet].eta(), (vJets[ijet].pt()<670. ? vJets[ijet].pt() : 670.) );
+			BTagWeights_Up 	   *= myBtagUtils.getNewBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),BTagSF_Up,"CSVM","CSVM/c_eff");
+			BTagWeights_Down   *= myBtagUtils.getNewBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),BTagSF_Down,"CSVM","CSVM/c_eff");
 
                     } else {
-                        //val = myBtagUtils.getBTagWeight(isLocalCSVLtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/udsg_eff").first;
-                        //valerr= myBtagUtils.getBTagWeight(isLocalCSVLtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/udsg_eff").second;
+                        //val = myBtagUtils.getBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/udsg_eff").first;
+                        //valerr= myBtagUtils.getBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/udsg_eff").second;
                     }
                     //double BTagWeights_Up = (val+valerr)/val;
                     //double BTagWeights_Down = (val-valerr)/val;
@@ -1322,6 +1378,9 @@ int main(int argc, char* argv[])
     PU_Central_File->Close();
     PU_Up_File->Close();
     PU_Down_File->Close();
+
+    MuonTrigEffSF_File->Close();
+    ElectronTrigEffSF_File->Close();
 
     if(outTxtFile_final)fclose(outTxtFile_final);
 }
