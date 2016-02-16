@@ -767,10 +767,10 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
         ev.jet_PFLoose[ev.jet] = passLooseId;
         ev.jet_PFTight[ev.jet] = passTightId;
 
-        ev.jet_px[ev.jet] = j.correctedP4(0).px();
-        ev.jet_py[ev.jet] = j.correctedP4(0).py();
-        ev.jet_pz[ev.jet] = j.correctedP4(0).pz();
-        ev.jet_en[ev.jet] = j.correctedP4(0).energy();
+        ev.jet_px[ev.jet] = j.px(); //correctedP4(0).px();
+        ev.jet_py[ev.jet] = j.py(); //correctedP4(0).py();
+        ev.jet_pz[ev.jet] = j.pz(); //correctedP4(0).pz();
+        ev.jet_en[ev.jet] = j.energy(); //correctedP4(0).energy();
 
         ev.jet_btag0[ev.jet] = j.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
         ev.jet_btag1[ev.jet] = j.bDiscriminator("pfJetBProbabilityBJetTags");
@@ -784,7 +784,7 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
         ev.jet_btag9[ev.jet] = j.bDiscriminator("pfCombinedSecondaryVertexSoftLeptonBJetTags");
         ev.jet_btag10[ev.jet] = j.bDiscriminator("pfCombinedMVABJetTags");
 
-        ev.jet_mass[ev.jet] = j.correctedP4(0).M();
+        ev.jet_mass[ev.jet] = j.mass(); //correctedP4(0).M();
         ev.jet_area[ev.jet] = j.jetArea();
         ev.jet_pu[ev.jet] = j.pileup();
         ev.jet_puId[ev.jet] = j.userFloat("pileupJetId:fullDiscriminant");
@@ -808,10 +808,10 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
     if(puppijets.isValid()) {
         for (const pat::Jet &j : *puppijets) {
             if(j.pt() < 20) continue;
-            ev.pjet_px[ev.pjet] = j.correctedP4(0).px();
-            ev.pjet_py[ev.pjet] = j.correctedP4(0).py();
-            ev.pjet_pz[ev.pjet] = j.correctedP4(0).pz();
-            ev.pjet_en[ev.pjet] = j.correctedP4(0).energy();
+            ev.pjet_px[ev.pjet] = j.px(); //correctedP4(0).px();
+            ev.pjet_py[ev.pjet] = j.px(); //correctedP4(0).py();
+            ev.pjet_pz[ev.pjet] = j.pz(); //correctedP4(0).pz();
+            ev.pjet_en[ev.pjet] = j.energy(); //correctedP4(0).energy();
 
             const reco::GenJet *gJet=j.genJet();
             if(gJet) ev.pjet_genpt[ev.pjet] = gJet->pt();
