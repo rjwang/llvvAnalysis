@@ -27,11 +27,13 @@ PhysicsEvent_t getPhysicsEventFrom(DataEvtSummary_t &ev)
         LorentzVector P4(ev.mn_px[i],ev.mn_py[i],ev.mn_pz[i],ev.mn_en[i]);
         if(P4.pt()>0) {
             phys.leptons.push_back(PhysicsObject_Lepton(P4, ev.mn_id[i]));
-            phys.leptons[nlep].setLeptonIDInfo(ev.mn_IsLoose[i], ev.mn_IsTight[i],ev.mn_IsSoft[i],ev.mn_IsHighPt[i],
-                                               ev.en_passVeto[i], ev.en_passLoose[i], ev.en_passMedium[i], ev.en_passTight[i]
-                                              );
+            phys.leptons[nlep].setLeptonIDInfo(ev.mn_IsLoose[i], ev.mn_IsTight[i], ev.mn_IsMedium[i], ev.mn_IsSoft[i],ev.mn_IsHighPt[i],
+                                               ev.en_passVeto[i], ev.en_passLoose[i], ev.en_passMedium[i], ev.en_passTight[i],
+					       ev.ta_dm[i]
+					      );
             phys.leptons[nlep].setLeptonIsoInfo(ev.mn_pileupIsoR03[i],ev.mn_chargedIsoR03[i],ev.mn_photonIsoR03[i],ev.mn_neutralHadIsoR03[i],
-                                                ev.en_pileupIso[i],ev.en_chargedIso[i],ev.en_photonIso[i],ev.en_neutralHadIso[i],ev.en_relIsoWithEA[i]
+                                                ev.en_pileupIso[i],ev.en_chargedIso[i],ev.en_photonIso[i],ev.en_neutralHadIso[i],ev.en_relIsoWithEA[i],
+					        ev.ta_IsLooseIso[i], ev.ta_IsMediumIso[i], ev.ta_IsTightIso[i]
                                                );
 
             nlep++;
@@ -42,17 +44,40 @@ PhysicsEvent_t getPhysicsEventFrom(DataEvtSummary_t &ev)
         LorentzVector P4(ev.en_px[i],ev.en_py[i],ev.en_pz[i],ev.en_en[i]);
         if(P4.pt()>0) {
             phys.leptons.push_back(PhysicsObject_Lepton(P4, ev.en_id[i]));
-            phys.leptons[nlep].setLeptonIDInfo(ev.mn_IsLoose[i], ev.mn_IsTight[i],ev.mn_IsSoft[i],ev.mn_IsHighPt[i],
-                                               ev.en_passVeto[i], ev.en_passLoose[i], ev.en_passMedium[i], ev.en_passTight[i]
+            phys.leptons[nlep].setLeptonIDInfo(ev.mn_IsLoose[i], ev.mn_IsTight[i], ev.mn_IsMedium[i], ev.mn_IsSoft[i],ev.mn_IsHighPt[i],
+                                               ev.en_passVeto[i], ev.en_passLoose[i], ev.en_passMedium[i], ev.en_passTight[i],
+					       ev.ta_dm[i]
                                               );
             phys.leptons[nlep].setLeptonIsoInfo(ev.mn_pileupIsoR03[i],ev.mn_chargedIsoR03[i],ev.mn_photonIsoR03[i],ev.mn_neutralHadIsoR03[i],
-                                                ev.en_pileupIso[i],ev.en_chargedIso[i],ev.en_photonIso[i],ev.en_neutralHadIso[i],ev.en_relIsoWithEA[i]
+                                                ev.en_pileupIso[i],ev.en_chargedIso[i],ev.en_photonIso[i],ev.en_neutralHadIso[i],ev.en_relIsoWithEA[i],
+						ev.ta_IsLooseIso[i], ev.ta_IsMediumIso[i], ev.ta_IsTightIso[i]
                                                );
 
 
             nlep++;
         }
     }
+
+
+    for(Int_t i=0; i<ev.ta; i++) {
+        LorentzVector P4(ev.ta_px[i],ev.ta_py[i],ev.ta_pz[i],ev.ta_en[i]);
+        if(P4.pt()>0) {
+            phys.leptons.push_back(PhysicsObject_Lepton(P4, ev.ta_id[i]));
+            phys.leptons[nlep].setLeptonIDInfo(ev.mn_IsLoose[i], ev.mn_IsTight[i], ev.mn_IsMedium[i], ev.mn_IsSoft[i],ev.mn_IsHighPt[i],
+                                               ev.en_passVeto[i], ev.en_passLoose[i], ev.en_passMedium[i], ev.en_passTight[i],
+					       ev.ta_dm[i]
+                                              );
+            phys.leptons[nlep].setLeptonIsoInfo(ev.mn_pileupIsoR03[i],ev.mn_chargedIsoR03[i],ev.mn_photonIsoR03[i],ev.mn_neutralHadIsoR03[i],
+                                                ev.en_pileupIso[i],ev.en_chargedIso[i],ev.en_photonIso[i],ev.en_neutralHadIso[i],ev.en_relIsoWithEA[i],
+						ev.ta_IsLooseIso[i], ev.ta_IsMediumIso[i], ev.ta_IsTightIso[i]
+                                               );
+
+            nlep++;
+        }
+    }
+
+
+
 
 
     // MET
@@ -79,6 +104,7 @@ PhysicsEvent_t getPhysicsEventFrom(DataEvtSummary_t &ev)
     //generator level particles
     for(Int_t ipart=0; ipart<ev.nmcparticles; ipart++) {
         LorentzVector p4(ev.mc_px[ipart],ev.mc_py[ipart],ev.mc_pz[ipart],ev.mc_en[ipart]);
+	if(ev.mc_status[ipart]==2 && abs(ev.mc_id[ipart])==15) phys.genleptons.push_back( PhysicsObject(p4,ev.mc_id[ipart]) );
         if(ev.mc_status[ipart]!=1) continue;
         switch( ev.mc_id[ipart] ) {
         case 12:
@@ -104,8 +130,9 @@ PhysicsEvent_t getPhysicsEventFrom(DataEvtSummary_t &ev)
         case -11:
         case 13:
         case -13:
-        case 15:
-        case -15: {
+        //case 15:
+        //case -15:
+	{
             phys.genleptons.push_back( PhysicsObject(p4,ev.mc_id[ipart]) );
         }
         break;
@@ -158,4 +185,41 @@ int getDileptonId(int id1, int id2)
 }
 
 
+bool isDYToLL(int id1, int id2)
+{
+	if(id1==11 || id2==-11) return true;
+	else if(id1==-11 || id2==11) return true;
+	else if(id1==13 || id2==-13) return true;
+	else if(id1==-13 || id2==13) return true;
+	else return false;
+}
+
+bool isDYToTauTau(int id1, int id2)
+{
+        if(id1==15 || id2==-15) return true;
+        else if(id1==-15 || id2==15) return true;
+        else return false;
+}
+
+
+float getSFfrom2DHist(double xval, double yval, TH2F* h_){
+
+    if(h_==NULL) {
+	cout << "[getSFfrom2DHist]: empty hist! " << endl;
+	return 1;
+    }
+    int xbins = h_->GetXaxis()->GetNbins();
+    if(xval > h_->GetXaxis()->GetBinUpEdge(xbins)    ) xval = h_->GetXaxis()->GetBinUpEdge(xbins);
+    if(xval < h_->GetXaxis()->GetBinLowEdge(1)       ) xval = h_->GetXaxis()->GetBinLowEdge(1);
+
+    int ybins = h_->GetYaxis()->GetNbins();
+    if(yval > h_->GetYaxis()->GetBinUpEdge(ybins)    ) yval = h_->GetYaxis()->GetBinUpEdge(ybins);
+    if(yval < h_->GetYaxis()->GetBinLowEdge(1)       ) yval = h_->GetYaxis()->GetBinLowEdge(1);
+
+    int binx = h_->GetXaxis()->FindBin(xval);
+    int biny = h_->GetYaxis()->FindBin(yval);
+    float sf_ = h_->GetBinContent(binx,biny);
+
+    return sf_;
+}
 

@@ -29,12 +29,14 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("vtx_y",         &evSummary_.vtx_y,          "vtx_y/F");
     t_->Branch("vtx_z",         &evSummary_.vtx_z,          "vtx_z/F");
 
+/*
     t_->Branch("fixedGridRhoAll",                           &evSummary_.fixedGridRhoAll,                        "fixedGridRhoAll/F");
     t_->Branch("fixedGridRhoFastjetAll",                    &evSummary_.fixedGridRhoFastjetAll,                 "fixedGridRhoFastjetAll/F");
     t_->Branch("fixedGridRhoFastjetAllCalo",                &evSummary_.fixedGridRhoFastjetAllCalo,             "fixedGridRhoFastjetAllCalo/F");
     t_->Branch("fixedGridRhoFastjetCentralCalo",            &evSummary_.fixedGridRhoFastjetCentralCalo,         "fixedGridRhoFastjetCentralCalo/F");
     t_->Branch("fixedGridRhoFastjetCentralChargedPileUp",   &evSummary_.fixedGridRhoFastjetCentralChargedPileUp,"fixedGridRhoFastjetCentralChargedPileUp/F");
     t_->Branch("fixedGridRhoFastjetCentralNeutral",         &evSummary_.fixedGridRhoFastjetCentralNeutral,      "fixedGridRhoFastjetCentralNeutral/F");
+*/
 
     //generator level info
     t_->Branch("ngenITpu",   	&evSummary_.ngenITpu,       "ngenITpu/I");
@@ -124,6 +126,7 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("en_pz",                 evSummary_.en_pz,                   "en_pz[en]/F");
     t_->Branch("en_en",                 evSummary_.en_en,                   "en_en[en]/F");
     t_->Branch("en_id",                 evSummary_.en_id,                   "en_id[en]/I");
+/*
     t_->Branch("en_d0",                 evSummary_.en_d0,                   "en_d0[en]/F");
     t_->Branch("en_dZ",                 evSummary_.en_dZ,                   "en_dZ[en]/F");
     t_->Branch("en_EtaSC",              evSummary_.en_EtaSC,                "en_EtaSC[en]/F");
@@ -136,6 +139,7 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("en_sigmaIetaIeta",      evSummary_.en_sigmaIetaIeta,        "en_sigmaIetaIeta[en]/F");
     t_->Branch("en_sigmaIetaIeta5x5",   evSummary_.en_sigmaIetaIeta5x5,     "en_sigmaIetaIeta5x5[en]/F");
     t_->Branch("en_ooEmooP",          	evSummary_.en_ooEmooP,              "en_ooEmooP[en]/F");
+*/
     t_->Branch("en_pileupIso",          evSummary_.en_pileupIso,            "en_pileupIso[en]/F");
     t_->Branch("en_chargedIso",         evSummary_.en_chargedIso,           "en_chargedIso[en]/F");
     t_->Branch("en_photonIso",          evSummary_.en_photonIso,            "en_photonIso[en]/F");
@@ -208,6 +212,7 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("jet_hadronFlavour",     evSummary_.jet_hadronFlavour,       "jet_hadronFlavour[jet]/I");
     t_->Branch("jet_genpt",             evSummary_.jet_genpt,               "jet_genpt[jet]/F");
 
+/*
     //jet (slimmedJetsPuppi)
     t_->Branch("pjet",                   &evSummary_.pjet,                    "pjet/I");
     t_->Branch("pjet_px",                evSummary_.pjet_px,                  "pjet_px[pjet]/F");
@@ -226,8 +231,9 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("pjet_btag8",             evSummary_.pjet_btag8,               "pjet_btag8[pjet]/F");
     t_->Branch("pjet_btag9",             evSummary_.pjet_btag9,               "pjet_btag9[pjet]/F");
     t_->Branch("pjet_btag10",            evSummary_.pjet_btag10,              "pjet_btag10[pjet]/F");
+*/
 
-
+/*
     //fjet (ak8PFJetsCHS)
     t_->Branch("fjet",                  &evSummary_.fjet,                   "fjet/I");
     t_->Branch("fjet_px",               evSummary_.fjet_px,                 "fjet_px[fjet]/F");
@@ -241,7 +247,7 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("fjet_tau1",             evSummary_.fjet_tau1,               "fjet_tau1[fjet]/F");
     t_->Branch("fjet_tau2",             evSummary_.fjet_tau2,               "fjet_tau2[fjet]/F");
     t_->Branch("fjet_tau3",             evSummary_.fjet_tau3,               "fjet_tau3[fjet]/F");
-
+*/
 
     //met
     t_->Branch("met_pt",               	&evSummary_.met_pt,                 "met_pt/F");
@@ -304,13 +310,14 @@ bool DataEvtSummaryHandler::attachToTree(TTree *t)
     t_->SetBranchAddress("vtx_y",           &evSummary_.vtx_y);
     t_->SetBranchAddress("vtx_z",           &evSummary_.vtx_z);
 
+/*
     t_->SetBranchAddress("fixedGridRhoAll",                           &evSummary_.fixedGridRhoAll);
     t_->SetBranchAddress("fixedGridRhoFastjetAll",                    &evSummary_.fixedGridRhoFastjetAll);
     t_->SetBranchAddress("fixedGridRhoFastjetAllCalo",                &evSummary_.fixedGridRhoFastjetAllCalo);
     t_->SetBranchAddress("fixedGridRhoFastjetCentralCalo",            &evSummary_.fixedGridRhoFastjetCentralCalo);
     t_->SetBranchAddress("fixedGridRhoFastjetCentralChargedPileUp",   &evSummary_.fixedGridRhoFastjetCentralChargedPileUp);
     t_->SetBranchAddress("fixedGridRhoFastjetCentralNeutral",         &evSummary_.fixedGridRhoFastjetCentralNeutral);
-
+*/
     //generator level info
     t_->SetBranchAddress("ngenITpu",        &evSummary_.ngenITpu);
     t_->SetBranchAddress("ngenOOTpu",       &evSummary_.ngenOOTpu);
@@ -390,6 +397,7 @@ bool DataEvtSummaryHandler::attachToTree(TTree *t)
     t_->SetBranchAddress("en_pz",                   evSummary_.en_pz);
     t_->SetBranchAddress("en_en",                   evSummary_.en_en);
     t_->SetBranchAddress("en_id",                   evSummary_.en_id);
+/*
     t_->SetBranchAddress("en_d0",                   evSummary_.en_d0);
     t_->SetBranchAddress("en_dZ",                   evSummary_.en_dZ);
     t_->SetBranchAddress("en_EtaSC",                evSummary_.en_EtaSC);
@@ -402,6 +410,7 @@ bool DataEvtSummaryHandler::attachToTree(TTree *t)
     t_->SetBranchAddress("en_sigmaIetaIeta",        evSummary_.en_sigmaIetaIeta);
     t_->SetBranchAddress("en_sigmaIetaIeta5x5",     evSummary_.en_sigmaIetaIeta5x5);
     t_->SetBranchAddress("en_ooEmooP",          	evSummary_.en_ooEmooP);
+*/
     t_->SetBranchAddress("en_pileupIso",            evSummary_.en_pileupIso);
     t_->SetBranchAddress("en_chargedIso",           evSummary_.en_chargedIso);
     t_->SetBranchAddress("en_photonIso",            evSummary_.en_photonIso);
@@ -474,7 +483,7 @@ bool DataEvtSummaryHandler::attachToTree(TTree *t)
     t_->SetBranchAddress("jet_hadronFlavour",       evSummary_.jet_hadronFlavour);
     t_->SetBranchAddress("jet_genpt",               evSummary_.jet_genpt);
 
-
+/*
     //pjet: slimmedJetsPuppi
     t_->SetBranchAddress("pjet",                     &evSummary_.pjet);
     t_->SetBranchAddress("pjet_px",                  evSummary_.pjet_px);
@@ -493,9 +502,9 @@ bool DataEvtSummaryHandler::attachToTree(TTree *t)
     t_->SetBranchAddress("pjet_btag8",               evSummary_.pjet_btag8);
     t_->SetBranchAddress("pjet_btag9",               evSummary_.pjet_btag9);
     t_->SetBranchAddress("pjet_btag10",               evSummary_.pjet_btag10);
+*/
 
-
-
+/*
     //fjet (ak8PFJetsCHS)
     t_->SetBranchAddress("fjet",                    &evSummary_.fjet);
     t_->SetBranchAddress("fjet_px",                 evSummary_.fjet_px);
@@ -509,7 +518,7 @@ bool DataEvtSummaryHandler::attachToTree(TTree *t)
     t_->SetBranchAddress("fjet_tau1",               evSummary_.fjet_tau1);
     t_->SetBranchAddress("fjet_tau2",               evSummary_.fjet_tau2);
     t_->SetBranchAddress("fjet_tau3",               evSummary_.fjet_tau3);
-
+*/
 
     //met
     t_->SetBranchAddress("met_pt",                  &evSummary_.met_pt);
@@ -563,8 +572,8 @@ void DataEvtSummaryHandler::resetStruct()
     evSummary_.en=0;
     evSummary_.ta=0;
     evSummary_.jet=0;
-    evSummary_.pjet=0;
-    evSummary_.fjet=0;
+    //evSummary_.pjet=0;
+    //evSummary_.fjet=0;
 }
 
 //

@@ -56,14 +56,6 @@
           "br": [
             1
           ]
-        }, 
-        {
-          "dtag": "MC13TeV_ZZinclusive", 
-          "xsec": 16.523, 
-          "split": 2, 
-          "br": [
-            1
-          ]
         }
       ]
     }, 
@@ -237,7 +229,34 @@
             1
           ]
         }
-      ]
+      ], 
+      "mctruthmode": 1
+    }, 
+    {
+      "isdata": false, 
+      "color": "66", 
+      "lcolor": "1", 
+      "tag": "Z#rightarrow #tau#tau", 
+      "marker": 66, 
+      "data": [
+        {
+          "dtag": "MC13TeV_DYJetsToLL_10to50", 
+          "xsec": 18610, 
+          "split": 10, 
+          "br": [
+            1
+          ]
+        }, 
+        {
+          "dtag": "MC13TeV_DYJetsToLL_50toInf", 
+          "xsec": 6025, 
+          "split": 10, 
+          "br": [
+            1
+          ]
+        }
+      ], 
+      "mctruthmode": 2
     }, 
     {
       "isdata": false, 
@@ -500,7 +519,7 @@
         }, 
         {
           "dtag": "Data13TeV_SingleMuon2015D_05Oct2015", 
-          "split": 19
+          "split": 20
         }, 
         {
           "dtag": "Data13TeV_DoubleEG2015D_PromptRecov4", 
@@ -2302,7 +2321,7 @@
       "marker": 90, 
       "data": [
         {
-          "dtag": "MC13TeV_Unpart_1p50", 
+          "dtag": "MC13TeV_Unpart_1p02", 
           "xsec": 46.18, 
           "split": 1, 
           "br": [
@@ -2324,7 +2343,7 @@
       "marker": 90, 
       "data": [
         {
-          "dtag": "MC13TeV_Unpart_1p50", 
+          "dtag": "MC13TeV_Unpart_1p04", 
           "xsec": 64.26, 
           "split": 1, 
           "br": [
@@ -2346,7 +2365,7 @@
       "marker": 90, 
       "data": [
         {
-          "dtag": "MC13TeV_Unpart_1p50", 
+          "dtag": "MC13TeV_Unpart_1p06", 
           "xsec": 66.91, 
           "split": 1, 
           "br": [
@@ -2368,7 +2387,7 @@
       "marker": 90, 
       "data": [
         {
-          "dtag": "MC13TeV_Unpart_1p50", 
+          "dtag": "MC13TeV_Unpart_1p09", 
           "xsec": 57.63, 
           "split": 1, 
           "br": [
@@ -2390,7 +2409,7 @@
       "marker": 90, 
       "data": [
         {
-          "dtag": "MC13TeV_Unpart_1p50", 
+          "dtag": "MC13TeV_Unpart_1p10", 
           "xsec": 53.50, 
           "split": 1, 
           "br": [
@@ -2412,7 +2431,7 @@
       "marker": 90, 
       "data": [
         {
-          "dtag": "MC13TeV_Unpart_1p50", 
+          "dtag": "MC13TeV_Unpart_1p20", 
           "xsec": 17.81, 
           "split": 1, 
           "br": [
@@ -2434,7 +2453,7 @@
       "marker": 90, 
       "data": [
         {
-          "dtag": "MC13TeV_Unpart_1p50", 
+          "dtag": "MC13TeV_Unpart_1p30", 
           "xsec": 4.729, 
           "split": 1, 
           "br": [
@@ -2456,7 +2475,7 @@
       "marker": 90, 
       "data": [
         {
-          "dtag": "MC13TeV_Unpart_1p50", 
+          "dtag": "MC13TeV_Unpart_1p40", 
           "xsec": 1.186, 
           "split": 1, 
           "br": [
@@ -2500,7 +2519,7 @@
       "marker": 90, 
       "data": [
         {
-          "dtag": "MC13TeV_Unpart_1p50", 
+          "dtag": "MC13TeV_Unpart_1p60", 
           "xsec": 0.07291, 
           "split": 1, 
           "br": [
@@ -2522,7 +2541,7 @@
       "marker": 90, 
       "data": [
         {
-          "dtag": "MC13TeV_Unpart_1p50", 
+          "dtag": "MC13TeV_Unpart_1p70", 
           "xsec": 0.01851, 
           "split": 1, 
           "br": [
@@ -2544,7 +2563,7 @@
       "marker": 90, 
       "data": [
         {
-          "dtag": "MC13TeV_Unpart_1p50", 
+          "dtag": "MC13TeV_Unpart_1p80", 
           "xsec": 0.004791, 
           "split": 1, 
           "br": [
@@ -2566,7 +2585,7 @@
       "marker": 90, 
       "data": [
         {
-          "dtag": "MC13TeV_Unpart_1p50", 
+          "dtag": "MC13TeV_Unpart_1p90", 
           "xsec": 0.001273, 
           "split": 1, 
           "br": [
@@ -2588,7 +2607,7 @@
       "marker": 90, 
       "data": [
         {
-          "dtag": "MC13TeV_Unpart_1p50", 
+          "dtag": "MC13TeV_Unpart_2p00", 
           "xsec": 0.0003458, 
           "split": 1, 
           "br": [
@@ -2610,7 +2629,7 @@
       "marker": 90, 
       "data": [
         {
-          "dtag": "MC13TeV_Unpart_1p50", 
+          "dtag": "MC13TeV_Unpart_2p20", 
           "xsec": 0.00002688, 
           "split": 1, 
           "br": [

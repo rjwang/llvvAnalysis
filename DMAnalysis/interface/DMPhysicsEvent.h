@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <vector>
+#include "TH2F.h"
 
 #include "llvvAnalysis/DMAnalysis/interface/DataEvtSummaryHandler.h"
 #include "DataFormats/Math/interface/deltaR.h"
@@ -35,10 +36,12 @@ class PhysicsObject_Lepton : public LorentzVector {
 public :
     PhysicsObject_Lepton(LorentzVector vec, Int_t id_):
         LorentzVector(vec), id(id_) { }
-    void setLeptonIDInfo(bool isLooseMu_, bool isTightMu_, bool isSoftMu_, bool isHighPtMu_,
-                         bool isElpassVeto_, bool isElpassLoose_, bool isElpassMedium_, bool isElpassTight_) {
+    void setLeptonIDInfo(bool isLooseMu_, bool isTightMu_, bool isMediumMu_, bool isSoftMu_, bool isHighPtMu_,
+                         bool isElpassVeto_, bool isElpassLoose_, bool isElpassMedium_, bool isElpassTight_,
+			 bool isTauDM_) {
         isLooseMu = isLooseMu_;
         isTightMu = isTightMu_;
+	isMediumMu = isMediumMu_;
         isSoftMu = isSoftMu_;
         isHighPtMu = isHighPtMu_;
 
@@ -46,11 +49,13 @@ public :
         isElpassLoose = isElpassLoose_;
         isElpassMedium = isElpassMedium_;
         isElpassTight = isElpassTight_;
+
+	isTauDM = isTauDM_;
     }
 
     void setLeptonIsoInfo(float mn_pileupIso_, float mn_chargedIso_, float mn_photonIso_, float mn_neutralHadIso_,
-                          float en_pileupIso_, float en_chargedIso_, float en_photonIso_, float en_neutralHadIso_,
-			  float en_relIsoWithEA_) {
+                          float en_pileupIso_, float en_chargedIso_, float en_photonIso_, float en_neutralHadIso_, float en_relIsoWithEA_,
+			  bool ta_IsLooseIso_, bool ta_IsMediumIso_, bool ta_IsTightIso_ ) {
 
         mn_pileupIso = mn_pileupIso_;
         mn_chargedIso = mn_chargedIso_;
@@ -61,8 +66,11 @@ public :
         en_chargedIso = en_chargedIso_;
         en_photonIso = en_photonIso_;
         en_neutralHadIso = en_neutralHadIso_;
-
         en_relIsoWithEA = en_relIsoWithEA_;
+
+	ta_IsLooseIso = ta_IsLooseIso_;
+	ta_IsMediumIso = ta_IsMediumIso_;
+	ta_IsTightIso = ta_IsTightIso_;
     }
 
     float e_pfRelIsoDbeta() {
@@ -78,11 +86,13 @@ public :
     }
 
     Int_t id;
-    bool isLooseMu, isTightMu, isSoftMu, isHighPtMu;
+    bool isLooseMu, isTightMu, isMediumMu, isSoftMu, isHighPtMu;
     bool isElpassVeto, isElpassLoose, isElpassMedium, isElpassTight;
+    bool isTauDM;
     float mn_pileupIso, mn_chargedIso, mn_photonIso, mn_neutralHadIso;
     float en_pileupIso, en_chargedIso, en_photonIso, en_neutralHadIso;
     float en_relIsoWithEA;
+    bool ta_IsLooseIso, ta_IsMediumIso, ta_IsTightIso;
 };
 
 
@@ -142,8 +152,9 @@ struct PhysicsEvent_t {
 PhysicsEvent_t getPhysicsEventFrom(DataEvtSummary_t &ev);
 int getDileptonId(int id1, int id2);
 
-
-
+bool isDYToLL(int id1, int id2);
+bool isDYToTauTau(int id1, int id2);
+float getSFfrom2DHist(double xval, double yval, TH2F* h_);
 
 
 

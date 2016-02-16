@@ -414,7 +414,34 @@
             1
           ]
         }
-      ]
+      ], 
+      "mctruthmode": 1
+    }, 
+    {
+      "isdata": false, 
+      "color": "66", 
+      "lcolor": "1", 
+      "tag": "Z#rightarrow #tau#tau", 
+      "marker": 66, 
+      "data": [
+        {
+          "dtag": "MC13TeV_DYJetsToLL_10to50", 
+          "xsec": 18610, 
+          "split": 10, 
+          "br": [
+            1
+          ]
+        }, 
+        {
+          "dtag": "MC13TeV_DYJetsToLL_50toInf", 
+          "xsec": 6025, 
+          "split": 10, 
+          "br": [
+            1
+          ]
+        }
+      ], 
+      "mctruthmode": 2
     }, 
     {
       "isdata": true, 
@@ -460,7 +487,7 @@
         }, 
         {
           "dtag": "Data13TeV_SingleMuon2015D_05Oct2015", 
-          "split": 19
+          "split": 20
         }, 
         {
           "dtag": "Data13TeV_DoubleEG2015D_PromptRecov4", 
@@ -511,13 +538,13 @@
       "isdata": false, 
       "color": "2", 
       "issignal": true, 
-      "tag": "DM(50)MA(200)", 
+      "tag": "Unpart(1.5)", 
       "lwidth": 2, 
       "marker": 2, 
       "data": [
         {
-          "dtag": "MC13TeV_DM_A_Mx50Mv200", 
-          "xsec": 0.1581, 
+          "dtag": "MC13TeV_Unpart_1p50", 
+          "xsec": 0.2928, 
           "split": 1, 
           "br": [
             1.0
@@ -527,13 +554,35 @@
       "fill": 0, 
       "spimpose": true, 
       "lcolor": "2", 
-      "lstyle": 2
+      "lstyle": 1
     }, 
     {
       "isdata": false, 
       "color": "6", 
       "issignal": true, 
-      "tag": "EWK_S_DM(1)_K1(1)_K2(1)", 
+      "tag": "ADD(3)", 
+      "lwidth": 2, 
+      "marker": 6, 
+      "data": [
+        {
+          "dtag": "MC13TeV_ADD_D3", 
+          "xsec": 0.03323, 
+          "split": 1, 
+          "br": [
+            1.0
+          ]
+        }
+      ], 
+      "fill": 0, 
+      "spimpose": true, 
+      "lcolor": "6", 
+      "lstyle": 7
+    }, 
+    {
+      "isdata": false, 
+      "color": "6", 
+      "issignal": true, 
+      "tag": "EWK_DM(1)", 
       "lwidth": 2, 
       "marker": 6, 
       "data": [

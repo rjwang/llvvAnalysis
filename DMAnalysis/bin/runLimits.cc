@@ -217,7 +217,7 @@ void initNormalizationSysts()
 {
     normSysts["lumi_7TeV"] = 0.022;
     normSysts["lumi_8TeV"] = 0.026;
-    normSysts["lumi_13TeV"] = 0.026;
+    normSysts["lumi_13TeV"] = 0.046;
     normSysts["accept_7TeV"] = 0.;//0.02;//0.003; //RJ
     normSysts["accept_8TeV"] = 0.;//0.02;//0.018; //RJ
     normSysts["sherpa_kin_syst"] = sysSherpa-1.0;
@@ -1761,12 +1761,12 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
                 }
 
                 if(procTitle.Contains("ADD")) {
-		    if(MV>0 || MA>0) continue;
+                    if(MV>0 || MA>0) continue;
                     if(mass>0 && !procTitle.Contains("ADD("+massStr+")"))continue;
                 }
 
                 if(procTitle.Contains("EWK_S_DM")) {
-		    if(MV>0 || MA>0) continue;
+                    if(MV>0 || MA>0) continue;
                     if(mass>0 && !procTitle.Contains("EWK_S_DM("+massStr+")_K1("+K1Str+")_K2("+K2Str+")"))continue;
                 }
 
@@ -2134,7 +2134,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 fprintf(pFile,"%45s %10s ", "lumi_13TeV", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                    if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets") && !dci.procs[j-1].Contains("Wjets")) {
+                    if(!dci.procs[j-1].Contains("WW_Top_ZTauTau") && !dci.procs[j-1].Contains("Zjets") && !dci.procs[j-1].Contains("Wjets")) {
                         fprintf(pFile,"%6f ",1.0+normSysts["lumi_13TeV"]);
                     } else {
                         fprintf(pFile,"%6s ","-");
@@ -2145,7 +2145,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 fprintf(pFile,"%45s %10s ", "lumi_8TeV", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                    if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets") && !dci.procs[j-1].Contains("Wjets")) {
+                    if(!dci.procs[j-1].Contains("WW_Top_ZTauTau") && !dci.procs[j-1].Contains("Zjets") && !dci.procs[j-1].Contains("Wjets")) {
                         fprintf(pFile,"%6f ",1.0+normSysts["lumi_8TeV"]);
                     } else {
                         fprintf(pFile,"%6s ","-");
@@ -2156,7 +2156,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 fprintf(pFile,"%45s %10s ", "lumi_7TeV", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                    if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets")) {
+                    if(!dci.procs[j-1].Contains("WW_Top_ZTauTau") && !dci.procs[j-1].Contains("Zjets")) {
                         fprintf(pFile,"%6f ",1.0+normSysts["lumi_7TeV"]);
                     } else {
                         fprintf(pFile,"%6s ","-");
@@ -2168,7 +2168,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 fprintf(pFile,"%45s %10s ", "accept_8TeV", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                    if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets")) {
+                    if(!dci.procs[j-1].Contains("WW_Top_ZTauTau") && !dci.procs[j-1].Contains("Zjets")) {
                         fprintf(pFile,"%6f ",1.0+normSysts["accept_8TeV"]);
                     } else {
                         fprintf(pFile,"%6s ","-");
@@ -2179,7 +2179,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 fprintf(pFile,"%45s %10s ", "accept_7TeV", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                    if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets")) {
+                    if(!dci.procs[j-1].Contains("WW_Top_ZTauTau") && !dci.procs[j-1].Contains("Zjets")) {
                         fprintf(pFile,"%6f ",1.0+normSysts["accept_7TeV"]);
                     } else {
                         fprintf(pFile,"%6s ","-");
@@ -2212,7 +2212,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 fprintf(pFile,"%45s %10s ", "CMS_eff_e", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                    if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets") && !dci.procs[j-1].Contains("Wjets")) {
+                    if(!dci.procs[j-1].Contains("WW_Top_ZTauTau") && !dci.procs[j-1].Contains("Zjets") && !dci.procs[j-1].Contains("Wjets")) {
                         fprintf(pFile,"%6f ",1.0+normSysts["CMS_eff_e"]);
                     } else {
                         fprintf(pFile,"%6s ","-");
@@ -2223,7 +2223,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 fprintf(pFile,"%45s %10s ", "CMS_eff_m", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                    if(!dci.procs[j-1].Contains("EM") && !dci.procs[j-1].Contains("Zjets") && !dci.procs[j-1].Contains("Wjets")) {
+                    if(!dci.procs[j-1].Contains("WW_Top_ZTauTau") && !dci.procs[j-1].Contains("Zjets") && !dci.procs[j-1].Contains("Wjets")) {
                         fprintf(pFile,"%6f ",1.0+normSysts["CMS_eff_m"]);
                     } else {
                         fprintf(pFile,"%6s ","-");
@@ -2240,7 +2240,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                             fprintf(pFile,"%45s %10s ", "CMS_zllwimps_EM_8TeV", "lnN");
                             for(size_t j=1; j<=dci.procs.size(); j++) {
                                 if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                                if(dci.procs[j-1].Contains("EM")) {
+                                if(dci.procs[j-1].Contains("WW_Top_ZTauTau")) {
             			if(dci.ch[i-1].Contains("eeeq0jets")) fprintf(pFile,"%6f ",2.109);
             			else if(dci.ch[i-1].Contains("eeeq1jets")) fprintf(pFile,"%6f ",2.459);
             			else if(dci.ch[i-1].Contains("mumueq0jets")) fprintf(pFile,"%6f ",2.018);
@@ -2255,7 +2255,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                             fprintf(pFile,"%45s %10s ", "CMS_zllwimps_EM_7TeV", "lnN");
                             for(size_t j=1; j<=dci.procs.size(); j++) {
                                 if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                                if(dci.procs[j-1].Contains("EM")) {
+                                if(dci.procs[j-1].Contains("WW_Top_ZTauTau")) {
                                     if(dci.ch[i-1].Contains("eeeq0jets")) fprintf(pFile,"%6f ",4.16);
                                     else if(dci.ch[i-1].Contains("eeeq1jets")) fprintf(pFile,"%6f ",2.018);
                                     else if(dci.ch[i-1].Contains("mumueq0jets")) fprintf(pFile,"%6f ",3.453);
@@ -2297,91 +2297,94 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
             */
 
 
+            /*
 
-            fprintf(pFile,"%45s %10s ", "CMS_zllwimps_ZZ_generator", "lnN");
-            for(size_t j=1; j<=dci.procs.size(); j++) {
-                if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                if(dci.procs[j-1].Contains("ZZ")) {
-                    if(DYMET_EXTRAPOL<=80)        fprintf(pFile,"%6f ",1.1424);
-                    else if (DYMET_EXTRAPOL==90 ) fprintf(pFile,"%6f ",1.1437);
-                    else if (DYMET_EXTRAPOL==100) fprintf(pFile,"%6f ",1.1507);
-                    else if (DYMET_EXTRAPOL==110) fprintf(pFile,"%6f ",1.1644);
-                    else if (DYMET_EXTRAPOL==120) fprintf(pFile,"%6f ",1.1636);
-                    else if (DYMET_EXTRAPOL==130) fprintf(pFile,"%6f ",1.1809);
-                    else if (DYMET_EXTRAPOL==140) fprintf(pFile,"%6f ",1.1866);
-                    else if (DYMET_EXTRAPOL==150) fprintf(pFile,"%6f ",1.1944);
-                    else if (DYMET_EXTRAPOL==170) fprintf(pFile,"%6f ",1.2331);
-                    else if (DYMET_EXTRAPOL==190) fprintf(pFile,"%6f ",1.2449);
-                    else if (DYMET_EXTRAPOL==210) fprintf(pFile,"%6f ",1.2573);
-                    else if (DYMET_EXTRAPOL==230) fprintf(pFile,"%6f ",1.3149);
-                    else if (DYMET_EXTRAPOL==250) fprintf(pFile,"%6f ",1.3596);
-                    else if (DYMET_EXTRAPOL>=260) fprintf(pFile,"%6f ",1.3797);
-                    else fprintf(pFile,"%6s ","-");
-                } else {
-                    fprintf(pFile,"%6s ","-");
-                }
-            }
-            fprintf(pFile,"\n");
-
+                    fprintf(pFile,"%45s %10s ", "CMS_zllwimps_ZZ_generator", "lnN");
+                    for(size_t j=1; j<=dci.procs.size(); j++) {
+                        if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
+                        if(dci.procs[j-1].Contains("ZZ")) {
+                            if(DYMET_EXTRAPOL<=80)        fprintf(pFile,"%6f ",1.1424);
+                            else if (DYMET_EXTRAPOL==90 ) fprintf(pFile,"%6f ",1.1437);
+                            else if (DYMET_EXTRAPOL==100) fprintf(pFile,"%6f ",1.1507);
+                            else if (DYMET_EXTRAPOL==110) fprintf(pFile,"%6f ",1.1644);
+                            else if (DYMET_EXTRAPOL==120) fprintf(pFile,"%6f ",1.1636);
+                            else if (DYMET_EXTRAPOL==130) fprintf(pFile,"%6f ",1.1809);
+                            else if (DYMET_EXTRAPOL==140) fprintf(pFile,"%6f ",1.1866);
+                            else if (DYMET_EXTRAPOL==150) fprintf(pFile,"%6f ",1.1944);
+                            else if (DYMET_EXTRAPOL==170) fprintf(pFile,"%6f ",1.2331);
+                            else if (DYMET_EXTRAPOL==190) fprintf(pFile,"%6f ",1.2449);
+                            else if (DYMET_EXTRAPOL==210) fprintf(pFile,"%6f ",1.2573);
+                            else if (DYMET_EXTRAPOL==230) fprintf(pFile,"%6f ",1.3149);
+                            else if (DYMET_EXTRAPOL==250) fprintf(pFile,"%6f ",1.3596);
+                            else if (DYMET_EXTRAPOL>=260) fprintf(pFile,"%6f ",1.3797);
+                            else fprintf(pFile,"%6s ","-");
+                        } else {
+                            fprintf(pFile,"%6s ","-");
+                        }
+                    }
+                    fprintf(pFile,"\n");
+            */
 
 
 
             //Oct 30, 2013
 
-            if(dci.ch[i-1].Contains("mumueq0jets")) {
-                fprintf(pFile,"%45s %10s ", "CMS_zllwimps_WZ3l", "lnN");
-                for(size_t j=1; j<=dci.procs.size(); j++) {
-                    if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                    if(dci.procs[j-1].Contains("WZ")) {
-                        fprintf(pFile,"%6f ",1.0+normSysts["CMS_zllwimps_mumueq0jets_leptonVeto"]);
-                    } else {
-                        fprintf(pFile,"%6s ","-");
+            /*
+                    if(dci.ch[i-1].Contains("mumueq0jets")) {
+                        fprintf(pFile,"%45s %10s ", "CMS_zllwimps_WZ3l", "lnN");
+                        for(size_t j=1; j<=dci.procs.size(); j++) {
+                            if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
+                            if(dci.procs[j-1].Contains("WZ")) {
+                                fprintf(pFile,"%6f ",1.0+normSysts["CMS_zllwimps_mumueq0jets_leptonVeto"]);
+                            } else {
+                                fprintf(pFile,"%6s ","-");
+                            }
+                        }
+                        fprintf(pFile,"\n");
                     }
-                }
-                fprintf(pFile,"\n");
-            }
 
-            if(dci.ch[i-1].Contains("mumueq1jets") || dci.ch[i-1].Contains("mumulesq1jets")) {
-                fprintf(pFile,"%45s %10s ", "CMS_zllwimps_WZ3l", "lnN");
-                for(size_t j=1; j<=dci.procs.size(); j++) {
-                    if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                    if(dci.procs[j-1].Contains("WZ")) {
-                        fprintf(pFile,"%6f ",1.0+normSysts["CMS_zllwimps_mumueq1jets_leptonVeto"]);
-                    } else {
-                        fprintf(pFile,"%6s ","-");
+                    if(dci.ch[i-1].Contains("mumueq1jets") || dci.ch[i-1].Contains("mumulesq1jets")) {
+                        fprintf(pFile,"%45s %10s ", "CMS_zllwimps_WZ3l", "lnN");
+                        for(size_t j=1; j<=dci.procs.size(); j++) {
+                            if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
+                            if(dci.procs[j-1].Contains("WZ")) {
+                                fprintf(pFile,"%6f ",1.0+normSysts["CMS_zllwimps_mumueq1jets_leptonVeto"]);
+                            } else {
+                                fprintf(pFile,"%6s ","-");
+                            }
+                        }
+                        fprintf(pFile,"\n");
                     }
-                }
-                fprintf(pFile,"\n");
-            }
 
 
 
 
-            if(dci.ch[i-1].Contains("eeeq0jets")) {
-                fprintf(pFile,"%45s %10s ", "CMS_zllwimps_WZ3l", "lnN");
-                for(size_t j=1; j<=dci.procs.size(); j++) {
-                    if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                    if(dci.procs[j-1].Contains("WZ")) {
-                        fprintf(pFile,"%6f ",1.0+normSysts["CMS_zllwimps_eeeq0jets_leptonVeto"]);
-                    } else {
-                        fprintf(pFile,"%6s ","-");
+                    if(dci.ch[i-1].Contains("eeeq0jets")) {
+                        fprintf(pFile,"%45s %10s ", "CMS_zllwimps_WZ3l", "lnN");
+                        for(size_t j=1; j<=dci.procs.size(); j++) {
+                            if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
+                            if(dci.procs[j-1].Contains("WZ")) {
+                                fprintf(pFile,"%6f ",1.0+normSysts["CMS_zllwimps_eeeq0jets_leptonVeto"]);
+                            } else {
+                                fprintf(pFile,"%6s ","-");
+                            }
+                        }
+                        fprintf(pFile,"\n");
                     }
-                }
-                fprintf(pFile,"\n");
-            }
 
-            if(dci.ch[i-1].Contains("eeeq1jets") || dci.ch[i-1].Contains("eelesq1jets")) {
-                fprintf(pFile,"%45s %10s ", "CMS_zllwimps_WZ3l", "lnN");
-                for(size_t j=1; j<=dci.procs.size(); j++) {
-                    if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                    if(dci.procs[j-1].Contains("WZ")) {
-                        fprintf(pFile,"%6f ",1.0+normSysts["CMS_zllwimps_eeeq1jets_leptonVeto"]);
-                    } else {
-                        fprintf(pFile,"%6s ","-");
+                    if(dci.ch[i-1].Contains("eeeq1jets") || dci.ch[i-1].Contains("eelesq1jets")) {
+                        fprintf(pFile,"%45s %10s ", "CMS_zllwimps_WZ3l", "lnN");
+                        for(size_t j=1; j<=dci.procs.size(); j++) {
+                            if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
+                            if(dci.procs[j-1].Contains("WZ")) {
+                                fprintf(pFile,"%6f ",1.0+normSysts["CMS_zllwimps_eeeq1jets_leptonVeto"]);
+                            } else {
+                                fprintf(pFile,"%6s ","-");
+                            }
+                        }
+                        fprintf(pFile,"\n");
                     }
-                }
-                fprintf(pFile,"\n");
-            }
+            */
 
 
 
@@ -2419,21 +2422,30 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
             // RJ, for count and cut
             ///////////////////////////////////////////////
 
-            fprintf(pFile,"%45s %10s ", "QCDscale_VV", "lnN");
+            fprintf(pFile,"%45s %10s ", "QCDscale", "lnN");
             for(size_t j=1; j<=dci.procs.size(); j++) {
                 if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                if(dci.procs[j-1].BeginsWith("ZZ")) {
-                    if(systpostfix.Contains('8')) {
-                        fprintf(pFile,"%6f ",1.067);
-                    } else {
-                        fprintf(pFile,"%6f ",1.067);
-                    }
+
+                if     (dci.procs[j-1].BeginsWith("UnPart1p01") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p01"]);
+                else if(dci.procs[j-1].BeginsWith("UnPart1p02") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p02"]);
+                else if(dci.procs[j-1].BeginsWith("UnPart1p04") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p04"]);
+                else if(dci.procs[j-1].BeginsWith("UnPart1p06") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p06"]);
+                else if(dci.procs[j-1].BeginsWith("UnPart1p09") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p09"]);
+                else if(dci.procs[j-1].BeginsWith("UnPart1p10") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p10"]);
+                else if(dci.procs[j-1].BeginsWith("UnPart1p20") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p20"]);
+                else if(dci.procs[j-1].BeginsWith("UnPart1p30") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p30"]);
+                else if(dci.procs[j-1].BeginsWith("UnPart1p40") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p40"]);
+                else if(dci.procs[j-1].BeginsWith("UnPart1p50") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p50"]);
+                else if(dci.procs[j-1].BeginsWith("UnPart1p60") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p60"]);
+                else if(dci.procs[j-1].BeginsWith("UnPart1p70") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p70"]);
+                else if(dci.procs[j-1].BeginsWith("UnPart1p80") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p80"]);
+                else if(dci.procs[j-1].BeginsWith("UnPart1p90") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart1p90"]);
+                else if(dci.procs[j-1].BeginsWith("UnPart2p00") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart2p00"]);
+                else if(dci.procs[j-1].BeginsWith("UnPart2p20") ) fprintf(pFile,"%6f ",normSysts["QCDscale_UnPart2p20"]);
+                else if(dci.procs[j-1].BeginsWith("ZZ")) {
+                        fprintf(pFile,"%6f ",1.02);
                 } else if(dci.procs[j-1].BeginsWith("WZ")) {
-                    if(systpostfix.Contains('8')) {
-                        fprintf(pFile,"%6f ",1.077);
-                    } else {
-                        fprintf(pFile,"%6f ",1.077);
-                    }
+                        fprintf(pFile,"%6f ",1.025);
                 } else {
                     fprintf(pFile,"%6s ","-");
                 }
@@ -2455,6 +2467,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                         fprintf(pFile,"\n");
             */
 
+/*
             fprintf(pFile,"%45s %10s ", "QCDscale_DM", "lnN");
             for(size_t j=1; j<=dci.procs.size(); j++) {
                 if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
@@ -2496,10 +2509,10 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
             }
             fprintf(pFile,"\n");
 
+*/
 
 
-
-
+/*
             fprintf(pFile,"%45s %10s ", "QCDscale_UnPart", "lnN");
             for(size_t j=1; j<=dci.procs.size(); j++) {
                 if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
@@ -2524,7 +2537,7 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                 }
             }
             fprintf(pFile,"\n");
-
+*/
 
 
 
@@ -2640,22 +2653,16 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                     }
                     for(size_t j=1; j<=dci.procs.size(); j++) {
                         if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                        if(it->first.Contains("sherpa")) continue; //RJ
-                        //if(it->first.Contains("CMS_scale_j")) continue; //RJ
-                        //if(it->first.Contains("CMS_res_j")) continue; //RJ
                         if(it->first.Contains("CMS_zllwimps_les") && dci.ch[i-1].Contains("mumu")) continue; //RJ
 
                         if(it->second.find(RateKey_t(dci.procs[j-1],dci.ch[i-1])) != it->second.end()) {
-                            if(it->first.Contains("sherpa") && (!dci.procs[j-1].Contains("zz2l2nu"))) {
-                                sprintf(sFile,"%s%6s ",sFile,"-");
-                            } else {
+				//cout << "dci.procs[j-1]: " << dci.procs[j-1] << " it->first: " << it->first  << endl;
                                 if(it->first.Contains("CMS_zllwimps_pdf")) {
                                     normSysts["CMS_zllwimps_pdf"]=it->second[RateKey_t(dci.procs[j-1],dci.ch[i-1])];
                                     continue;
                                 }
                                 sprintf(sFile,"%s%6.3f ",sFile,it->second[RateKey_t(dci.procs[j-1],dci.ch[i-1])]);
                                 isSyst=true;
-                            }
                         } else {
                             sprintf(sFile,"%s%6s ",sFile,"-");
                         }
@@ -2669,8 +2676,8 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
 
             fprintf(pFile,"%45s %10s ", "pdf_qqbar", "lnN");
             for(size_t j=1; j<=dci.procs.size(); j++) {
-                //cout << "pdf_qqbar: dci.procs[j-1] " << dci.procs[j-1] << endl;
                 if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
+
                 if(dci.procs[j-1].BeginsWith("ZH")) {
                     if(systpostfix.Contains('8')) {
                         fprintf(pFile,"%6f ",1.055);
@@ -2678,21 +2685,16 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                         fprintf(pFile,"%6f ",1.055);
                     }
                 } else if(dci.procs[j-1].BeginsWith("ZZ")) {
-                    if(systpostfix.Contains('8')) {
-                        fprintf(pFile,"%6f ",1.057);
-                    } else {
-                        fprintf(pFile,"%6f ",1.057);
-                    }
+                        fprintf(pFile,"%6f ",1.02);
                 } else if(dci.procs[j-1].BeginsWith("WZ")) {
-                    if(systpostfix.Contains('8')) {
-                        fprintf(pFile,"%6f ",1.048);
-                    } else {
-                        fprintf(pFile,"%6f ",1.048);
-                    }
-                } else if(dci.procs[j-1].BeginsWith("D5") || dci.procs[j-1].BeginsWith("D8")
+                        fprintf(pFile,"%6f ",1.015);
+                } else
+
+		if(dci.procs[j-1].BeginsWith("D5") || dci.procs[j-1].BeginsWith("D8")
                           || dci.procs[j-1].BeginsWith("C3") || dci.procs[j-1].BeginsWith("D9")
                           || dci.procs[j-1].BeginsWith("UnPart")
-			  || dci.procs[j-1].BeginsWith("ewk_s_dm")
+                          || dci.procs[j-1].BeginsWith("ewk_s_dm")
+			  || dci.procs[j-1].BeginsWith("add")
                           || dci.procs[j-1].BeginsWith("dm") ) {
                     fprintf(pFile,"%6f ",normSysts["CMS_zllwimps_pdf"]); //convert shape -> normalization
                 } else {
@@ -2860,14 +2862,14 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
         //if(subNRB2011 || subNRB2012) doBackgroundSubtraction(selCh,"emu",allShapes,histo,histo+"_NRBctrl", url, Root, true);
         //replace WZ by its estimate from 3rd Lepton SB
         //if(subWZ)doWZSubtraction(selCh,"emu",allShapes,histo,histo+"_3rdLepton");
-
+*/
 
         // MC Z+jets -> DYExtrapolation
         doDYextrapolation(selCh,allShapes,histo,"pfmet_minus_shapes", DYMET_EXTRAPOL, true);
         //doDYextrapolation(selCh,allShapes,histo,"balancedif_minus_shapes", DYRESP_EXTRAPOL, false);
         //doDYextrapolation(selCh,allShapes,histo,"dphizmet_minus_shapes", DYDPHI_EXTRAPOL, true);
 
-    */
+
     //replace Z+Jet background by Gamma+Jet estimates
     ////if(subDY)doDYReplacement(selCh,"gamma",allShapes,histo,"met_met");
     /////
@@ -2938,7 +2940,7 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
                 }
 
                 if(proc.Contains("ADD")) {
-		    if(MV>0 || MA>0) continue;
+                    if(MV>0 || MA>0) continue;
                     if(mass>0 && !proc.Contains("ADD("+massStr+")"))continue;
                 }
 
@@ -3191,7 +3193,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
     proc.ReplaceAll("zz2l2nu","ZZ");
     proc.ReplaceAll("wz3lnu","WZ");
     proc.ReplaceAll("zjetsdata","Zjets");
-    proc.ReplaceAll("topwwztautaudata","EM");
+    proc.ReplaceAll("topwwztautaudata","WW_Top_ZTauTau");
     proc.ReplaceAll("wjetsdata","Wjets");
 
 
@@ -3266,7 +3268,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                     TH1* statup=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"Up");
                     TH1* statdown=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"Down");
                     //RENJIE
-                    if(proc.Contains("EM")) {
+                    if(proc.Contains("WW_Top_ZTauTau")) {
                         statup=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"Up");
                         statdown=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"Down");
                     }
@@ -3283,9 +3285,10 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                     //############################################################################
                     //### bin-by-bin uncertainty
                     //############################################################################
-                    bool useBinbyBin(false);
-                    useBinbyBin &= (proc.Contains("ZH") || proc.Contains("ZZ") || proc.Contains("WZ") || proc.Contains("EM") ||
+                    bool useBinbyBin(true);
+                    useBinbyBin &= (proc.Contains("ZH") || proc.Contains("ZZ") || proc.Contains("WZ") || proc.Contains("WW_Top_ZTauTau") ||
                                     proc.Contains("D1") || proc.Contains("D4") || proc.Contains("D5") ||
+                                    proc.Contains("ewk_s_dm") || proc.Contains("vvv") || proc.Contains("zjets") ||
                                     proc.Contains("D8") ||  proc.Contains("D9") || proc.Contains("C3")
                                    );
                     useBinbyBin &= (shape);
@@ -3293,7 +3296,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
 
                     if(!useBinbyBin) {
 
-                        if(proc.Contains("EM")) {
+                        if(proc.Contains("WW_Top_ZTauTau")) {
                             statup  ->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"Up");
                             statdown->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"Down");
                         } else if(proc.Contains("Zjets")) {
@@ -3305,7 +3308,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                         }
 
                         if(shape) { //RENJIE  Jun15
-                            if(proc.Contains("EM"))
+                            if(proc.Contains("WW_Top_ZTauTau"))
                                 //cout << "Skiping " << proc <<" stat" << endl;
                                 //cout << "removing EM stat" << endl;
                                 dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=1.0;
@@ -3314,7 +3317,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                             else
                                 dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=1.0;
                         } else {
-                            if(proc.Contains("EM"))
+                            if(proc.Contains("WW_Top_ZTauTau"))
                                 //cout << "removing EM stat" << endl;
                                 dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
                             else if(proc.Contains("Zjets"))
@@ -3347,44 +3350,27 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
 
                             for(int jbin=1; jbin<=statup->GetXaxis()->GetNbins(); jbin++) {
                                 if(jbin!=iBin) continue;
-                                statup  ->SetBinContent(jbin,std::min(2*hshape->GetBinContent(jbin), std::max(0.01*hshape->GetBinContent(jbin), statup  ->GetBinContent(jbin) + statup  ->GetBinError(jbin))));
-                                statdown->SetBinContent(jbin,std::min(2*hshape->GetBinContent(jbin), std::max(0.01*hshape->GetBinContent(jbin), statdown->GetBinContent(jbin) - statdown->GetBinError(jbin))));
+                                statup  ->SetBinContent(jbin,std::min(2*hshape->GetBinContent(jbin),
+									std::max(0.01*hshape->GetBinContent(jbin), statup  ->GetBinContent(jbin) + statup  ->GetBinError(jbin))));
+                                statdown->SetBinContent(jbin,std::min(2*hshape->GetBinContent(jbin),
+									std::max(0.01*hshape->GetBinContent(jbin), statdown->GetBinContent(jbin) - statdown->GetBinError(jbin))));
                                 //double variance = (statup->Integral()/hshapes[0]->Integral());
                             }
 
                             //#########Debug###########
                             double variance = (statup->Integral()/hshapes[0]->Integral());
                             TString name_variance = proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_Bin"+Bin+"Up";
-                            if(proc.Contains("EM")) name_variance = proc+postfix+"_CMS_zllwimps_stat_"+proc+systpostfix+"_Bin"+Bin+"Up";
+                            if(proc.Contains("WW_Top_ZTauTau")) name_variance = proc+postfix+"_CMS_zllwimps_stat_"+proc+systpostfix+"_Bin"+Bin+"Up";
                             cout << name_variance << ": " << variance << endl;
                             nuisance_h->Fill(variance);
                             //#########Debug###########
                             //if((proc=="zz2l2nu") && variance<1.0001) {saveBins.push_back(iBin); continue;}
-                            if(ch.Contains("eq0jets")) {
-                                if(proc.Contains("ZZ") && variance < 1.005) {
-                                    saveBins.push_back(iBin);
-                                    continue;
-                                }
-                                if(!proc.Contains("ZZ") && variance < 1.008) {
-                                    saveBins.push_back(iBin);
-                                    continue;
-                                }
-                            } else if(ch.Contains("eq1jets")) {
-                                if(proc.Contains("ZZ") && variance < 1.01) {
-                                    saveBins.push_back(iBin);
-                                    continue;
-                                }
-                                if(!proc.Contains("ZZ") && variance < 1.02) {
-                                    saveBins.push_back(iBin);    //save bins
-                                    continue;
-                                }
-                            } else continue;
-
+			    if(variance < 1.005) saveBins.push_back(iBin);
 
 //                            statup  ->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_Bin"+Bin+"Up");
 //                            statdown->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_Bin"+Bin+"Down");
 
-                            if(proc.Contains("EM")) {
+                            if(proc.Contains("WW_Top_ZTauTau")) {
                                 statup  ->Write(proc+postfix+"_CMS_zllwimps_stat_"+proc+systpostfix+"_Bin"+Bin+"Up");
                                 statdown->Write(proc+postfix+"_CMS_zllwimps_stat_"+proc+systpostfix+"_Bin"+Bin+"Down");
                             } else {
@@ -3393,49 +3379,51 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                             }
 
                             if(shape) {
-                                if(proc.Contains("EM")) dci.systs["CMS_zllwimps_stat_"+proc+systpostfix+"_Bin"+Bin][RateKey_t(proc,ch)]=1.0;
+                                if(proc.Contains("WW_Top_ZTauTau")) dci.systs["CMS_zllwimps_stat_"+proc+systpostfix+"_Bin"+Bin][RateKey_t(proc,ch)]=1.0;
                                 else dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_Bin"+Bin][RateKey_t(proc,ch)]=1.0;
 
                             } else {
-                                if(proc.Contains("EM")) dci.systs["CMS_zllwimps_stat_"+proc+systpostfix+"_Bin"+Bin][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
+                                if(proc.Contains("WW_Top_ZTauTau")) dci.systs["CMS_zllwimps_stat_"+proc+systpostfix+"_Bin"+Bin][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
                                 else dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_Bin"+Bin][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
                             }
 
                         }
 
                         //#################### Bin-by-Bin Rest bins #####################
-                        /*
-                        			for(unsigned int ij=0; ij<saveBins.size(); ij++){
-                        			    int iBin=saveBins[ij];
-                        			    if(hshape->GetBinContent(iBin)<=0) continue;
-                                                    TH1* statup=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"_BinRestUp");
-                                                    TH1* statdown=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"_BinRestDown");
 
-                                                    statup  ->SetBinContent(iBin,std::min(2*hshape->GetBinContent(iBin), std::max(0.01*hshape->GetBinContent(iBin), statup  ->GetBinContent(iBin) + statup  ->GetBinError(iBin))));
-                                                    statdown->SetBinContent(iBin,std::min(2*hshape->GetBinContent(iBin), std::max(0.01*hshape->GetBinContent(iBin), statdown->GetBinContent(iBin) - statdown->GetBinError(iBin))));
+                        for(unsigned int ij=0; ij<saveBins.size(); ij++) {
+                            int iBin=saveBins[ij];
+                            if(hshape->GetBinContent(iBin)<=0) continue;
+                            TH1* statup=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"_BinRestUp");
+                            TH1* statdown=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"_BinRestDown");
 
-                        			}
+                            statup  ->SetBinContent(iBin,std::min(2*hshape->GetBinContent(iBin),
+						std::max(0.01*hshape->GetBinContent(iBin), statup  ->GetBinContent(iBin) + statup  ->GetBinError(iBin))));
+                            statdown->SetBinContent(iBin,std::min(2*hshape->GetBinContent(iBin),
+						std::max(0.01*hshape->GetBinContent(iBin), statdown->GetBinContent(iBin) - statdown->GetBinError(iBin))));
+
+                        }
 
 
-                        			if(saveBins.size()>0){
-                                                    if(proc=="topwwztautaudata"){
-                                                        statup  ->Write(proc+postfix+"_CMS_zllwimps_stat_"+proc+systpostfix+"_BinRestUp");
-                                                        statdown->Write(proc+postfix+"_CMS_zllwimps_stat_"+proc+systpostfix+"_BinRestDown");
-                                                    }else{
-                                                        statup  ->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_BinRestUp");
-                                                        statdown->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_BinRestDown");
-                                                    }
+                        if(saveBins.size()>0) {
+                            if(proc=="topwwztautaudata") {
+                                statup  ->Write(proc+postfix+"_CMS_zllwimps_stat_"+proc+systpostfix+"_BinRestUp");
+                                statdown->Write(proc+postfix+"_CMS_zllwimps_stat_"+proc+systpostfix+"_BinRestDown");
+                            } else {
+                                statup  ->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_BinRestUp");
+                                statdown->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_BinRestDown");
+                            }
 
-                                                    if(shape) {
-                                                        if(proc=="topwwztautaudata") dci.systs["CMS_zllwimps_stat_"+proc+systpostfix+"_BinRest"][RateKey_t(proc,ch)]=1.0;
-                                                        else dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_BinRest"][RateKey_t(proc,ch)]=1.0;
+                            if(shape) {
+                                if(proc=="topwwztautaudata") dci.systs["CMS_zllwimps_stat_"+proc+systpostfix+"_BinRest"][RateKey_t(proc,ch)]=1.0;
+                                else dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_BinRest"][RateKey_t(proc,ch)]=1.0;
 
-                                                    }else{
-                                                        if(proc=="topwwztautaudata") dci.systs["CMS_zllwimps_stat_"+proc+systpostfix+"_BinRest"][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
-                                                        else dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_BinRest"][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
-                                                    }
-                        			}
-                        */
+                            } else {
+                                if(proc=="topwwztautaudata") dci.systs["CMS_zllwimps_stat_"+proc+systpostfix+"_BinRest"][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
+                                else dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_BinRest"][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
+                            }
+                        }
+
 
 
 
@@ -3460,7 +3448,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                         if(ch.Contains("ee")) wjetsch="ee";
                         if(ch.Contains("mumu")) wjetsch="mumu";
 
-                        if(proc.Contains("EM") || proc.Contains("Zjets")) dci.systs["CMS_zllwimps_sys_"+ch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=systUncertainty;
+                        if(proc.Contains("WW_Top_ZTauTau") || proc.Contains("Zjets")) dci.systs["CMS_zllwimps_sys_"+ch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=systUncertainty;
                         else if(proc.Contains("Wjets")) dci.systs["CMS_zllwimps_sys_"+wjetsch+"_"+proc+systpostfix][RateKey_t(proc,ch)]=systUncertainty;
                         else dci.systs["CMS_zllwimps_sys_"+proc+systpostfix][RateKey_t(proc,ch)]=systUncertainty;
                     }
@@ -3634,16 +3622,16 @@ void doDYextrapolation(std::vector<TString>& selCh,map<TString, Shape_t>& allSha
 
             //update  Feb 24
             TString tag_dy = selCh[i]+AnalysisBins[b];
-            if(tag_dy=="eelesq1jets") sf = 1.25;//1.49205;
-            else if(tag_dy=="mumulesq1jets") sf = 1.16;//1.46399;
+            if(tag_dy=="eelesq1jets") sf = 1.02964;//1.49205;
+            else if(tag_dy=="mumulesq1jets") sf = 1.09576;//1.46399;
             else sf = 1.;
 
             cout << "Scale Factor: " << sf << " DY MC: " << hChan_DATADY->Integral() << endl;
             hChan_DATADY->Scale(sf);
 
             //assign Systematics
-            if(tag_dy=="eelesq1jets") hChan_DATADY->SetBinError(0, 0.10/*0.193361*/*hChan_DATADY->Integral());
-            if(tag_dy=="mumulesq1jets") hChan_DATADY->SetBinError(0, 0.11/*0.48201*/*hChan_DATADY->Integral());
+            if(tag_dy=="eelesq1jets") hChan_DATADY->SetBinError(0, 0.1251/*0.193361*/*hChan_DATADY->Integral());
+            if(tag_dy=="mumulesq1jets") hChan_DATADY->SetBinError(0, 0.0876983/*0.48201*/*hChan_DATADY->Integral());
 
             cout << "DY Extrapolation: " << hChan_DATADY->Integral() << endl;
             if(hChan_DATADY->Integral() > 1E-6) shapeChan_SI.bckg.push_back(hChan_DATADY);

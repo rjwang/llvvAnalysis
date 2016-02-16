@@ -227,6 +227,30 @@ std::pair<double,double> BTagUtils::getBTagWeight(bool istag, double pt, double 
 
 
 //
+double BTagUtils::getNewBTagWeight(bool istag, double pt, double SF, TString btag, TString key)
+{
+    float mcTag = 1.;
+    float mcNoTag = 1.;
+    float dataTag = 1.;
+    float dataNoTag = 1.;
+
+    double eff = getBTagEff(pt,key);
+
+    if(istag) {
+        mcTag *= eff;
+        dataTag *= eff*SF;
+    } else {
+        mcNoTag *= (1- eff);
+        dataNoTag *= (1- eff*SF);
+    }
+
+    double wtbtag = (dataNoTag * dataTag ) / ( mcNoTag * mcTag );
+
+    return wtbtag;
+}
+
+
+//
 BTagUtils::~BTagUtils()
 {
 }

@@ -86,6 +86,9 @@ process.mainAnalyzer = cms.EDAnalyzer('MainAnalyzer',
     prunedTag = cms.InputTag("prunedGenParticles"),
     genJetsTag = cms.InputTag("slimmedGenJets"),
 
+    puInfoTag = cms.InputTag("slimmedAddPileupInfo", "", "PAT"),
+    genInfoTag = cms.InputTag("generator", "", "SIM"),
+
 
     ##trigger
     bits = cms.InputTag("TriggerResults","","HLT"),

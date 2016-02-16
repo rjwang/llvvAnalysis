@@ -34,7 +34,7 @@ struct DataEvtSummary_t {
     //primary vertex
     Int_t nvtx;
     Float_t vtx_x, vtx_y, vtx_z;
-    Float_t fixedGridRhoAll,fixedGridRhoFastjetAll,fixedGridRhoFastjetAllCalo,fixedGridRhoFastjetCentralCalo,fixedGridRhoFastjetCentralChargedPileUp,fixedGridRhoFastjetCentralNeutral;
+    //Float_t fixedGridRhoAll,fixedGridRhoFastjetAll,fixedGridRhoFastjetAllCalo,fixedGridRhoFastjetCentralCalo,fixedGridRhoFastjetCentralChargedPileUp,fixedGridRhoFastjetCentralNeutral;
 
     //generator info
     Int_t ngenITpu,ngenOOTpu,ngenOOTpum1, ngenTruepu;
@@ -74,9 +74,9 @@ struct DataEvtSummary_t {
     Int_t en;
     Float_t en_px[MAXPARTICLES],en_py[MAXPARTICLES],en_pz[MAXPARTICLES],en_en[MAXPARTICLES];
     Int_t en_id[MAXPARTICLES];
-    Float_t en_d0[MAXPARTICLES],en_dZ[MAXPARTICLES];
-    Float_t en_EtaSC[MAXPARTICLES],en_PhiSC[MAXPARTICLES],en_EnSC[MAXPARTICLES];
-    Float_t en_dEtaIn[MAXPARTICLES],en_dPhiIn[MAXPARTICLES],en_hOverE[MAXPARTICLES],en_R9[MAXPARTICLES],en_sigmaIetaIeta[MAXPARTICLES],en_sigmaIetaIeta5x5[MAXPARTICLES],en_ooEmooP[MAXPARTICLES];
+    //Float_t en_d0[MAXPARTICLES],en_dZ[MAXPARTICLES];
+    //Float_t en_EtaSC[MAXPARTICLES],en_PhiSC[MAXPARTICLES],en_EnSC[MAXPARTICLES];
+    //Float_t en_dEtaIn[MAXPARTICLES],en_dPhiIn[MAXPARTICLES],en_hOverE[MAXPARTICLES],en_R9[MAXPARTICLES],en_sigmaIetaIeta[MAXPARTICLES],en_sigmaIetaIeta5x5[MAXPARTICLES],en_ooEmooP[MAXPARTICLES];
     Float_t en_pileupIso[MAXPARTICLES],en_chargedIso[MAXPARTICLES],en_photonIso[MAXPARTICLES],en_neutralHadIso[MAXPARTICLES];
     Float_t en_relIsoWithEA[MAXPARTICLES],en_relIsoWithDBeta[MAXPARTICLES],en_MissingHits[MAXPARTICLES],en_passConversionVeto[MAXPARTICLES];
     Bool_t en_passVeto[MAXPARTICLES],en_passLoose[MAXPARTICLES],en_passMedium[MAXPARTICLES],en_passTight[MAXPARTICLES],en_passHEEP[MAXPARTICLES];
@@ -105,6 +105,7 @@ struct DataEvtSummary_t {
     Bool_t jet_PFLoose[MAXPARTICLES], jet_PFTight[MAXPARTICLES];
     Int_t jet_partonFlavour[MAXPARTICLES], jet_hadronFlavour[MAXPARTICLES];
 
+/*
     //jet (slimmedJetsPuppi)
     Int_t pjet;
     Float_t pjet_px[MAXPARTICLES],pjet_py[MAXPARTICLES],pjet_pz[MAXPARTICLES],pjet_en[MAXPARTICLES];
@@ -112,15 +113,16 @@ struct DataEvtSummary_t {
     Float_t pjet_btag4[MAXPARTICLES],pjet_btag5[MAXPARTICLES],pjet_btag6[MAXPARTICLES],pjet_btag7[MAXPARTICLES];
     Float_t pjet_btag8[MAXPARTICLES],pjet_btag9[MAXPARTICLES],pjet_btag10[MAXPARTICLES];
     Float_t pjet_genpt[MAXPARTICLES];
+*/
 
-
+/*
     //fjet (ak8PFJetsCHS)
     Int_t fjet;
     Float_t fjet_px[MAXPARTICLES],fjet_py[MAXPARTICLES],fjet_pz[MAXPARTICLES],fjet_en[MAXPARTICLES];
     Float_t fjet_prunedM[MAXPARTICLES],fjet_trimmedM[MAXPARTICLES],fjet_filteredM[MAXPARTICLES];
     Float_t fjet_tau1[MAXPARTICLES],fjet_tau2[MAXPARTICLES],fjet_tau3[MAXPARTICLES];
     Float_t fjet_genpt[MAXPARTICLES];
-
+*/
 
     //met
     Float_t met_pt,met_phi,met_sumMET;

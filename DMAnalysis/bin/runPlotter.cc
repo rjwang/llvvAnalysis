@@ -248,8 +248,8 @@ void GetInitialNumberOfEvents(JSONWrapper::Object& Root, std::string RootDir, Na
          if(cnorm==1 && isMC)printf("is there a problem with %s ? cnorm = %f\n",(Samples[j])["dtag"].toString().c_str(), cnorm);
          if(!isMC)PUCentralnnorm = 1;
 
-         double VBFMCRescale = tmphist->GetXaxis()->GetNbins()>5 ? tmphist->GetBinContent(6) / tmphist->GetBinContent(2) : 1.0;
-	 if(VBFMCRescale!=0)          cnorm *= VBFMCRescale;
+         //double VBFMCRescale = tmphist->GetXaxis()->GetNbins()>5 ? tmphist->GetBinContent(6) / tmphist->GetBinContent(2) : 1.0;
+	 //if(VBFMCRescale!=0)          cnorm *= VBFMCRescale;
          //printf("VBFMCRescale for sample %s is %f\n", (Samples[j])["dtag"].toString().c_str(), VBFMCRescale );
          sampleInfo.initialNumberOfEvents = cnorm / PUCentralnnorm;
 	 //cout << "initialNumberOfEvents: " << sampleInfo.initialNumberOfEvents << endl;

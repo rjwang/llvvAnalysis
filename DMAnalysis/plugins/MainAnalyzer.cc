@@ -115,7 +115,7 @@ private:
     edm::EDGetTokenT<pat::TauCollection> tauTag_;
     edm::EDGetTokenT<pat::PhotonCollection> photonTag_;
     edm::EDGetTokenT<pat::JetCollection> jetTag_;
-    edm::EDGetTokenT<pat::JetCollection> jetPuppiTag_;
+//    edm::EDGetTokenT<pat::JetCollection> jetPuppiTag_;
 //    edm::EDGetTokenT<pat::JetCollection> fatjetTag_;
     edm::EDGetTokenT<pat::METCollection> metTag_;
     edm::EDGetTokenT<pat::METCollection> metNoHFTag_;
@@ -230,7 +230,7 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
     tauTag_(		consumes<pat::TauCollection>(iConfig.getParameter<edm::InputTag>("tausTag"))			),
     photonTag_(		consumes<pat::PhotonCollection>(iConfig.getParameter<edm::InputTag>("photonsTag"))		),
     jetTag_(		consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jetsTag"))			),
-    jetPuppiTag_(       consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jetsPuppiTag"))               ),
+//    jetPuppiTag_(       consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jetsPuppiTag"))               ),
 //    fatjetTag_(		consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("fatjetsTag"))			),
     metTag_(		consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("metsTag"))			),
     metNoHFTag_(        consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("metsNoHFTag"))                ),
@@ -797,7 +797,7 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
         ev.jet++;
     }
 
-
+/*
     //
     // slimmedJetsPuppi
     //
@@ -832,6 +832,7 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
         }
     }
 
+*/
     //
     // fat jet selection (ak8PFJetsCHS)
     //

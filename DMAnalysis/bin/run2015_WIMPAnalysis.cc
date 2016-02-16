@@ -41,6 +41,39 @@
 
 using namespace std;
 
+
+namespace LHAPDF {
+void initPDFSet(int nset, const std::string& filename, int member=0);
+int numberPDF(int nset);
+void usePDFMember(int nset, int member);
+double xfx(int nset, double x, double Q, int fl);
+double getXmin(int nset, int member);
+double getXmax(int nset, int member);
+double getQ2min(int nset, int member);
+double getQ2max(int nset, int member);
+void extrapolate(bool extrapolate=true);
+}
+
+struct stPDFval {
+    stPDFval() {}
+    stPDFval(const stPDFval& arg) :
+        qscale(arg.qscale),
+        x1(arg.x1),
+        x2(arg.x2),
+        id1(arg.id1),
+        id2(arg.id2) {
+    }
+
+    double qscale;
+    double x1;
+    double x2;
+    int id1;
+    int id2;
+};
+
+
+
+
 int main(int argc, char* argv[])
 {
     //##################################################################################
@@ -94,9 +127,20 @@ int main(int argc, char* argv[])
     bool isSingleElePD(!isMC && url.Contains("SingleElectron"));
     bool isDoubleElePD(!isMC && url.Contains("DoubleEG"));
 
-    bool isMC_ZZ  = isMC && ( string(url.Data()).find("TeV_ZZTo2L2Nu")  != string::npos);
-//  bool isMC_WZ  = isMC && ( string(url.Data()).find("TeV_WZ_")  != string::npos);
-//  bool isMC_WW  = isMC && ( string(url.Data()).find("TeV_WW_")  != string::npos);
+    bool isMC_ZZ2L2Nu  = isMC && ( string(url.Data()).find("TeV_ZZTo2L2Nu")  != string::npos);
+    bool isMC_ZZTo4L   = isMC && ( string(url.Data()).find("TeV_ZZTo4L")  != string::npos);
+    bool isMC_ZZTo2L2Q = isMC && ( string(url.Data()).find("TeV_ZZTo2L2Q")  != string::npos);
+
+    bool isMC_WZ  = isMC && ( string(url.Data()).find("TeV_WZamcatnloFXFX")  != string::npos
+                              || string(url.Data()).find("MC13TeV_WZpowheg")  != string::npos );
+
+    bool isMC_VVV = isMC && ( string(url.Data()).find("MC13TeV_WZZ_")  != string::npos
+                              || string(url.Data()).find("MC13TeV_WWZ_")  != string::npos
+                              || string(url.Data()).find("MC13TeV_ZZZ_")  != string::npos );
+
+    bool isMCBkg_runPDF = (isMC_ZZ2L2Nu || isMC_ZZTo4L || isMC_ZZTo2L2Q ||
+                           isMC_WZ || isMC_VVV);
+
     bool isMC_ttbar = isMC && (string(url.Data()).find("TeV_TT")  != string::npos);
     bool isMC_stop  = isMC && (string(url.Data()).find("TeV_SingleT")  != string::npos);
     bool isMC_WIMP  = isMC && (string(url.Data()).find("TeV_DM_V_Mx") != string::npos
@@ -145,13 +189,14 @@ int main(int argc, char* argv[])
         varNames.push_back("_pudown"); 	//10
         varNames.push_back("_btagup"); 	//11
         varNames.push_back("_btagdown");//12
-        if(isSignal)            {
+        if(isSignal || isMCBkg_runPDF) {
             varNames.push_back("_pdfup");
             varNames.push_back("_pdfdown");
+            varNames.push_back("_qcdscaleup");
+            varNames.push_back("_qcdscaledown");
         }
     }
     size_t nvarsToInclude=varNames.size();
-
 
 
     //tree info
@@ -166,36 +211,48 @@ int main(int argc, char* argv[])
     JetCorrectionUncertainty jecUnc(uncFile.Data());
 
 
-
-    //pdf info
-    PDFInfo *mPDFInfo=0;
-    if(isSignal) {
-        TString pdfUrl = runProcess.getParameter<std::string>("pdfInput");
-        std::string Url = runProcess.getParameter<std::string>("input");
-        if(doWIMPreweighting) {
-            if(Url.find("TeV_DM_V_Mx") != string::npos) 	Url = runProcess.getParameter<std::string>("WIMPreweighting_DM_V_Mx");
-            else if(Url.find("TeV_DM_A_Mx") != string::npos) 	Url = runProcess.getParameter<std::string>("WIMPreweighting_DM_A_Mx");
-        }
-
-        std::size_t found = Url.find_last_of("/\\");
-        pdfUrl += '/';
-        pdfUrl += Url.substr(found+1);
-
-
-        if(pdfUrl.Contains("K1_0.1_K2_1")) pdfUrl.ReplaceAll("K1_0.1_K2_1","K1_1_K2_1");
-        if(pdfUrl.Contains("K1_0.2_K2_1")) pdfUrl.ReplaceAll("K1_0.2_K2_1","K1_1_K2_1");
-        if(pdfUrl.Contains("K1_0.3_K2_1")) pdfUrl.ReplaceAll("K1_0.3_K2_1","K1_1_K2_1");
-        if(pdfUrl.Contains("K1_0.5_K2_1")) pdfUrl.ReplaceAll("K1_0.5_K2_1","K1_1_K2_1");
-        if(pdfUrl.Contains("K1_2_K2_1"))   pdfUrl.ReplaceAll("K1_2_K2_1","K1_1_K2_1");
-        if(pdfUrl.Contains("K1_3_K2_1"))   pdfUrl.ReplaceAll("K1_3_K2_1","K1_1_K2_1");
-        if(pdfUrl.Contains("K1_5_K2_1"))   pdfUrl.ReplaceAll("K1_5_K2_1","K1_1_K2_1");
-        if(pdfUrl.Contains("K1_10_K2_1"))  pdfUrl.ReplaceAll("K1_10_K2_1","K1_1_K2_1");
-        pdfUrl.ReplaceAll(".root","_pdf.root");
-
-        mPDFInfo=new PDFInfo(pdfUrl,"cteq66.LHgrid");
-        cout << "Readout " << mPDFInfo->numberPDFs() << " pdf variations: " << pdfUrl << endl;
+    //INITIALIZE THE PDF TOOL
+    string pdfSets[]   = {"NNPDF30_lo_as_0130.LHgrid"}; //cteq66.LHgrid","NNPDF30_lo_as_0130.LHgrid","MSTW2008lo68cl.LHgrid"};
+    std::vector<Int_t>   nPdfVars;
+    const size_t nPdfSets=sizeof(pdfSets)/sizeof(string);
+    //const size_t nPdfSets=1;
+    for(size_t ipdf=0; ipdf<nPdfSets; ipdf++) {
+        LHAPDF::initPDFSet(ipdf+1, pdfSets[ipdf]);
+        nPdfVars.push_back( LHAPDF::numberPDF(ipdf+1) );
     }
 
+
+    /*
+        //pdf info
+        PDFInfo *mPDFInfo=0;
+        if(isSignal || isMCBkg_runPDF) {
+            TString pdfUrl = runProcess.getParameter<std::string>("pdfInput");
+            std::string Url = runProcess.getParameter<std::string>("input");
+            if(doWIMPreweighting) {
+                if(Url.find("TeV_DM_V_Mx") != string::npos) 	Url = runProcess.getParameter<std::string>("WIMPreweighting_DM_V_Mx");
+                else if(Url.find("TeV_DM_A_Mx") != string::npos) 	Url = runProcess.getParameter<std::string>("WIMPreweighting_DM_A_Mx");
+            }
+
+            std::size_t found = Url.find_last_of("/\\");
+            pdfUrl += '/';
+            pdfUrl += Url.substr(found+1);
+
+
+            if(pdfUrl.Contains("K1_0.1_K2_1")) pdfUrl.ReplaceAll("K1_0.1_K2_1","K1_1_K2_1");
+            if(pdfUrl.Contains("K1_0.2_K2_1")) pdfUrl.ReplaceAll("K1_0.2_K2_1","K1_1_K2_1");
+            if(pdfUrl.Contains("K1_0.3_K2_1")) pdfUrl.ReplaceAll("K1_0.3_K2_1","K1_1_K2_1");
+            if(pdfUrl.Contains("K1_0.5_K2_1")) pdfUrl.ReplaceAll("K1_0.5_K2_1","K1_1_K2_1");
+            if(pdfUrl.Contains("K1_2_K2_1"))   pdfUrl.ReplaceAll("K1_2_K2_1","K1_1_K2_1");
+            if(pdfUrl.Contains("K1_3_K2_1"))   pdfUrl.ReplaceAll("K1_3_K2_1","K1_1_K2_1");
+            if(pdfUrl.Contains("K1_5_K2_1"))   pdfUrl.ReplaceAll("K1_5_K2_1","K1_1_K2_1");
+            if(pdfUrl.Contains("K1_10_K2_1"))  pdfUrl.ReplaceAll("K1_10_K2_1","K1_1_K2_1");
+            pdfUrl.ReplaceAll(".root","_pdf.root");
+
+            mPDFInfo=new PDFInfo(pdfUrl,"cteq66.LHgrid");
+            cout << "Readout " << mPDFInfo->numberPDFs() << " pdf variations: " << pdfUrl << endl;
+        }
+
+    */
 
     //##################################################################################
     //##########################    INITIATING HISTOGRAMS     ##########################
@@ -361,6 +418,12 @@ int main(int argc, char* argv[])
 
 
 
+    // DY ctrl
+    mon.addHistogram( new TH1F( "pfmet_DYctrlN_3",      ";E_{T}^{miss} [GeV];Events", 100,0,500));
+    mon.addHistogram( new TH1F( "balancedif_DYctrlN_3", ";|E_{T}^{miss}-#it{q}_{T}|/#it{q}_{T};Events", 20,0,1.0) );
+    mon.addHistogram( new TH1F( "dphiZMET_DYctrlN_3",   ";#Delta#it{#phi}(#it{l^{+}l^{-}},E_{T}^{miss});Events", 100,0,TMath::Pi()) );
+
+
 
 
 
@@ -402,6 +465,10 @@ int main(int argc, char* argv[])
     }
 
     TH1F* Hoptim_systs  =  (TH1F*) mon.addHistogram( new TH1F ("optim_systs"    , ";syst;", nvarsToInclude,0,nvarsToInclude) ) ;
+
+
+    //for extrapolation of DY process based on MET
+    mon.addHistogram( new TH2F ("pfmet_minus_shapes",";cut index; E_{T}^{miss} [GeV];#Events ",nOptims,0,nOptims, 100,0,500) );
 
 
 
@@ -491,6 +558,32 @@ int main(int argc, char* argv[])
 
 
 
+    //loop over events
+    std::vector<stPDFval> pdfvals;
+    //loop on all the events
+    if(isSignal) {
+        printf("Progressing Bar     :0%%       20%%       40%%       60%%       80%%       100%%\n");
+        printf("Scanning the ntuple :");
+        int treeStep = (evEnd-evStart)/50;
+        if(treeStep==0)treeStep=1;
+        for( int iev=evStart; iev<evEnd; iev++) {
+            if((iev-evStart)%treeStep==0) {
+                printf(".");
+                fflush(stdout);
+            }
+            summaryHandler_.getEntry(iev);
+            DataEvtSummary_t &ev = summaryHandler_.getEvent();
+            stPDFval valForPDF;
+            valForPDF.qscale = ev.qscale;
+            valForPDF.x1     = ev.x1;
+            valForPDF.x2     = ev.x2;
+            valForPDF.id1     = ev.id1;
+            valForPDF.id2     = ev.id2;
+            pdfvals.push_back(valForPDF);
+        }
+    }
+
+
 
     // muon trigger efficiency SF
     TString MuonTrigEffSF_ = runProcess.getParameter<std::string>("MuonTrigEffSF");
@@ -569,6 +662,11 @@ int main(int argc, char* argv[])
             weight            *= weight_pileup_Central->GetBinContent(binx);
             TotalWeight_plus  *= weight_pileup_Up->GetBinContent(binx);
             TotalWeight_minus *= weight_pileup_Down->GetBinContent(binx);
+
+            //cout << "PU weight: " << weight_pileup_Central->GetBinContent(binx)
+            //		<< " plus: " << weight_pileup_Up->GetBinContent(binx)
+            //		<< " minus: " << weight_pileup_Down->GetBinContent(binx) << endl;
+
         }
 
         Hcutflow->Fill(1,genWeight);
@@ -601,7 +699,7 @@ int main(int argc, char* argv[])
 
 
         //for Wimps
-        if(isMC_WIMP || isMC_ADD || isMC_Unpart || isMC_ZZ) {
+        if(isMC_WIMP || isMC_ADD || isMC_Unpart || isMC_ZZ2L2Nu) {
             if(phys.genleptons.size()!=2) continue;
             if(phys.genGravitons.size()!=1 && phys.genWIMPs.size()!=2 && phys.genneutrinos.size()!=2) continue;
 
@@ -771,7 +869,7 @@ int main(int argc, char* argv[])
 
             if(evcat==EE   && !(hasEEtrigger||hasEtrigger) ) continue;
             if(evcat==MUMU && !(hasMMtrigger||hasMtrigger) ) continue;
-            if(evcat==EMU  && !hasEMtrigger && !(hasEtrigger && hasMtrigger) ) continue;
+            if(evcat==EMU  && !hasEMtrigger ) continue;
 
             //this is a safety veto for the single mu PD
             if(isSingleMuPD) {
@@ -797,7 +895,7 @@ int main(int argc, char* argv[])
         } else {
             if(evcat==EE   && (hasEEtrigger || hasEtrigger) ) hasTrigger=true;
             if(evcat==MUMU && (hasMMtrigger || hasMtrigger) ) hasTrigger=true;
-            if(evcat==EMU  && (hasEMtrigger || (hasEtrigger && hasMtrigger)) ) hasTrigger=true;
+            if(evcat==EMU  && hasEMtrigger ) hasTrigger=true;
             if(!hasTrigger) continue;
         }
 
@@ -880,10 +978,10 @@ int main(int argc, char* argv[])
                 //
                 hasTightIdandIso &= ( phys.leptons[ilep].isElpassMedium && phys.leptons[ilep].pt()>10 );
 
-            //} else if(abs(lepid)==15) { //tau
-            //    hasLooseIdandIso &= ( phys.leptons[ilep].isTauDM && phys.leptons[ilep].ta_IsLooseIso && phys.leptons[ilep].pt()>20 );
-            //    //
-            //    hasTightIdandIso &= ( phys.leptons[ilep].isTauDM && phys.leptons[ilep].ta_IsTightIso && phys.leptons[ilep].pt()>20 );
+            } else if(abs(lepid)==15) { //tau
+                hasLooseIdandIso &= ( phys.leptons[ilep].isTauDM && phys.leptons[ilep].ta_IsLooseIso && phys.leptons[ilep].pt()>20 );
+                //
+                hasTightIdandIso &= ( phys.leptons[ilep].isTauDM && phys.leptons[ilep].ta_IsTightIso && phys.leptons[ilep].pt()>20 );
 
             } else continue;
 
@@ -951,11 +1049,11 @@ int main(int argc, char* argv[])
                 if(abs(corrJets[ijet].flavid)==5) {
                     //BTagWeights *= myBtagUtils.getBTagWeight(isCSVtagged,corrJets[ijet].pt(),corrJets[ijet].eta(),abs(corrJets[ijet].flavid),"CSVL","CSVL/b_eff").first;
                     double btag_sf = btag_reader.eval( BTagEntry::FLAV_B, corrJets[ijet].eta(), (corrJets[ijet].pt()<670. ? corrJets[ijet].pt() : 670.) );
-		    BTagWeights *= myBtagUtils.getNewBTagWeight(isCSVtagged, corrJets[ijet].pt(), btag_sf, "CSVM","CSVM/b_eff");
+                    BTagWeights *= myBtagUtils.getNewBTagWeight(isCSVtagged, corrJets[ijet].pt(), btag_sf, "CSVM","CSVM/b_eff");
                 } else if(abs(corrJets[ijet].flavid)==4) {
                     //BTagWeights *= myBtagUtils.getBTagWeight(isCSVtagged,corrJets[ijet].pt(),corrJets[ijet].eta(),abs(corrJets[ijet].flavid),"CSVL","CSVL/c_eff").first;
                     double btag_sf = btag_reader.eval( BTagEntry::FLAV_C, corrJets[ijet].eta(), (corrJets[ijet].pt()<670. ? corrJets[ijet].pt() : 670.) );
-		     BTagWeights *= myBtagUtils.getNewBTagWeight(isCSVtagged, corrJets[ijet].pt(), btag_sf, "CSVM","CSVM/c_eff");
+                    BTagWeights *= myBtagUtils.getNewBTagWeight(isCSVtagged, corrJets[ijet].pt(), btag_sf, "CSVM","CSVM/c_eff");
                 } else {
                     //BTagWeights *= myBtagUtils.getBTagWeight(isCSVtagged,corrJets[ijet].pt(),corrJets[ijet].eta(),abs(corrJets[ijet].flavid),"CSVL","CSVL/udsg_eff").first;
                     //no SF available yet for light flavor jet (CSVv2.csv)
@@ -1157,6 +1255,13 @@ int main(int argc, char* argv[])
                         mon.fillHisto("axialpfmet_presel",    tags,  axialmet,  weight);
 
 
+                        //forDY ctrl
+                        if(passResponseCut) {
+                            mon.fillHisto("pfmet_DYctrlN_3", tags, metP4.pt(), weight);
+                            mon.fillHisto("balancedif_DYctrlN_3",tags, balanceDif, weight);
+                            mon.fillHisto("dphiZMET_DYctrlN_3",tags, dphiZMET, weight);
+                        }
+
                         if(passDphiZMETcut && passResponseCut) {
                             mon.fillHisto("eventflow",  tags, 5, weight);
 
@@ -1205,21 +1310,71 @@ int main(int argc, char* argv[])
         //Fill histogram for posterior optimization, or for control regions
         for(size_t ivar=0; ivar<nvarsToInclude; ivar++) {
             float iweight = weight;                                               //nominal
+
+            //pileup
             if(varNames[ivar]=="_puup")        iweight *=TotalWeight_plus;        //pu up
             if(varNames[ivar]=="_pudown")      iweight *=TotalWeight_minus;       //pu down
 
-            if(isSignal && (varNames[ivar]=="_pdfup" || varNames[ivar]=="_pdfdown")) {
-                if(mPDFInfo) {
-                    float PDFWeight_plus(1.0), PDFWeight_down(1.0);
-                    std::vector<float> wgts=mPDFInfo->getWeights(iev);
-                    for(size_t ipw=0; ipw<wgts.size(); ipw++) {
-                        PDFWeight_plus = TMath::Max(PDFWeight_plus,wgts[ipw]);
-                        PDFWeight_down = TMath::Min(PDFWeight_down,wgts[ipw]);
+            //PDF
+            if( (isSignal) && (varNames[ivar]=="_pdfup" || varNames[ivar]=="_pdfdown")) {
+                printf("Loop on PDF sets and variations\n");
+                float PDFWeight_plus(1.0), PDFWeight_down(1.0);
+                for(size_t ipdf=0; ipdf<nPdfSets; ipdf++) {
+                    for(int i=0; i <(nPdfVars[ipdf]+1); ++i) {
+                        LHAPDF::usePDFMember(ipdf+1,i);
+                        char nameBuf[256];
+                        sprintf(nameBuf,"%s_var%d", pdfSets[ipdf].c_str(), i);
+                        for(unsigned int v=0; v<pdfvals.size(); v++) {
+                            double xpdf1 = LHAPDF::xfx(ipdf+1, pdfvals[v].x1, pdfvals[v].qscale, pdfvals[v].id1)/pdfvals[v].x1;
+                            double xpdf2 = LHAPDF::xfx(ipdf+1, pdfvals[v].x2, pdfvals[v].qscale, pdfvals[v].id2)/pdfvals[v].x2;
+                            float pdfWgt = xpdf1 * xpdf2;
+                            PDFWeight_plus = TMath::Max(PDFWeight_plus,pdfWgt);
+                            PDFWeight_down = TMath::Min(PDFWeight_down,pdfWgt);
+                        }
                     }
-                    if(varNames[ivar]=="_pdfup")    iweight *= PDFWeight_plus;
-                    if(varNames[ivar]=="_pdfdown")  iweight *= PDFWeight_down;
                 }
+
+                if(varNames[ivar]=="_pdfup")    iweight *= PDFWeight_plus;
+                else if(varNames[ivar]=="_pdfdown")  iweight *= PDFWeight_down;
+                /*
+                        if(mPDFInfo) {
+                            float PDFWeight_plus(1.0), PDFWeight_down(1.0);
+                            std::vector<float> wgts=mPDFInfo->getWeights(iev);
+                            for(size_t ipw=0; ipw<wgts.size(); ipw++) {
+                                PDFWeight_plus = TMath::Max(PDFWeight_plus,wgts[ipw]);
+                                PDFWeight_down = TMath::Min(PDFWeight_down,wgts[ipw]);
+                            }
+                            if(varNames[ivar]=="_pdfup")    iweight *= PDFWeight_plus;
+                            else if(varNames[ivar]=="_pdfdown")  iweight *= PDFWeight_down;
+                        }
+                */
             }
+
+
+            //QCDscale
+            if( (isSignal || isMCBkg_runPDF) && (varNames[ivar]=="_qcdscaleup" || varNames[ivar]=="_qcdscaledown")) {
+                float QCDscaleWeight_plus(1.0), QCDscaleWeight_down(1.0);
+                std::vector<float> QCDscaleWgts;
+                QCDscaleWgts.clear();
+                QCDscaleWgts.push_back(ev.weight_QCDscale_muR1_muF2);
+                QCDscaleWgts.push_back(ev.weight_QCDscale_muR1_muF0p5);
+                QCDscaleWgts.push_back(ev.weight_QCDscale_muR2_muF1);
+                QCDscaleWgts.push_back(ev.weight_QCDscale_muR2_muF2);
+                QCDscaleWgts.push_back(ev.weight_QCDscale_muR0p5_muF1);
+                QCDscaleWgts.push_back(ev.weight_QCDscale_muR0p5_muF0p5);
+                for(size_t ipw=0; ipw<QCDscaleWgts.size(); ipw++) {
+                    if(ipw==0) {
+                        QCDscaleWeight_plus = QCDscaleWgts[0];
+                        QCDscaleWeight_down = QCDscaleWgts[0];
+                    } else {
+                        QCDscaleWeight_plus = TMath::Max(QCDscaleWeight_plus,QCDscaleWgts[ipw]);
+                        QCDscaleWeight_down = TMath::Min(QCDscaleWeight_down,QCDscaleWgts[ipw]);
+                    }
+                }
+                if(varNames[ivar]=="_qcdscaleup")    iweight *= QCDscaleWeight_plus;
+                else if(varNames[ivar]=="_qcdscaledown")  iweight *= QCDscaleWeight_down;
+            }
+
 
             //##############################################
             // recompute MET/MT if JES/JER was varied
@@ -1272,16 +1427,16 @@ int main(int argc, char* argv[])
                         //valerr = myBtagUtils.getBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/b_eff").second;
                         double BTagSF_Up   = btag_reader_up.eval( BTagEntry::FLAV_B, vJets[ijet].eta(), (vJets[ijet].pt()<670. ? vJets[ijet].pt() : 670.) );
                         double BTagSF_Down = btag_reader_down.eval( BTagEntry::FLAV_B, vJets[ijet].eta(), (vJets[ijet].pt()<670. ? vJets[ijet].pt() : 670.) );
-			BTagWeights_Up   *= myBtagUtils.getNewBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),BTagSF_Up, "CSVM","CSVM/b_eff");
-			BTagWeights_Down *= myBtagUtils.getNewBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),BTagSF_Down,"CSVM","CSVM/b_eff");
+                        BTagWeights_Up   *= myBtagUtils.getNewBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),BTagSF_Up, "CSVM","CSVM/b_eff");
+                        BTagWeights_Down *= myBtagUtils.getNewBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),BTagSF_Down,"CSVM","CSVM/b_eff");
 
                     } else if(abs(vJets[ijet].flavid)==4) {
                         //val = myBtagUtils.getBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/c_eff").first;
                         //valerr = myBtagUtils.getBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/c_eff").second;
                         double BTagSF_Up   = btag_reader_up.eval( BTagEntry::FLAV_C, vJets[ijet].eta(), (vJets[ijet].pt()<670. ? vJets[ijet].pt() : 670.) );
                         double BTagSF_Down = btag_reader_down.eval( BTagEntry::FLAV_C, vJets[ijet].eta(), (vJets[ijet].pt()<670. ? vJets[ijet].pt() : 670.) );
-			BTagWeights_Up 	   *= myBtagUtils.getNewBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),BTagSF_Up,"CSVM","CSVM/c_eff");
-			BTagWeights_Down   *= myBtagUtils.getNewBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),BTagSF_Down,"CSVM","CSVM/c_eff");
+                        BTagWeights_Up 	   *= myBtagUtils.getNewBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),BTagSF_Up,"CSVM","CSVM/c_eff");
+                        BTagWeights_Down   *= myBtagUtils.getNewBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),BTagSF_Down,"CSVM","CSVM/c_eff");
 
                     } else {
                         //val = myBtagUtils.getBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/udsg_eff").first;
@@ -1320,6 +1475,11 @@ int main(int argc, char* argv[])
 
                 bool passOptimSelection(passBaseSelection && passLocalMETcut && passLocalBalanceCut && passLocalDphiZMETcut);
 
+
+                //for extrapolation of DY process based on MET
+                if(ivar==0 && passBaseSelection && /*passLocalMETcut &&*/ passLocalBalanceCut && passLocalDphiZMETcut ) {
+                    mon.fillHisto("pfmet_minus_shapes",tags,index, vMET.pt(), iweight);
+                }
 
 
                 // fill shapes for limit setting

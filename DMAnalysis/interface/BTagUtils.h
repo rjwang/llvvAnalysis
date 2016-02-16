@@ -39,6 +39,7 @@ public:
     double getBTagEff(double pt, TString key);
     std::pair<double,double> getBTagSF(double pt, double eta, int flavorJet, TString btag);
     std::pair<double,double> getBTagWeight(bool istag, double pt, double eta, int flavorJet, TString btag, TString key);
+    double getNewBTagWeight(bool istag, double pt, double SF, TString btag, TString key);
 
     int getptbin_for_btag(float pt);
     int get_eta_bin_jet(float eta);
