@@ -210,49 +210,48 @@ int main(int argc, char* argv[])
     cout << "Loading jet energy scale uncertainties: " << uncFile << endl;
     JetCorrectionUncertainty jecUnc(uncFile.Data());
 
-
-    //INITIALIZE THE PDF TOOL
-    string pdfSets[]   = {"NNPDF30_lo_as_0130.LHgrid"}; //cteq66.LHgrid","NNPDF30_lo_as_0130.LHgrid","MSTW2008lo68cl.LHgrid"};
-    std::vector<Int_t>   nPdfVars;
-    const size_t nPdfSets=sizeof(pdfSets)/sizeof(string);
-    //const size_t nPdfSets=1;
-    for(size_t ipdf=0; ipdf<nPdfSets; ipdf++) {
-        LHAPDF::initPDFSet(ipdf+1, pdfSets[ipdf]);
-        nPdfVars.push_back( LHAPDF::numberPDF(ipdf+1) );
-    }
-
-
     /*
-        //pdf info
-        PDFInfo *mPDFInfo=0;
-        if(isSignal || isMCBkg_runPDF) {
-            TString pdfUrl = runProcess.getParameter<std::string>("pdfInput");
-            std::string Url = runProcess.getParameter<std::string>("input");
-            if(doWIMPreweighting) {
-                if(Url.find("TeV_DM_V_Mx") != string::npos) 	Url = runProcess.getParameter<std::string>("WIMPreweighting_DM_V_Mx");
-                else if(Url.find("TeV_DM_A_Mx") != string::npos) 	Url = runProcess.getParameter<std::string>("WIMPreweighting_DM_A_Mx");
-            }
-
-            std::size_t found = Url.find_last_of("/\\");
-            pdfUrl += '/';
-            pdfUrl += Url.substr(found+1);
+        //INITIALIZE THE PDF TOOL
+        string pdfSets[]   = {"NNPDF30_lo_as_0130.LHgrid"}; //cteq66.LHgrid","NNPDF30_lo_as_0130.LHgrid","MSTW2008lo68cl.LHgrid"};
+        std::vector<Int_t>   nPdfVars;
+        const size_t nPdfSets=sizeof(pdfSets)/sizeof(string);
+        //const size_t nPdfSets=1;
+        for(size_t ipdf=0; ipdf<nPdfSets; ipdf++) {
+            LHAPDF::initPDFSet(ipdf+1, pdfSets[ipdf]);
+            nPdfVars.push_back( LHAPDF::numberPDF(ipdf+1) );
+        }
+    */
 
 
-            if(pdfUrl.Contains("K1_0.1_K2_1")) pdfUrl.ReplaceAll("K1_0.1_K2_1","K1_1_K2_1");
-            if(pdfUrl.Contains("K1_0.2_K2_1")) pdfUrl.ReplaceAll("K1_0.2_K2_1","K1_1_K2_1");
-            if(pdfUrl.Contains("K1_0.3_K2_1")) pdfUrl.ReplaceAll("K1_0.3_K2_1","K1_1_K2_1");
-            if(pdfUrl.Contains("K1_0.5_K2_1")) pdfUrl.ReplaceAll("K1_0.5_K2_1","K1_1_K2_1");
-            if(pdfUrl.Contains("K1_2_K2_1"))   pdfUrl.ReplaceAll("K1_2_K2_1","K1_1_K2_1");
-            if(pdfUrl.Contains("K1_3_K2_1"))   pdfUrl.ReplaceAll("K1_3_K2_1","K1_1_K2_1");
-            if(pdfUrl.Contains("K1_5_K2_1"))   pdfUrl.ReplaceAll("K1_5_K2_1","K1_1_K2_1");
-            if(pdfUrl.Contains("K1_10_K2_1"))  pdfUrl.ReplaceAll("K1_10_K2_1","K1_1_K2_1");
-            pdfUrl.ReplaceAll(".root","_pdf.root");
-
-            mPDFInfo=new PDFInfo(pdfUrl,"cteq66.LHgrid");
-            cout << "Readout " << mPDFInfo->numberPDFs() << " pdf variations: " << pdfUrl << endl;
+    //pdf info
+    PDFInfo *mPDFInfo=0;
+    if(isSignal || isMCBkg_runPDF) {
+        TString pdfUrl = runProcess.getParameter<std::string>("pdfInput");
+        std::string Url = runProcess.getParameter<std::string>("input");
+        if(doWIMPreweighting) {
+            if(Url.find("TeV_DM_V_Mx") != string::npos) 	Url = runProcess.getParameter<std::string>("WIMPreweighting_DM_V_Mx");
+            else if(Url.find("TeV_DM_A_Mx") != string::npos) 	Url = runProcess.getParameter<std::string>("WIMPreweighting_DM_A_Mx");
         }
 
-    */
+        std::size_t found = Url.find_last_of("/\\");
+        pdfUrl += '/';
+        pdfUrl += Url.substr(found+1);
+
+
+        if(pdfUrl.Contains("K1_0.1_K2_1")) pdfUrl.ReplaceAll("K1_0.1_K2_1","K1_1_K2_1");
+        if(pdfUrl.Contains("K1_0.2_K2_1")) pdfUrl.ReplaceAll("K1_0.2_K2_1","K1_1_K2_1");
+        if(pdfUrl.Contains("K1_0.3_K2_1")) pdfUrl.ReplaceAll("K1_0.3_K2_1","K1_1_K2_1");
+        if(pdfUrl.Contains("K1_0.5_K2_1")) pdfUrl.ReplaceAll("K1_0.5_K2_1","K1_1_K2_1");
+        if(pdfUrl.Contains("K1_2_K2_1"))   pdfUrl.ReplaceAll("K1_2_K2_1","K1_1_K2_1");
+        if(pdfUrl.Contains("K1_3_K2_1"))   pdfUrl.ReplaceAll("K1_3_K2_1","K1_1_K2_1");
+        if(pdfUrl.Contains("K1_5_K2_1"))   pdfUrl.ReplaceAll("K1_5_K2_1","K1_1_K2_1");
+        if(pdfUrl.Contains("K1_10_K2_1"))  pdfUrl.ReplaceAll("K1_10_K2_1","K1_1_K2_1");
+        pdfUrl.ReplaceAll(".root","_pdf.root");
+
+        mPDFInfo=new PDFInfo(pdfUrl,"cteq66.LHgrid");
+        cout << "Readout " << mPDFInfo->numberPDFs() << " pdf variations: " << pdfUrl << endl;
+    }
+
 
     //##################################################################################
     //##########################    INITIATING HISTOGRAMS     ##########################
@@ -557,32 +556,32 @@ int main(int argc, char* argv[])
     TH1F* weight_pileup_Down = (TH1F *) PU_Down_File->Get("pileup");
 
 
-
-    //loop over events
-    std::vector<stPDFval> pdfvals;
-    //loop on all the events
-    if(isSignal) {
-        printf("Progressing Bar     :0%%       20%%       40%%       60%%       80%%       100%%\n");
-        printf("Scanning the ntuple :");
-        int treeStep = (evEnd-evStart)/50;
-        if(treeStep==0)treeStep=1;
-        for( int iev=evStart; iev<evEnd; iev++) {
-            if((iev-evStart)%treeStep==0) {
-                printf(".");
-                fflush(stdout);
+    /*
+        //loop over events
+        std::vector<stPDFval> pdfvals;
+        //loop on all the events
+        if(isSignal) {
+            printf("Progressing Bar     :0%%       20%%       40%%       60%%       80%%       100%%\n");
+            printf("Scanning the ntuple :");
+            int treeStep = (evEnd-evStart)/50;
+            if(treeStep==0)treeStep=1;
+            for( int iev=evStart; iev<evEnd; iev++) {
+                if((iev-evStart)%treeStep==0) {
+                    printf(".");
+                    fflush(stdout);
+                }
+                summaryHandler_.getEntry(iev);
+                DataEvtSummary_t &ev = summaryHandler_.getEvent();
+                stPDFval valForPDF;
+                valForPDF.qscale = ev.qscale;
+                valForPDF.x1     = ev.x1;
+                valForPDF.x2     = ev.x2;
+                valForPDF.id1     = ev.id1;
+                valForPDF.id2     = ev.id2;
+                pdfvals.push_back(valForPDF);
             }
-            summaryHandler_.getEntry(iev);
-            DataEvtSummary_t &ev = summaryHandler_.getEvent();
-            stPDFval valForPDF;
-            valForPDF.qscale = ev.qscale;
-            valForPDF.x1     = ev.x1;
-            valForPDF.x2     = ev.x2;
-            valForPDF.id1     = ev.id1;
-            valForPDF.id2     = ev.id2;
-            pdfvals.push_back(valForPDF);
         }
-    }
-
+    */
 
 
     // muon trigger efficiency SF
@@ -1317,37 +1316,39 @@ int main(int argc, char* argv[])
 
             //PDF
             if( (isSignal) && (varNames[ivar]=="_pdfup" || varNames[ivar]=="_pdfdown")) {
-                printf("Loop on PDF sets and variations\n");
-                float PDFWeight_plus(1.0), PDFWeight_down(1.0);
-                for(size_t ipdf=0; ipdf<nPdfSets; ipdf++) {
-                    for(int i=0; i <(nPdfVars[ipdf]+1); ++i) {
-                        LHAPDF::usePDFMember(ipdf+1,i);
-                        char nameBuf[256];
-                        sprintf(nameBuf,"%s_var%d", pdfSets[ipdf].c_str(), i);
-                        for(unsigned int v=0; v<pdfvals.size(); v++) {
-                            double xpdf1 = LHAPDF::xfx(ipdf+1, pdfvals[v].x1, pdfvals[v].qscale, pdfvals[v].id1)/pdfvals[v].x1;
-                            double xpdf2 = LHAPDF::xfx(ipdf+1, pdfvals[v].x2, pdfvals[v].qscale, pdfvals[v].id2)/pdfvals[v].x2;
-                            float pdfWgt = xpdf1 * xpdf2;
-                            PDFWeight_plus = TMath::Max(PDFWeight_plus,pdfWgt);
-                            PDFWeight_down = TMath::Min(PDFWeight_down,pdfWgt);
+                /*
+                        printf("Loop on PDF sets and variations\n");
+                        float PDFWeight_plus(1.0), PDFWeight_down(1.0);
+                        for(size_t ipdf=0; ipdf<nPdfSets; ipdf++) {
+                            for(int i=0; i <(nPdfVars[ipdf]+1); ++i) {
+                                LHAPDF::usePDFMember(ipdf+1,i);
+                                char nameBuf[256];
+                                sprintf(nameBuf,"%s_var%d", pdfSets[ipdf].c_str(), i);
+                                for(unsigned int v=0; v<pdfvals.size(); v++) {
+                                    double xpdf1 = LHAPDF::xfx(ipdf+1, pdfvals[v].x1, pdfvals[v].qscale, pdfvals[v].id1)/pdfvals[v].x1;
+                                    double xpdf2 = LHAPDF::xfx(ipdf+1, pdfvals[v].x2, pdfvals[v].qscale, pdfvals[v].id2)/pdfvals[v].x2;
+                                    float pdfWgt = xpdf1 * xpdf2;
+                                    PDFWeight_plus = TMath::Max(PDFWeight_plus,pdfWgt);
+                                    PDFWeight_down = TMath::Min(PDFWeight_down,pdfWgt);
+                                }
+                            }
                         }
+
+                        if(varNames[ivar]=="_pdfup")    iweight *= PDFWeight_plus;
+                        else if(varNames[ivar]=="_pdfdown")  iweight *= PDFWeight_down;
+                */
+
+                if(mPDFInfo) {
+                    float PDFWeight_plus(1.0), PDFWeight_down(1.0);
+                    std::vector<float> wgts=mPDFInfo->getWeights(iev);
+                    for(size_t ipw=0; ipw<wgts.size(); ipw++) {
+                        PDFWeight_plus = TMath::Max(PDFWeight_plus,wgts[ipw]);
+                        PDFWeight_down = TMath::Min(PDFWeight_down,wgts[ipw]);
                     }
+                    if(varNames[ivar]=="_pdfup")    iweight *= PDFWeight_plus;
+                    else if(varNames[ivar]=="_pdfdown")  iweight *= PDFWeight_down;
                 }
 
-                if(varNames[ivar]=="_pdfup")    iweight *= PDFWeight_plus;
-                else if(varNames[ivar]=="_pdfdown")  iweight *= PDFWeight_down;
-                /*
-                        if(mPDFInfo) {
-                            float PDFWeight_plus(1.0), PDFWeight_down(1.0);
-                            std::vector<float> wgts=mPDFInfo->getWeights(iev);
-                            for(size_t ipw=0; ipw<wgts.size(); ipw++) {
-                                PDFWeight_plus = TMath::Max(PDFWeight_plus,wgts[ipw]);
-                                PDFWeight_down = TMath::Min(PDFWeight_down,wgts[ipw]);
-                            }
-                            if(varNames[ivar]=="_pdfup")    iweight *= PDFWeight_plus;
-                            else if(varNames[ivar]=="_pdfdown")  iweight *= PDFWeight_down;
-                        }
-                */
             }
 
 
