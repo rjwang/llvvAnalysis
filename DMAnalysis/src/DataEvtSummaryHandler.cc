@@ -43,8 +43,6 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("ngenOOTpu",  	&evSummary_.ngenOOTpu,      "ngenOOTpu/I");
     t_->Branch("ngenOOTpum1",  	&evSummary_.ngenOOTpum1,    "ngenOOTpum1/I");
     t_->Branch("ngenTruepu",  	&evSummary_.ngenTruepu,     "ngenTruepu/I");
-    t_->Branch("puweight",     	&evSummary_.puWeight,       "puweight/F");
-    t_->Branch("hptWeights", 	evSummary_.hptWeights,      "hptWeights[5]/F");
     t_->Branch("pthat",      	&evSummary_.pthat,          "pthat/F");
     t_->Branch("genWeight",  	&evSummary_.genWeight,      "genWeight/F");
     t_->Branch("qscale",     	&evSummary_.qscale,         "qscale/F");
@@ -323,8 +321,6 @@ bool DataEvtSummaryHandler::attachToTree(TTree *t)
     t_->SetBranchAddress("ngenOOTpu",       &evSummary_.ngenOOTpu);
     t_->SetBranchAddress("ngenOOTpum1",  	&evSummary_.ngenOOTpum1);
     t_->SetBranchAddress("ngenTruepu",  	&evSummary_.ngenTruepu);
-    t_->SetBranchAddress("puweight",     	&evSummary_.puWeight);
-    t_->SetBranchAddress("hptWeights",      evSummary_.hptWeights);
     t_->SetBranchAddress("pthat",           &evSummary_.pthat);
     t_->SetBranchAddress("genWeight",       &evSummary_.genWeight);
     t_->SetBranchAddress("qscale",          &evSummary_.qscale);
@@ -574,6 +570,30 @@ void DataEvtSummaryHandler::resetStruct()
     evSummary_.jet=0;
     //evSummary_.pjet=0;
     //evSummary_.fjet=0;
+
+    evSummary_.ngenITpu=0;
+    evSummary_.ngenOOTpu=0;
+    evSummary_.ngenOOTpum1=0;
+    evSummary_.ngenTruepu=0;
+    evSummary_.genWeight=0;
+    evSummary_.qscale=0;
+    evSummary_.x1=0;
+    evSummary_.x2=0;
+    evSummary_.id1=0;
+    evSummary_.id2=0;
+    evSummary_.pthat=0;
+
+    evSummary_.weight_QCDscale_muR1_muF1=0;
+    evSummary_.weight_QCDscale_muR1_muF2=0;
+    evSummary_.weight_QCDscale_muR1_muF0p5=0;
+    evSummary_.weight_QCDscale_muR2_muF1=0;
+    evSummary_.weight_QCDscale_muR2_muF2=0;
+    evSummary_.weight_QCDscale_muR2_muF0p5=0;
+    evSummary_.weight_QCDscale_muR0p5_muF1=0;
+    evSummary_.weight_QCDscale_muR0p5_muF2=0;
+    evSummary_.weight_QCDscale_muR0p5_muF0p5=0;
+
+
 }
 
 //

@@ -25,3 +25,10 @@ Prepare:
 	git fetch origin
 	git checkout v6.0.0
 	scramv1 b vclean; scramv1 b # always make a clean build, as scram doesn't always see updates to src/LinkDef.h
+
+	## for CMSSW_7_6_X
+	setenv SCRAM_ARCH slc6_amd64_gcc493
+	scramv1 project CMSSW CMSSW_7_6_3
+	cd CMSSW_7_6_3/src
+	cmsenv
+	git clone git@github.com:rjwang/llvvAnalysis.git llvvAnalysis/DMAnalysis

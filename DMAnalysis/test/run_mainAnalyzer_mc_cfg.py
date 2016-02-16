@@ -19,7 +19,7 @@ process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 
 #------ Declare the correct global tag ------#
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
-process.GlobalTag.globaltag = '74X_mcRun2_asymptotic_v2'
+process.GlobalTag.globaltag = '76X_mcRun2_asymptotic_v12'
 
 
 #

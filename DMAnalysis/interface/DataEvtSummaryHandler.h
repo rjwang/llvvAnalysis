@@ -38,7 +38,6 @@ struct DataEvtSummary_t {
 
     //generator info
     Int_t ngenITpu,ngenOOTpu,ngenOOTpum1, ngenTruepu;
-    Float_t puWeight, hptWeights[5];
     Float_t pthat,genWeight, qscale, x1,x2;
     Int_t id1,id2;
     Float_t weight_QCDscale_muR1_muF1;
