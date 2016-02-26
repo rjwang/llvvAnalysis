@@ -153,9 +153,7 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
 
 void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bin, TString& ch, std::vector<TString>& systs, std::vector<TH1*>& hshapes);
 DataCardInputs convertHistosForLimits(Int_t mass,TString histo="finalmt",TString url="plotter.root",TString Json="");
-DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo="finalmt",TString url="plotter.root",TString Json="");
 std::vector<TString> buildDataCard(Int_t mass, TString histo="finalmt", TString url="plotter.root",TString Json="");
-std::vector<TString> buildDataCard(TString atgcpar,Int_t mass, TString histo="finalmt", TString url="plotter.root",TString Json="");
 void doBackgroundSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t> &allShapes, TString mainHisto, TString sideBandHisto, TString url, JSONWrapper::Object &Root, bool isMCclosureTest);
 void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t> &allShapes, TString mainHisto,bool isMCclosureTest);
 void doWjetsBackground(std::vector<TString>& selCh,map<TString, Shape_t> &allShapes, TString mainHisto);
@@ -202,7 +200,6 @@ int indexcut   = -1, indexcutL=-1, indexcutR=-1;
 int mass=-1, massL=-1, massR=-1;
 int MV=-1, MA=-1;
 float K1=-1, K2=-1;
-TString atgcpar="", atgcpar2="";
 bool runSystematics = false;
 bool shape = false;
 float sysSherpa=1.;
@@ -453,10 +450,6 @@ int main(int argc, char* argv[])
             sscanf(argv[i+1],"%i",&mass );
             i++;
             printf("mass = %i\n", mass);
-        } else if(arg.find("--atgc")     !=string::npos && i+1<argc)  {
-            atgcpar = argv[i+1];
-            i++;
-            printf("aTGC parameter: %s\n", atgcpar.Data());
         } else if(arg.find("--bins")     !=string::npos && i+1<argc)  {
             char* pch = strtok(argv[i+1],",");
             printf("bins are : ");
@@ -513,20 +506,10 @@ int main(int argc, char* argv[])
         //Channels.push_back("ll"); //RENJIE, add all
     }
 
-    atgcpar2 = atgcpar;
-    atgcpar2.ReplaceAll("-", "M");
-    atgcpar2.ReplaceAll("+", "P");
-    atgcpar2.ReplaceAll("=0.", "=P0.");
-    atgcpar2.ReplaceAll(".", "p");
-    atgcpar2.ReplaceAll("=", "_");
-
-    //if(systpostfix.Contains('8')) {NonResonnantSyst = 0.25; GammaJetSyst = 0.40;}
-    if(atgcpar.Length()>0) GammaJetSyst = 0.0;
-
     initNormalizationSysts();
 
     //build the datacard for this mass point
-    std::vector<TString> dcUrls = buildDataCard(atgcpar,mass,histo,inFileUrl, jsonFile);
+    std::vector<TString> dcUrls = buildDataCard(mass,histo,inFileUrl, jsonFile);
 
 //    fOut_binbybinNuisance->cd();
 //    nuisance_h->Write("Bin by Bin Nuisance");
@@ -827,8 +810,6 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
 
     TString massStr("");
     if(mass>0)massStr += mass;
-    if(atgcpar.Length()>0) massStr = atgcpar;
-    TString massStr2 = atgcpar2;
 
     TString MVStr("");
     if(MV>0)MVStr += MV;
@@ -983,9 +964,6 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
                 else if(mass>0 && procTitle.Contains("qqH") && procTitle.Contains("WW"))procTitle = "qqH("+massStr+")WW";
                 else if(mass>0 && procTitle.Contains("ZH")                             )procTitle = "ZH("+massStr+")2lMET";
 
-                //if(atgcpar.Length()>0 && !procTitle.Contains(massStr)) continue;
-                if(atgcpar.Length()>0 && !procTitle.EndsWith(massStr)) continue;
-                if(atgcpar.Length()>0) procTitle = "ZZ("+massStr+")";
 
                 val = h->IntegralAndError(1,h->GetXaxis()->GetNbins(),valerr);
 
@@ -1174,16 +1152,10 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
 
 std::vector<TString>  buildDataCard(Int_t mass, TString histo, TString url, TString Json)
 {
-    return buildDataCard("", mass, histo, url, Json);
-}
-
-
-std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, TString url, TString Json)
-{
     std::vector<TString> dcUrls;
 
     //get the datacard inputs
-    DataCardInputs dci = convertHistosForLimits(atgcpar,mass,histo,url,Json);
+    DataCardInputs dci = convertHistosForLimits(mass,histo,url,Json);
 
     TString eecard = "";
     TString mumucard = "";
@@ -1377,11 +1349,6 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
 //
 DataCardInputs convertHistosForLimits(Int_t mass,TString histo,TString url,TString Json)
 {
-    return convertHistosForLimits("",mass,histo,url,Json);
-}
-
-DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,TString url,TString Json)
-{
     DataCardInputs dci;
 
     //init the json wrapper
@@ -1390,10 +1357,6 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
     //init globalVariables
     TString massStr("");
     if(mass>0)massStr += mass;
-    if(atgcpar.Length()>0) massStr = atgcpar;
-    TString massStr2 = atgcpar2;
-    if(massStr2.CompareTo("")==0) massStr2 = massStr;
-    //std::set<TString> allCh,allProcs;
     std::vector<TString> allCh,allProcs;
 
     TString MVStr("");
@@ -1522,7 +1485,7 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
 
 
     //prepare the output
-    dci.shapesFile="zllwimps_"+massStr2+systpostfix+".root";
+    dci.shapesFile="zllwimps_"+systpostfix+".root";
     TFile *fout=TFile::Open(dci.shapesFile,"recreate");
 
     //loop on channel/proc/systematics
@@ -1588,9 +1551,6 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
                 if(mass>0 && proc.Contains("ZH")                        )proc = "ZH"+massStr+"2lMET";
 
                 cout << "############## Signal: " << proc << "##############" << endl;
-                if(atgcpar.Length()>0 && !proc.EndsWith(massStr)) continue;
-                if(atgcpar.Length()>0) proc = "ZZ2l2nu_"+massStr2;
-
                 std::vector<std::pair<TString, TH1*> > vars = shapeSt.signalVars[h->GetTitle()];
                 std::vector<TString> systs;
                 std::vector<TH1*>    hshapes;
