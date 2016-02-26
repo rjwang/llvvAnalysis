@@ -235,8 +235,6 @@ void initNormalizationSysts()
     normSysts["CMS_zllwimps_mumueq1jets_leptonVeto"] = 0.013;
     normSysts["CMS_zllwimps_eeeq1jets_leptonVeto"] = 0.013;
 
-    //
-    normSysts["CMS_zllwimps_pdf"] = 0.;
 
     //unparticle
     normSysts["QCDscale_UnPart1p01"]=1.027561608;
@@ -540,15 +538,12 @@ Shape_t getShapeFromFile(TFile* inF, TString ch, TString shapeName, int cutBin, 
 
         bool isSignal(Process[i].isTag("issignal") && Process[i]["issignal"].toBool());
         if(Process[i]["spimpose"].toBool() && (proc.Contains("ggH") || proc.Contains("qqH")))isSignal=true;
-        bool isInSignal(Process[i].isTag("isinsignal") && Process[i]["isinsignal"].toBool());
         int color(1);
         if(Process[i].isTag("color" ) ) color  = (int)Process[i]["color" ].toInt();
         int lcolor(color);
         if(Process[i].isTag("lcolor") ) lcolor = (int)Process[i]["lcolor"].toInt();
         int mcolor(color);
         if(Process[i].isTag("mcolor") ) mcolor = (int)Process[i]["mcolor"].toInt();
-        //int fcolor(color);
-        //if(Process[i].isTag("fcolor") ) fcolor = (int)Process[i]["fcolor"].toInt();
         int lwidth(1);
         if(Process[i].isTag("lwidth") ) lwidth = (int)Process[i]["lwidth"].toInt();
         int lstyle(1);
@@ -571,13 +566,8 @@ Shape_t getShapeFromFile(TFile* inF, TString ch, TString shapeName, int cutBin, 
             TString histoName = ch+"_"+shapeName+varName ;
             TH2* hshape2D = (TH2*)pdir->Get(histoName );
             if(!hshape2D) {
-//            if(varName==""){
-                //replace by empty histogram (take inclusive histo to make sure it has same binning)
                 hshape2D = (TH2*)pdir->Get(shapeName+varName);
                 if(hshape2D)hshape2D->Reset();
-//            }else{
-//               continue;
-//            }
             }
 
             if(hshape2D) {
@@ -617,7 +607,6 @@ Shape_t getShapeFromFile(TFile* inF, TString ch, TString shapeName, int cutBin, 
                         hshape->SetBinError(x,0);
                     }
                 }
-                //hshape->Rebin(2);
                 hshape->GetYaxis()->SetTitle("Entries (/25GeV)");
             }
 
@@ -683,16 +672,8 @@ Shape_t getShapeFromFile(TFile* inF, TString ch, TString shapeName, int cutBin, 
                     }
                 }
             } else {
-                if(isInSignal) {
-                    if(varName=="")  BackgroundsInSignal.push_back(proc);
-                    if(varName=="")  shape.bckgInSignal.push_back(hshape);
-                    else             shape.bckgInSignalVars[proc].push_back( std::pair<TString,TH1*>(varName,hshape) );
-                } else {
-                    if(varName=="")  shape.bckg.push_back(hshape);
-                    else             shape.bckgVars[proc].push_back( std::pair<TString,TH1*>(varName,hshape) );
-                }
-
-                //printf("histoName = B %i -- %i  -- %s - %s --> %s\n", i, int(varName==""), proc.Data(), histoName.Data(), hshape->GetTitle());
+                if(varName=="")  shape.bckg.push_back(hshape);
+                else             shape.bckgVars[proc].push_back( std::pair<TString,TH1*>(varName,hshape) );
             }
         }
         //delete syst;
@@ -720,76 +701,6 @@ Shape_t getShapeFromFile(TFile* inF, TString ch, TString shapeName, int cutBin, 
             }
         }
     }
-
-
-    //subtract background that are included to signal sample
-    //if(shape.signal.size()>1 && BackgroundsInSignal.size()>0)printf("YOU ARE TRYING TO SUBTRACT BACKGROUNDS FROM SIGNAL SAMPLE WHILE YOU HAVE MORE THAN ONE SIGNAL GIVEN!  ASSUME THAT FIRST SIGNAL SAMPLE IS THE ONE CONTAINING THE BACKGROUND\n");
-    if(shape.signal.size()>1 && BackgroundsInSignal.size()>0) printf("YOU ARE TRYING TO SUBTRACT BACKGROUNDS FROM SIGNAL SAMPLE WHILE YOU HAVE MORE THAN ONE SIGNAL GIVEN! ASSUME THAT ALL SIGNAL SAMPLES CONTAIN THE BACKGROUND, AND SUBTRACT THEM ALL!\n");
-    //for(size_t i=0;i<BackgroundsInSignal.size()  && shape.signal.size()>0  ;i++){
-    //deal with central value
-    //for(size_t j=0;j<shape.bckg.size();j++){
-    for(size_t j=0; j<shape.bckgInSignal.size(); j++) {
-        //printf("Compare %s and %s\n",shape.bckg[j]->GetTitle(), BackgroundsInSignal[i].Data());
-        //if(BackgroundsInSignal[i]!=shape.bckg[j]->GetTitle())continue;
-        //printf("Subtract %s to %s\n",shape.signal[0]->GetTitle(), BackgroundsInSignal[i].Data());
-        //shape.signal[0]->Add(shape.bckg[j],-1);
-        std::map<TString, std::vector<double> > atgcShiftMap;
-        for(size_t k=0; k<shape.signal.size(); ++k) {
-            printf("Subtract %s to %s\n", shape.signal[k]->GetTitle(), shape.bckgInSignal[j]->GetTitle());
-            shape.signal[k]->Add(shape.bckgInSignal[j],-1);
-            // Get bin values for interpolated points
-            TString atgcCorrIdx = ch+"_"+shape.signal[k]->GetTitle();
-            if(systpostfix.Contains("7"))      atgcCorrIdx.Prepend("7TeV_");
-            else if(systpostfix.Contains("8")) atgcCorrIdx.Prepend("8TeV_");
-            std::vector<double> atgcCorrVect; //, atgcErrVect;
-            //if(extrvalpoints.count(atgcCorrIdx.Data())>0) atgcCorrVect = extrvalpoints[atgcCorrIdx.Data()];
-            //else std::cout << "No ATGC correction found with label " << atgcCorrIdx.Data() << "!" << std::endl;
-            //if(extrerrpoints.count(atgcCorrIdx.Data())>0) atgcErrVect = extrerrpoints[atgcCorrIdx.Data()];
-            if(atgcCorrVect.size()!=((unsigned int)shape.signal[k]->GetNbinsX())) {
-                std::cout << "ATGC correction has different size than signal shape!" << std::endl;
-                std::cout << "           atgcCorrVect.size() = " << atgcCorrVect.size() << "  (" << atgcCorrIdx.Data() << ")" << std::endl;
-                std::cout << "  shape.signal[k]->GetNbinsX() = " << shape.signal[k]->GetNbinsX() << "  (" << shape.signal[k]->GetTitle() << ")" << std::endl;
-                atgcCorrVect.clear(); //atgcErrVect.clear();
-            }
-            std::vector<double> atgcShiftVec(atgcCorrVect.size(), 0.);
-            for(int x=0; x<=shape.signal[k]->GetNbinsX()+1; x++) {
-                if(shape.signal[k]->GetBinContent(x)<0)shape.signal[k]->SetBinContent(x,0.0);
-                if(atgcCorrVect.size()==0) continue;
-                if(x==0 || x==shape.signal[k]->GetNbinsX()+1) continue;
-                if(atgcCorrVect[x-1]<0.) continue;
-                atgcShiftVec[x-1] = atgcCorrVect[x-1] - shape.signal[k]->GetBinContent(x);
-                // before changing, save the difference (the syst plots will be shifted by the same amount)
-
-                shape.signal[k]->SetBinContent(x, atgcCorrVect[x-1]);
-                // replace the content of the bin with the expected value for the extrapolated point
-            }
-            if(atgcShiftVec.size()>0) atgcShiftMap[atgcCorrIdx] = atgcShiftVec;
-        }
-        //}
-
-        //deal with systematics
-        //const std::vector<std::pair<TString, TH1*> >& bckgSysts = shape.bckgVars  [BackgroundsInSignal[i] ];
-        const std::vector<std::pair<TString, TH1*> >& bckgSysts = shape.bckgInSignalVars[shape.bckgInSignal[j]->GetTitle()];
-        for(size_t k=0; k<shape.signal.size(); ++k) {
-            const std::vector<std::pair<TString, TH1*> >& signSysts = shape.signalVars[shape.signal[k]->GetTitle() ];
-            if(bckgSysts.size()!=signSysts.size())printf("Problem the two vectors have different size!\n");
-            TString atgcCorrIdx = ch+"_"+shape.signal[k]->GetTitle();
-            if(systpostfix.Contains("7"))      atgcCorrIdx.Prepend("7TeV_");
-            else if(systpostfix.Contains("8")) atgcCorrIdx.Prepend("8TeV_");
-            for(size_t jsys=0; jsys<bckgSysts.size(); jsys++) {
-                signSysts[jsys].second->Add(bckgSysts[jsys].second, -1);
-                for(int x=0; x<=signSysts[jsys].second->GetNbinsX()+1; x++) {
-                    if(signSysts[jsys].second->GetBinContent(x)<0)signSysts[jsys].second->SetBinContent(x,0.0);
-                    if(atgcShiftMap.count(atgcCorrIdx)==0) continue;
-                    if(x==0 || x==shape.signal[k]->GetNbinsX()+1) continue;
-                    signSysts[jsys].second->SetBinContent( x, signSysts[jsys].second->GetBinContent(x) + atgcShiftMap[atgcCorrIdx][x-1] );
-                    // apply to the syst plots the same shift used for the main distribution
-                }
-            }
-        }
-    }
-
-
 
     //all done
     return shape;
@@ -2010,16 +1921,12 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
             TH1 *temp=(TH1*) hshape->Clone();
             temp->Add(hshapes[0],-1);
             if(temp->Integral()!=0) {
-//                if(shape && !systName.Contains("_pdf")) { //convert pdf shape uncertaint to normalization one
-//                    dci.systs[systName][RateKey_t(proc,ch)]=1.0;
-//                } else {
                 double Unc = 1 + fabs(temp->Integral()/hshapes[0]->Integral());
                 if(dci.systs.find(systName)==dci.systs.end() || dci.systs[systName].find(RateKey_t(proc,ch))==dci.systs[systName].end() ) {
                     dci.systs[systName][RateKey_t(proc,ch)]=Unc;
                 } else {
                     dci.systs[systName][RateKey_t(proc,ch)]=(dci.systs[systName][RateKey_t(proc,ch)] + Unc)/2.0;
                 }
-//                }
             }
 
 
