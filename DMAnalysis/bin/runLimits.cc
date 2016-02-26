@@ -145,9 +145,6 @@ struct DataCardInputs {
 
 void printHelp();
 Shape_t getShapeFromFile(TFile* inF, TString ch, TString shapeName, int cutBin,JSONWrapper::Object &Root,double minCut=0, double maxCut=9999, bool onlyData=false);
-void showShape(std::vector<TString>& selCh ,map<TString, Shape_t>& allShapes, TString mainHisto, TString SaveName);
-void Draw1DHistogram(TH1* mc, THStack *stack, TH1 *mcPlusRelUnc, TGraphErrors *errors, std::vector<TH1 *>& spimpose, TH1 *data, TLegend *legA, bool noLog, TString finstate, TString AnalysisBins);
-void Draw2DHistogram(std::map<TString, TH1*>& mapbkgs, std::vector<TH1 *>& spimpose, TH1 *data, TString finstate, TString AnalysisBins);
 
 void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &allShapes, TString shName, bool isdataBlinded);
 
@@ -821,804 +818,6 @@ Shape_t getShapeFromFile(TFile* inF, TString ch, TString shapeName, int cutBin, 
     return shape;
 }
 
-//
-void showShape(std::vector<TString>& selCh ,map<TString, Shape_t>& allShapes, TString mainHisto, TString SaveName)
-{
-    cout << "########################## showShape ##########################" << endl;
-    std::map<TString, TH1*> CCHistos;
-
-    TCanvas* c1 = new TCanvas("c1","c1",300*AnalysisBins.size(),300*selCh.size());
-    c1->SetTopMargin(0.00);
-    c1->SetRightMargin(0.00);
-    c1->SetBottomMargin(0.00);
-    c1->SetLeftMargin(0.00);
-    TPad* t1 = new TPad("t1","t1", 0.03, 0.03, 1.0, 1.00);
-    t1->Draw();
-    t1->cd();
-    t1->Divide(AnalysisBins.size(), selCh.size(), 0, 0);
-
-    t1->cd(selCh.size()*AnalysisBins.size());
-    TLegend* legA  = new TLegend(0.6,0.5,0.99,0.85, "NDC");
-    legA->SetNColumns(1); //RJ
-    t1->cd(0);
-
-    bool haserrorsleg(false);
-
-    for(size_t s=0; s<selCh.size(); s++) {
-        for(size_t b=0; b<AnalysisBins.size(); b++) {
-            TVirtualPad* pad = t1->cd(1+s*AnalysisBins.size()+b);
-            pad->SetTopMargin(0.06);
-            pad->SetRightMargin(0.03);
-            pad->SetBottomMargin(0.07);
-            pad->SetLeftMargin(0.06);
-
-            TH1* allbkg=NULL;
-            std::map<TString, TH1*> mapbkg;
-            std::map<TString, TH1*> mapsig;
-            TH1* alldata=NULL;
-
-            Shape_t& shape = allShapes.find(selCh[s]+AnalysisBins[b]+mainHisto)->second;
-            cout << " Limit setting shapes: " << selCh[s]+AnalysisBins[b]+"_"+mainHisto << endl;
-
-            if(!allbkg) {
-                allbkg=(TH1*)shape.totalBckg->Clone("mc");
-            } else {
-                allbkg->Add(shape.totalBckg);
-            }
-            if(!alldata) {
-                alldata=(TH1*)shape.data->Clone("data");
-            } else {
-                alldata->Add(shape.data);
-            }
-
-            for(size_t i=0; i<shape.bckg.size(); i++) {
-                if(shape.bckg[i]->Integral()<=1E-6) continue;
-                cout << " Backgrounds: " << shape.bckg[i]->GetTitle() << endl;
-                if(mapbkg.find(shape.bckg[i]->GetTitle())!=mapbkg.end()) {
-                    mapbkg[shape.bckg[i]->GetTitle()]->Add(shape.bckg[i]);
-                } else {
-                    mapbkg[shape.bckg[i]->GetTitle()]=(TH1*)shape.bckg[i]->Clone(shape.bckg[i]->GetTitle());
-                }
-
-                //cut & count plot
-                double VAL, ERR;
-                VAL = shape.bckg[i]->IntegralAndError(1,shape.bckg[i]->GetXaxis()->GetNbins(),ERR);
-                if(CCHistos.find(shape.bckg[i]->GetTitle())==CCHistos.end()) {
-                    CCHistos[shape.bckg[i]->GetTitle()] = new TH1D(TString(shape.bckg[i]->GetTitle())+"CC", "", 25,0,25);
-                    CCHistos[shape.bckg[i]->GetTitle()]->SetLineColor(shape.bckg[i]->GetLineColor());
-                    CCHistos[shape.bckg[i]->GetTitle()]->SetLineStyle(shape.bckg[i]->GetLineStyle());
-                    CCHistos[shape.bckg[i]->GetTitle()]->SetLineWidth(shape.bckg[i]->GetLineWidth());
-                    CCHistos[shape.bckg[i]->GetTitle()]->SetFillColor(shape.bckg[i]->GetFillColor());
-                    CCHistos[shape.bckg[i]->GetTitle()]->SetFillStyle(shape.bckg[i]->GetFillStyle());
-                }
-                CCHistos[shape.bckg[i]->GetTitle()]->SetBinContent(1+s*AnalysisBins.size()+b,VAL);
-                CCHistos[shape.bckg[i]->GetTitle()]->SetBinError(1+s*AnalysisBins.size()+b,VAL);
-            }
-
-            TString massStr("");
-            if(mass>0) massStr += mass;
-            if(atgcpar.Length()>0) massStr = atgcpar;
-            TString massStr2 = atgcpar2;
-            for(size_t ip=0; ip<shape.signal.size(); ip++) {
-                TString proc(shape.signal[ip]->GetTitle());
-                if(mass>0 && !proc.Contains(massStr))continue;
-                if(mass>0 && proc.Contains("ggH") && proc.Contains("ZZ"))proc = "ggHZZ2l2v";
-                else if(mass>0 && proc.Contains("D1")			     )proc = "D1_"+massStr+"GeV";
-                else if(mass>0 && proc.Contains("D4")                        )proc = "D4_"+massStr+"GeV";
-                else if(mass>0 && proc.Contains("D5")                        )proc = "D5_"+massStr+"GeV";
-                else if(mass>0 && proc.Contains("D8")                        )proc = "D8_"+massStr+"GeV";
-                else if(mass>0 && proc.Contains("D9")                        )proc = "D9_"+massStr+"GeV";
-                else if(mass>0 && proc.Contains("C3")                        )proc = "C3_"+massStr+"GeV";
-                else if(mass>0 && proc.Contains("qqH") && proc.Contains("ZZ"))proc = "qqHZZ2l2v";
-                else if(mass>0 && proc.Contains("ggH") && proc.Contains("WW"))proc = "ggHWW2l2v";
-                else if(mass>0 && proc.Contains("qqH") && proc.Contains("WW"))proc = "qqHWW2l2v";
-                else if(mass>0 && proc.Contains("ZH")                        )proc = "ZH"+massStr+"2lMET";
-                else continue;
-
-                if(proc=="qqHZZ") {
-                    shape.signal[ip]->SetLineStyle(2);
-                }
-
-                //if(atgcpar.Length()>0 && !proc.Contains(massStr)) continue;
-                if(atgcpar.Length()>0 && !proc.EndsWith(massStr)) continue;
-                if(atgcpar.Length()>0) proc = "ZZ2l2nu_"+massStr2;
-
-                if(mapsig.find(shape.signal[ip]->GetTitle())!=mapsig.end()) {
-                    mapsig[shape.signal[ip]->GetTitle()]->Add(shape.signal[ip]);
-                } else {
-                    mapsig[shape.signal[ip]->GetTitle()]=(TH1*)shape.signal[ip]->Clone(shape.signal[ip]->GetTitle());
-                }
-
-                //cut & count plot
-                double VAL, ERR;
-                VAL = shape.signal[ip]->IntegralAndError(1,shape.signal[ip]->GetXaxis()->GetNbins(),ERR);
-                if(CCHistos.find(shape.signal[ip]->GetTitle())==CCHistos.end()) {
-                    CCHistos[shape.signal[ip]->GetTitle()] = new TH1D(TString(shape.signal[ip]->GetTitle())+"CC", "", 25,0,25);
-                    CCHistos[shape.signal[ip]->GetTitle()]->SetLineColor(shape.signal[ip]->GetLineColor());
-                    CCHistos[shape.signal[ip]->GetTitle()]->SetLineStyle(shape.signal[ip]->GetLineStyle());
-                    CCHistos[shape.signal[ip]->GetTitle()]->SetLineWidth(shape.signal[ip]->GetLineWidth());
-                    CCHistos[shape.signal[ip]->GetTitle()]->SetFillColor(shape.signal[ip]->GetFillColor());
-                    CCHistos[shape.signal[ip]->GetTitle()]->SetFillStyle(shape.signal[ip]->GetFillStyle());
-                }
-                CCHistos[shape.signal[ip]->GetTitle()]->SetBinContent(1+s*AnalysisBins.size()+b,VAL);
-                CCHistos[shape.signal[ip]->GetTitle()]->SetBinError(1+s*AnalysisBins.size()+b,ERR);
-            }
-
-            THStack *stack=0;
-            TH1* mc=allbkg;
-            TH1* mcPlusRelUnc=0;
-            TGraphErrors* errors=0;
-
-            if(allbkg) {
-                mcPlusRelUnc = (TH1 *) allbkg->Clone("totalmcwithunc");
-                mcPlusRelUnc->SetDirectory(0);
-                mcPlusRelUnc->Reset();
-                stack = new THStack("stack","stack");
-                for(std::map<TString, TH1*>::iterator it=mapbkg.begin(); it!=mapbkg.end(); ++it) {
-                    it->second->SetLineColor( it->second->GetFillColor());
-                    stack->Add(it->second,"HIST");
-                    if(s==0 && b==0)legA->AddEntry(it->second,it->second->GetTitle(),"F");
-
-                    double baseRelUnc = it->second->GetBinError(0)/it->second->Integral();
-                    //if(TString(it->second->GetTitle()).Contains("rightarrow ll (data)")){printf("replace uncertainty %g",baseRelUnc); baseRelUnc=1.0;}
-                    for(int ibin=1; ibin<=mcPlusRelUnc->GetXaxis()->GetNbins(); ibin++) {
-                        double val = it->second->GetBinContent(ibin);
-                        double err = it->second->GetBinError(ibin);
-                        double value = mcPlusRelUnc->GetBinContent(ibin) + val;
-                        double error = sqrt(pow(mcPlusRelUnc->GetBinError(ibin),2) + pow(err,2) + pow(val*baseRelUnc,2));
-
-                        //Syst Err from Shape
-                        std::vector<float> ErrShape_tot;
-                        ErrShape_tot.clear();
-                        // Loop on proc
-                        //std::cout << " ************** " << it->first.Data() << " ************** " << std::endl;
-                        for(std::map<TString,std::vector<std::pair<TString, TH1*> > >::iterator jt=shape.bckgVars.begin(); jt!=shape.bckgVars.end(); ++jt) {
-                            if(it->first.Contains("data")) continue;
-                            if(it->first.CompareTo(jt->first)!=0) continue;
-                            //std::cout << " ************** " << jt->first.Data() << " ************** " << std::endl;
-                            //float Err(0);
-                            //cout<<"proc: "<<jt->first<<endl; //Z#rightarrow ll
-                            std::vector<float> ErrShape_up;
-                            ErrShape_up.clear();
-                            std::vector<float> ErrShape_down;
-                            ErrShape_down.clear();
-                            // Loop on syst
-                            for(int isel=0; isel<12 ; isel++) {
-                                if((jt->second)[isel].first.Contains("up")) {
-                                    //cout << "isel: " << isel << ":  " << (jt->second)[isel].first <<endl;
-                                    TH1F *h1 = (TH1F*) (jt->second)[isel].second;
-                                    float err_tmp = h1->GetBinContent(ibin);
-                                    err_tmp = (err_tmp-value)/value;
-                                    //cout<<"Syst Name: "<<(jt->second)[isel].first<<" : "<<h1->GetBinContent(ibin)<<" "<<value<<" -> "<<err_tmp<<endl;
-                                    if(err_tmp!=-1 && value!=0) ErrShape_up.push_back(err_tmp);
-                                    else                        ErrShape_up.push_back(0.);
-                                } else if((jt->second)[isel].first.Contains("down")) {
-                                    //cout << "isel: " << isel << ":  " << (jt->second)[isel].first <<endl;
-                                    TH1F *h1 = (TH1F*) (jt->second)[isel].second;
-                                    float err_tmp = h1->GetBinContent(ibin);
-                                    err_tmp = (err_tmp-value)/value;
-                                    //cout<<"Syst Name: "<<(jt->second)[isel].first<<" : "<<h1->GetBinContent(ibin)<<" "<<value<<" -> "<<err_tmp<<endl;
-                                    if(err_tmp!=-1 && value!=0) ErrShape_down.push_back(err_tmp);
-                                    else                        ErrShape_down.push_back(0.);
-                                } else {
-                                    cout<<"WARNING: Syst not computed properly: "<<endl;
-                                }
-                            }//syst
-                            std::vector<float> ErrShape;
-                            ErrShape.clear();
-                            for(unsigned int isel=0; isel<ErrShape_down.size() ; isel++) {
-                                if(ErrShape_down.size() != ErrShape_up.size()) cout<<"WARNING: Syst not computed properly"<<endl;
-                                ErrShape.push_back( std::max(fabs(ErrShape_down[isel]), fabs(ErrShape_up[isel])) );
-                            }
-                            // Non-shape uncertainties ("lnN")
-                            for(std::map<TString, double>::const_iterator kt=normSysts.begin(); kt!=normSysts.end(); ++kt) {
-                                if(kt->first.Contains("7TeV") && !systpostfix.Contains("7TeV")) continue;
-                                if(kt->first.Contains("8TeV") && !systpostfix.Contains("8TeV")) continue;
-                                if(kt->first.EndsWith("_e") && !selCh[s].Contains("ee")) continue;
-                                if(kt->first.EndsWith("_m") && !selCh[s].Contains("mumu")) continue;
-                                if(kt->first.Contains("_zz_") && !it->first.Contains("ZZ")) continue;
-                                if(kt->first.Contains("_wz_") && !it->first.Contains("WZ")) continue;
-                                if(kt->first.Contains("_zlldata_") && !it->first.Contains("Z#rightarrow ll (data)")) continue;
-                                if(kt->first.Contains("_topwwztautaudata_") && !it->first.Contains("Top/WW/Ztautau (data)")) continue;
-
-                                ErrShape.push_back(kt->second);
-                            }
-                            float TotErrShape(0);
-                            for(unsigned int iEr=0; iEr<ErrShape.size(); iEr++) TotErrShape+=pow(ErrShape[iEr],2);
-                            TotErrShape=sqrt(TotErrShape);
-                            //cout<<"Sing process Unc:"<<TotErrShape<<endl;
-                            ErrShape_tot.push_back(TotErrShape);
-                        }//process
-                        float TotErrShape_tot(0.);
-                        for(unsigned int iEr=0; iEr<ErrShape_tot.size(); iEr++) TotErrShape_tot+=pow(ErrShape_tot[iEr],2);
-                        TotErrShape_tot=sqrt(TotErrShape_tot);
-                        //cout<<"BIN unc:"<<TotErrShape_tot<<" , the other is: "<<error<<" summed are: "<<sqrt(TotErrShape_tot*TotErrShape_tot+error*error)<<endl;
-
-                        //Syst Err not form datacard (harcoded)
-
-                        mcPlusRelUnc->SetBinContent(ibin,value);
-                        mcPlusRelUnc->SetBinError(ibin,error);
-                    }
-                }
-
-
-                double mcErorMax=0;
-                errors = new TGraphErrors(mcPlusRelUnc->GetXaxis()->GetNbins());
-                int icutg=0;
-                for(int ibin=1; ibin<=mcPlusRelUnc->GetXaxis()->GetNbins(); ibin++) {
-                    if(mcPlusRelUnc->GetBinContent(ibin)>0)
-                        errors->SetPoint(icutg,mcPlusRelUnc->GetXaxis()->GetBinCenter(ibin), mcPlusRelUnc->GetBinContent(ibin));
-                    errors->SetPointError(icutg,mcPlusRelUnc->GetXaxis()->GetBinWidth(ibin)/2.0, mcPlusRelUnc->GetBinError(ibin));
-                    icutg++;
-                    mcErorMax = std::max(mcErorMax, mcPlusRelUnc->GetBinContent(ibin) + mcPlusRelUnc->GetBinError(ibin));
-                }
-
-                TH1* axis = (TH1*)allbkg->Clone("axis");
-                axis->Reset();
-                axis->GetXaxis()->SetTitle(mc->GetXaxis()->GetTitle());
-                axis->GetYaxis()->SetTitle(b==0?mc->GetYaxis()->GetTitle():"");
-                //axis->SetMinimum(mc->GetMinimum());
-                //axis->SetMaximum(1.1*std::max(mcErorMax, alldata->GetMaximum()));
-                axis->SetMaximum(1.9*std::max(mcErorMax, alldata->GetMaximum()));
-                //axis->GetXaxis()->SetRangeUser(150,700);//
-                axis->GetXaxis()->SetRangeUser(0,400);//
-                axis->Draw();
-                stack->Draw("same");
-
-
-                errors->Set(icutg);
-                //errors->SetFillStyle(3427);
-                //errors->SetFillStyle(3002);
-                errors->SetFillStyle(3254); //RJ
-                errors->SetFillColor(kGray+3);
-                errors->SetLineStyle(1);
-                errors->SetLineColor(0);
-                errors->Draw("2 same");
-                if(!haserrorsleg) {
-                    legA->AddEntry(errors,"Syst.+Stat. Unc.","F"); //RJ
-                    haserrorsleg=true;
-                }
-            }
-
-
-            std::vector<TH1 *> sigvec;
-            for(std::map<TString, TH1*>::iterator it=mapsig.begin(); it!=mapsig.end(); it++) {
-                it->second->SetFillStyle(0);
-                it->second->Draw("hist same");
-                if(s==0 && b==0)legA->AddEntry(it->second,it->second->GetTitle(),"L");
-                sigvec.push_back(it->second);
-            }
-
-
-
-            if(alldata) {
-                alldata->Draw("E1 same");
-                if(s==0 && b==0)legA->AddEntry(alldata,alldata->GetTitle(),"PL");
-            }
-
-
-            TPaveText* Label = new TPaveText(0.1,0.81,0.94,0.89, "NDC");
-            Label->SetFillColor(0);
-            Label->SetFillStyle(0);
-            Label->SetLineColor(0);
-            Label->SetBorderSize(0);
-            Label->SetTextAlign(31);
-            TString LabelText = selCh[s]+"  -  "+AnalysisBins[b];
-            LabelText.ReplaceAll("mumu","#mu#mu");
-            LabelText.ReplaceAll("geq2jets","#geq2jets");
-            LabelText.ReplaceAll("eq0jets","0jet");
-            LabelText.ReplaceAll("eq1jets","1jet");
-            Label->AddText(LabelText);
-            Label->Draw();
-
-
-
-            if(s==selCh.size()-1 && b==AnalysisBins.size()-1) {
-                legA->SetFillColor(0);
-                legA->SetFillStyle(0);
-                legA->SetLineColor(0);
-                legA->SetBorderSize();
-                legA->SetHeader("");
-                legA->Draw("same");
-                legA->SetTextFont(42);
-            }
-
-            //Draw1DHistogram(mc, stack, mcPlusRelUnc, errors, sigvec, alldata, legA, true, selCh[s], AnalysisBins[b]);
-            //if(histo.Contains("dphiLL_mt_shapes"))
-            //    Draw2DHistogram(mapbkg, sigvec, alldata, selCh[s], AnalysisBins[b]);
-
-
-            /*
-              TH1 *ratio=0;
-              if(allbkg && alldata){
-                  c1->cd();
-                  TPad* t2 = new TPad("t2","t2", 0.0, 0.0, 1.0, 0.2);     t2->Draw();
-                  t2->cd();
-                  t2->SetGridy(true);
-                  t2->SetTopMargin(0);   t2->SetBottomMargin(0.5);
-                  float yscale = (1.0-0.2)/(0.18-0);
-                  TH1 *ratio = (TH1*)alldata->Clone("RatioHistogram");
-                  ratio->SetDirectory(0);
-                  ratio->Divide(allbkg);
-                  ratio->GetYaxis()->SetTitle("Obs/Ref");
-                  ratio->GetXaxis()->SetTitle("");
-                  ratio->SetMinimum(0);
-                  ratio->SetMaximum(2.2);
-                  ratio->GetXaxis()->SetTitleOffset(1.3);
-                  ratio->GetXaxis()->SetLabelSize(0.033*yscale);
-                  ratio->GetXaxis()->SetTitleSize(0.036*yscale);
-                  ratio->GetXaxis()->SetTickLength(0.03*yscale);
-                  ratio->GetYaxis()->SetTitleOffset(0.3);
-                  ratio->GetYaxis()->SetNdivisions(5);
-                  ratio->GetYaxis()->SetLabelSize(0.033*yscale);
-                  ratio->GetYaxis()->SetTitleSize(0.036*yscale);
-                  ratio->GetXaxis()->SetRangeUser(175,450);
-                  ratio->Draw("E1");
-              }
-            */
-            pad->SetLogy();
-            pad->Update();
-        }
-    }
-
-    t1->cd();
-    t1->Update();
-    c1->cd();
-    TPaveText* T = new TPaveText(0.1,0.995,0.84,0.95, "NDC");
-    T->SetFillColor(0);
-    T->SetFillStyle(0);
-    T->SetLineColor(0);
-    T->SetBorderSize(0);
-    T->SetTextAlign(22);
-    if(systpostfix.Contains('8')) {
-        T->AddText("CMS preliminary, ZH #rightarrow ll+MET, #sqrt{s}=8.0 TeV, #scale[0.5]{#int} L=19.6  fb^{-1}");
-    } else {
-        T->AddText("CMS preliminary, ZH #rightarrow ll+MET, #sqrt{s}=7.0 TeV, #scale[0.5]{#int} L=5.1  fb^{-1}");
-    }
-    T->Draw();
-    c1->Update();
-    //c1->SaveAs(SaveName+"_Shape.eps");
-    //c1->SaveAs(SaveName+"_Shape.png");
-    //c1->SaveAs(SaveName+"_Shape.pdf");
-    //c1->SaveAs(SaveName+"_Shape.C");
-    delete c1;
-    cout << "########################## showShape ##########################" << endl;
-}
-
-
-void Draw1DHistogram(TH1* mc, THStack *stack, TH1 *mcPlusRelUnc, TGraphErrors *errors, std::vector<TH1 *>& spimpose, TH1 *data, TLegend *legA, bool noLog, TString finstate, TString AnalysisBins)
-{
-
-    bool showsigvsBkg(true);
-    bool isDataBlind = true;
-
-    TCanvas* c1d = new TCanvas("c1d","c1d",750,800);//,800,800);
-
-    TPad* t1d = new TPad();
-    if(!isDataBlind) t1d = new TPad("t1d","t1d", 0.0, 0.3, 1.0, 1.0);
-    else t1d = new TPad("t1d","t1d", 0.0, 0.0, 1.0, 1.0);
-
-    t1d->Draw();
-    t1d->cd();
-    if(!isDataBlind) t1d->SetBottomMargin(0); //RJ
-    TString name_denRelUncH;
-    if(!noLog) t1d->SetLogy(true);
-    if(histo.Contains("redMet_rebin_shapes") ||
-            histo.Contains("zpt_rebin_shapes") ) t1d->SetLogx(true);
-    float maximumFound(noLog);
-
-    if(mc &&  maximumFound<mc->GetMaximum()) maximumFound=mc->GetMaximum() * (noLog ? (systpostfix.Contains('8') ? 1.2 : 1.4) : 1.1);
-    if(data && maximumFound<data->GetMaximum()) maximumFound=data->GetMaximum() * (noLog ? (systpostfix.Contains('8') ? 1.2 : 1.4) : 1.1);
-
-    bool canvasIsFilled(false);
-    if(stack && stack->GetStack() && stack->GetStack()->GetEntriesFast()>0) {
-        stack->Draw("");
-        TH1 *hist=(TH1*)stack->GetStack()->At(0);
-        //Set YTitle, RJ
-        float binsize = hist->GetBinWidth(1);
-        std::ostringstream strs;
-        strs << binsize;
-        TString binSize = strs.str();
-        if(stack->GetXaxis()) {
-            stack->GetXaxis()->SetTitle(hist->GetXaxis()->GetTitle());
-            if(histo.Contains("new_mt_shapes")) stack->GetXaxis()->SetTitle("M_{T}(ll,#slash{E}_{T}) [GeV]");
-            if(isDataBlind) stack->GetYaxis()->SetTitle(hist->GetYaxis()->GetTitle());
-            //stack->GetYaxis()->SetTitle("Entries");
-            TString xtitle = hist->GetXaxis()->GetTitle();
-            if(xtitle.Contains("GeV") )
-                stack->GetYaxis()->SetTitle("Events / "+binSize+" GeV");
-            else	stack->GetYaxis()->SetTitle("Events / "+binSize);
-
-            stack->GetXaxis()->SetTitleSize(0.05);
-            stack->GetYaxis()->SetTitleSize(0.05);
-            stack->GetXaxis()->SetMoreLogLabels(true);
-            name_denRelUncH = hist->GetXaxis()->GetTitle(); //RJ
-            if(histo.Contains("redMet_rebin_shapes")) stack->GetXaxis()->SetLimits(40., stack->GetXaxis()->GetXmax());
-            if(histo.Contains("zpt_rebin_shapes")) stack->GetXaxis()->SetLimits(40., stack->GetXaxis()->GetXmax());
-            if(histo.Contains("redMet_shapes")) {
-                stack->GetXaxis()->SetLimits(40., 400.);
-            }
-            if(histo.Contains("zpt_shapes")) {
-                stack->GetXaxis()->SetLimits(40., 400.);
-            }
-
-            stack->SetMinimum(hist->GetMinimum());
-            stack->SetMaximum(maximumFound);
-            if(noLog) {
-                stack->SetMaximum(1.2*maximumFound);
-                //stack->GetXaxis()->SetRangeUser(hist->GetMinimum(),maximumFound);
-            }
-        }
-        canvasIsFilled = true;
-    }
-
-    stack->GetYaxis()->SetTitleOffset(1.3);
-    stack->GetYaxis()->SetLabelSize(0.04);
-    stack->GetYaxis()->SetTitleSize(0.04);
-
-    stack->GetXaxis()->SetTitleOffset(1.3);
-    stack->GetXaxis()->SetLabelSize(0.04);
-    stack->GetXaxis()->SetTitleSize(0.04);
-
-
-
-    if(errors) {
-        errors->Draw("2 same");
-    }
-
-    if(data) {
-        //if(!isDataBlind)
-        //data->Draw(canvasIsFilled ? "E1 same" : "E1"); //RJ, blind data point for Higgs-Exotic Meeting
-        canvasIsFilled = true;
-    }
-
-    for(size_t ip=0; ip<spimpose.size(); ip++) {
-        //double mrksz = spimpose[ip]->GetMarkerSize(); spimpose[ip]->SetMarkerSize(mrksz*0.1); spimpose[ip]->Draw((canvasIsFilled ? "e1same": "e1") ); canvasIsFilled = true; //spimpose[ip]->SetMarkerSize(mrksz);
-        TString opt = "hist";
-        spimpose[ip]->Draw( (opt + (canvasIsFilled ? "same": "")).Data() );
-        canvasIsFilled = true;
-    }
-
-    TPaveText* T = new TPaveText(0.1,0.995,0.9,0.95, "NDC");
-    T->SetFillColor(0);
-    T->SetFillStyle(0);
-    T->SetLineColor(0);
-    T->SetTextAlign(22);
-    T->SetTextFont(42);
-    char Buffer[1024];
-    //bool isSim = data ? false : true;
-    double iEcm  = systpostfix.Contains('8') ? 8.0 : 7.0;
-    double iLumi = systpostfix.Contains('8') ? 19577 : 5051;
-
-
-    T = new TPaveText(0.18,0.9,0.33,0.8, "NDC");
-    sprintf(Buffer, "#splitline{#bf{CMS}}{Preliminary}");
-    T->AddText(Buffer);
-    T->SetTextFont(42);
-    T->Draw("same");
-    T->SetBorderSize(0);
-
-    T = new TPaveText(0.35,0.9,0.5,0.8, "NDC");
-    if(finstate.Contains("mumu"))   sprintf(Buffer, "#splitline{#it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}}{#it{#mu#mu channel}}");
-    if(finstate.Contains("ee"))     sprintf(Buffer, "#splitline{#it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}}{#it{ee channel}}");
-    if(finstate.Contains("ll"))     sprintf(Buffer, "#splitline{#it{ZH #rightarrow l^{+}l^{-}+#slash{E}_{T}}}{#it{ll channel}}");
-    T->AddText(Buffer);
-    T->SetTextFont(42);
-    T->Draw("same");
-    T->SetBorderSize(0);
-
-    T = new TPaveText(0.35,0.8,0.5,0.75, "NDC");
-    sprintf(Buffer, "#sqrt{s} = %.1f TeV", iEcm);
-    T->AddText(Buffer);
-    T->SetTextFont(42);
-    T->Draw("same");
-    T->SetBorderSize(0);
-
-    T = new TPaveText(0.35,0.75,0.52,0.7, "NDC");
-    sprintf(Buffer, "#scale[1.1]{#font[12]{#int}}Ldt = %.1f fb^{-1}",iLumi/1000);
-    T->AddText(Buffer);
-    T->SetTextFont(42);
-    T->Draw("same");
-    T->SetBorderSize(0);
-
-
-    legA->SetX1(0.55);
-    legA->SetY1(0.65);
-    legA->SetX2(0.95);
-    legA->SetY2(0.92);
-    legA->SetFillColor(0);
-    legA->SetFillStyle(0);
-    legA->SetLineColor(0);
-    legA->SetHeader("");
-    legA->Draw("same");
-    legA->SetTextFont(42);
-
-    std::vector<TH1 *> compDists;
-    if(data)                   compDists.push_back(data);
-    else if(spimpose.size()>0) compDists = spimpose;
-
-    if(mc && compDists.size() && !isDataBlind) {
-        c1d->cd();
-        TPad* t2d = new TPad("t2d","t2d", 0.0, 0.0, 1.0, 0.3);
-        t2d->Draw();
-        t2d->cd();
-        t2d->SetGridy(true);
-        t2d->SetTopMargin(0);
-        t2d->SetBottomMargin(0.5);
-        if(histo.Contains("redMet_rebin_shapes") ||
-                histo.Contains("zpt_rebin_shapes") ) t2d->SetLogx(true);
-
-        // MC stats + syst
-        TH1D *denRelUncH=0;
-        if(mcPlusRelUnc) denRelUncH=(TH1D *) mcPlusRelUnc->Clone("mcrelunc");
-        else             denRelUncH=(TH1D *) mc->Clone("mcrelunc");
-        for(int xbin=1; xbin<=denRelUncH->GetXaxis()->GetNbins(); xbin++) {
-            if(denRelUncH->GetBinContent(xbin)==0) continue;
-            Double_t err=denRelUncH->GetBinError(xbin)/denRelUncH->GetBinContent(xbin);
-            denRelUncH->SetBinContent(xbin,1);
-            denRelUncH->SetBinError(xbin,err);
-        }
-        TGraphErrors *denRelUnc=new TGraphErrors(denRelUncH);
-        denRelUnc->SetLineColor(1);
-        denRelUnc->SetFillStyle(3001);
-        denRelUnc->SetFillColor(kGray);
-        denRelUnc->SetMarkerColor(1);
-        denRelUnc->SetMarkerStyle(1);
-        denRelUncH->Reset("ICE");
-        denRelUncH->Draw();
-        denRelUnc->Draw("3");
-        float yscale = (1.0-0.2)/(0.18-0);
-        denRelUncH->GetYaxis()->SetTitle("Data/#Sigma MC");
-        denRelUncH->SetMinimum(0.1);//0.4);
-        denRelUncH->SetMaximum(1.9);//1.6);
-        denRelUncH->GetXaxis()->SetTitle("");
-        //denRelUncH->SetMinimum(0);
-        //denRelUncH->SetMaximum(data->GetBinContent(data->GetMaximumBin())*1.10);
-        denRelUncH->GetXaxis()->SetTitleOffset(1.3);
-        denRelUncH->GetXaxis()->SetLabelSize(0.033*yscale);
-        denRelUncH->GetXaxis()->SetTitleSize(0.036*yscale);
-        denRelUncH->GetXaxis()->SetTickLength(0.03*yscale);
-        denRelUncH->GetXaxis()->SetTitle(name_denRelUncH); //RJ
-        denRelUncH->GetYaxis()->SetTitleOffset(0.3);
-        denRelUncH->GetYaxis()->SetNdivisions(5);
-        denRelUncH->GetYaxis()->SetLabelSize(0.033*yscale);
-        denRelUncH->GetYaxis()->SetTitleSize(0.036*yscale);
-        denRelUncH->GetXaxis()->SetMoreLogLabels(true);
-        //denRelUncH->GetXaxis()->SetNdivisions(9);
-        if(histo.Contains("redMet_rebin_shapes")) denRelUncH->GetXaxis()->SetRangeUser(40., denRelUncH->GetXaxis()->GetXmax());
-        if(histo.Contains("zpt_rebin_shapes")) denRelUncH->GetXaxis()->SetRangeUser(40, denRelUncH->GetXaxis()->GetXmax());
-        if(histo.Contains("redMet_shapes")) denRelUncH->GetXaxis()->SetRangeUser(40., 400.);
-        if(histo.Contains("zpt_shapes")) denRelUncH->GetXaxis()->SetRangeUser(40, 400.);
-
-        // Add comparisons
-        for(size_t icd=0; icd<compDists.size(); icd++) {
-            TString name("CompHistogram");
-            name+=icd;
-            TH1D *dataToObsH = (TH1D*)compDists[icd]->Clone(name);
-            dataToObsH->Divide(mc);
-            if(!isDataBlind) dataToObsH->Draw("same"); //RJ, Blind data point
-        }
-    } else {
-        //if not comparison resize the canvas
-        //c1d->SetWindowSize(600,400);
-        //c1d->SetCanvasSize(600,400);
-        t1d->SetPad(0,0,1,1);
-    }
-
-    c1d->Modified();
-    c1d->Update();
-    c1d->cd();
-    //cout << "AnalysisBins: " << AnalysisBins << endl;
-
-    string SavePath = (finstate + AnalysisBins + "_" + histo + systpostfix + ".eps").Data();
-    while(SavePath.find("*")!=std::string::npos)SavePath.replace(SavePath.find("*"),1,"");
-    while(SavePath.find("#")!=std::string::npos)SavePath.replace(SavePath.find("#"),1,"");
-    while(SavePath.find("{")!=std::string::npos)SavePath.replace(SavePath.find("{"),1,"");
-    while(SavePath.find("}")!=std::string::npos)SavePath.replace(SavePath.find("}"),1,"");
-    while(SavePath.find("(")!=std::string::npos)SavePath.replace(SavePath.find("("),1,"");
-    while(SavePath.find(")")!=std::string::npos)SavePath.replace(SavePath.find(")"),1,"");
-    while(SavePath.find("^")!=std::string::npos)SavePath.replace(SavePath.find("^"),1,"");
-    while(SavePath.find("/")!=std::string::npos)SavePath.replace(SavePath.find("/"),1,"-");
-    system(string(("rm -f ") + SavePath).c_str());
-    c1d->SaveAs(SavePath.c_str());
-    while(SavePath.find(".eps")!=std::string::npos)SavePath.replace(SavePath.find(".eps"),4,".png");
-    c1d->SaveAs(SavePath.c_str());
-    while(SavePath.find(".png")!=std::string::npos)SavePath.replace(SavePath.find(".png"),4,".pdf");
-    c1d->SaveAs(SavePath.c_str());
-    delete c1d;
-    delete T;
-
-
-    /******************/
-    if(showsigvsBkg) {
-        TCanvas* cc = new TCanvas("cc","cc",800,600);//,800,800);
-        //cc->cd();
-        //TPad* t2 = new TPad("t2d","t2d", 0.0, 0.0, 1.0, 0.3);
-        //t2d->Draw();
-        //t2d->cd();
-        //t2d->SetGridy(true);
-        //t2d->SetTopMargin(0);
-        //t2d->SetBottomMargin(0.5);
-
-        // Add comparisons
-        for(size_t ip=0; ip<spimpose.size(); ip++) {
-            TH1D *sigTobkg = (TH1D*)spimpose[ip]->Clone();
-            sigTobkg->Divide(mc);
-            sigTobkg->Draw();
-
-            float binsize = sigTobkg->GetBinWidth(1);
-            std::ostringstream strs;
-            strs << binsize;
-            TString binSize = strs.str();
-
-            sigTobkg->GetYaxis()->SetTitle("Sig/Bkg / "+binSize);
-        }
-
-
-        //TPaveText* T = new TPaveText(0.1,0.995,0.84,0.95, "NDC");
-        TPaveText* T = new TPaveText(0.1,0.995,0.9,0.95, "NDC");
-        T->SetFillColor(0);
-        T->SetFillStyle(0);
-        T->SetLineColor(0);
-        T->SetTextAlign(22);
-        char Buffer[1024];
-        bool isSim = data ? false : true;
-        double iEcm  = systpostfix.Contains('8') ? 8.0 : 7.0;
-        double iLumi = systpostfix.Contains('8') ? 19577 : 5051;
-        //isSim = true; //RJ
-        if(isSim) sprintf(Buffer, "CMS simulation, ZH #rightarrow ll+MET, #sqrt{s}=%.1f TeV, #scale[0.7]{#int} L=%.1f fb^{-1}", iEcm, iLumi/1000);
-        else      sprintf(Buffer, "CMS preliminary, ZH #rightarrow ll+MET, #sqrt{s}=%.1f TeV, #scale[0.7]{#int} L=%.1f fb^{-1}", iEcm, iLumi/1000);
-        T->AddText(Buffer);
-        T->Draw("same");
-        T->SetBorderSize(0);
-
-        //RJ adding ee or mumu channel number!
-        TPaveText* T2 = new TPaveText(0.2,0.91,0.3,0.81, "NDC");
-        T2->SetFillColor(0);
-        T2->SetFillStyle(0);
-        T2->SetLineColor(0);
-        T2->SetTextAlign(22);
-        char Buffer2[1024];
-        if(finstate.Contains("ee"))       sprintf(Buffer2,"(ee)");
-        if(finstate.Contains("mumu"))     sprintf(Buffer2,"(#mu#mu)");
-        if(finstate.Contains("lleq"))	  sprintf(Buffer2,"(ee+#mu#mu)");
-        T2->AddText(Buffer2);
-        T2->Draw("same");
-
-        string mysavePath_eps = (finstate + AnalysisBins + "_" + histo + systpostfix + "_sigToBkg.eps").Data();
-        string mysavePath_png = (finstate + AnalysisBins + "_" + histo + systpostfix + "_sigToBkg.png").Data();
-        string mysavePath_pdf = (finstate + AnalysisBins + "_" + histo + systpostfix + "_sigToBkg.pdf").Data();
-        cc->SaveAs(mysavePath_eps.c_str());
-        cc->SaveAs(mysavePath_png.c_str());
-        cc->SaveAs(mysavePath_pdf.c_str());
-        delete cc;
-    }
-    /******************/
-}
-
-
-void Draw2DHistogram(std::map<TString, TH1*>& mapbkgs, std::vector<TH1 *>& spimpose, TH1 *data, TString finstate, TString AnalysisBins)
-{
-
-    double DphiLLXaxis[4];//BalanceXaxis[4], DphiLLXaxis[4], CosThetaXaxis[4];
-    //BalanceXaxis[0] = 0.8;
-    //BalanceXaxis[1] = 0.9;
-    //BalanceXaxis[2] = 1.1;
-    //BalanceXaxis[3] = 1.2;
-    DphiLLXaxis[0] = 0.;
-    DphiLLXaxis[1] = 0.6;
-    DphiLLXaxis[2] = 1.4;
-    DphiLLXaxis[3] = TMath::Pi();
-    //CosThetaXaxis[0] = -1.;
-    //CosThetaXaxis[1] = -0.5;
-    //CosThetaXaxis[2] = 0.;
-    //CosThetaXaxis[3] = 1.;
-
-    std::map<TString, TH1*> toDraw;
-    TH1* totBkg=NULL;
-    for(std::map<TString, TH1*>::iterator it=mapbkgs.begin(); it!=mapbkgs.end(); ++it) {
-        toDraw[it->first]=it->second ;
-        if(!totBkg) totBkg=(TH1*)it->second->Clone();
-        else	totBkg->Add(it->second);
-    }
-    for(size_t ip=0; ip<spimpose.size(); ip++) {
-        toDraw[spimpose[ip]->GetTitle()]=spimpose[ip];
-    }
-    toDraw["Data"]=data;
-    toDraw["Background"]=totBkg;
-
-    for(std::map<TString, TH1*>::iterator it=toDraw.begin(); it!=toDraw.end(); ++it) {
-        TCanvas* c_1 = new TCanvas("c_1","c_1",800,800);
-        c_1->SetTopMargin(0.08);
-        c_1->SetRightMargin(0.15);
-        //c_1->SetBottomMargin(0.00);
-        //c_1->SetLeftMargin(0.00);
-        //TPad* t1 = new TPad("t1","t1", 0.0, 0.0, 1.0, 1.0);
-        //t1->Draw();
-        //t1->cd();
-
-        //t1->SetPadTopMargin   (0.06);
-        //t1->SetPadBottomMargin(0.12);
-        //t1->SetPadRightMargin (0.1);
-        //t1->SetPadLeftMargin  (0.14);
-
-        TH2F *hist = new TH2F("",";M_{T} [GeV];#Delta#phi_{ll} [rad];Events",12,0,1200,3,DphiLLXaxis);
-        hist->SetTitleOffset(1.2,"yz");
-        TH1* hist_id = it->second;
-        TString iTitle = it->first;
-        for(int ybin=1; ybin<=3; ybin++) {
-            for(int xbin=1; xbin<=12; xbin++) {
-                double value = hist_id->GetBinContent(xbin+12*(ybin-1));
-                //printf("val: \t%f\n",value);
-                hist->SetBinContent(xbin,ybin,value);
-            }
-        }
-        gStyle->SetPalette(1);
-        hist->SetMinimum(-1.0e-10);
-        hist->Draw("COLZ");
-
-
-        TPaveText* T = new TPaveText(0.4,0.98,0.86,0.90, "NDC");
-        T->SetFillColor(0);
-        T->SetFillStyle(0);
-        T->SetLineColor(0);
-        T->SetTextAlign(22);
-        T->SetTextFont(42);
-        char Buffer[1024];
-        bool isSim = data ? false : true;
-        double iEcm  = systpostfix.Contains('8') ? 8.0 : 7.0;
-        double iLumi = systpostfix.Contains('8') ? 19577 : 5051;
-        if(finstate.Contains("mumu")) sprintf(Buffer, "#it{ZH #rightarrow ll+#slash{E}_{T}}, #it{#mu#mu channel}, #sqrt{s} = %.1f TeV, L = %.1f fb^{-1}", iEcm, iLumi/1000);
-        if(finstate.Contains("ee")) sprintf(Buffer, "#it{ZH #rightarrow ll+#slash{E}_{T}}, #it{ee channel}, #sqrt{s} = %.1f TeV, L = %.1f fb^{-1}", iEcm, iLumi/1000);
-        T->AddText(Buffer);
-        T->Draw("same");
-        T->SetBorderSize(0);
-
-        T = new TPaveText(0.58,0.995,0.86,0.95, "NDC");
-        isSim = true;
-        if(isSim) sprintf(Buffer, "#bf{CMS Preliminary}");
-        T->AddText(Buffer);
-        T->Draw("same");
-        T->SetBorderSize(0);
-
-        T = new TPaveText(0.12,0.98,0.3,0.90, "NDC");
-        if(iTitle.Contains("ZH(105)"))		sprintf(Buffer, "SM M_{H}=105GeV");
-        else if(iTitle.Contains("ZH(115)"))	sprintf(Buffer, "SM M_{H}=115GeV");
-        else if(iTitle.Contains("ZH(125)"))	sprintf(Buffer, "SM M_{H}=125GeV");
-        else if(iTitle.Contains("ZH(135)"))     sprintf(Buffer, "SM M_{H}=135GeV");
-        else if(iTitle.Contains("ZH(145)"))     sprintf(Buffer, "SM M_{H}=145GeV");
-        else if(iTitle.Contains("Data")) 	sprintf(Buffer, "  Data         ");
-        else if(iTitle.Contains("WZ"))  	sprintf(Buffer, " WZ#rightarrow 3l#nu     ");
-        else if(iTitle.Contains("ZZ")) 		sprintf(Buffer, " ZZ#rightarrow 2l2#nu    ");
-        else if(iTitle.Contains("WW")) {
-            T = new TPaveText(0.12,0.98,0.37,0.90, "NDC");
-            sprintf(Buffer, iTitle);
-        } else sprintf(Buffer, iTitle);
-        T->AddText(Buffer);
-        T->Draw("same");
-        T->SetBorderSize(0);
-
-        string SavePath = (finstate + AnalysisBins + "_" + histo + systpostfix + "_" + iTitle + ".eps").Data();
-        while(SavePath.find("*")!=std::string::npos)SavePath.replace(SavePath.find("*"),1,"");
-        while(SavePath.find("#")!=std::string::npos)SavePath.replace(SavePath.find("#"),1,"");
-        while(SavePath.find("{")!=std::string::npos)SavePath.replace(SavePath.find("{"),1,"");
-        while(SavePath.find("}")!=std::string::npos)SavePath.replace(SavePath.find("}"),1,"");
-        while(SavePath.find("(")!=std::string::npos)SavePath.replace(SavePath.find("("),1,"");
-        while(SavePath.find(")")!=std::string::npos)SavePath.replace(SavePath.find(")"),1,"");
-        while(SavePath.find("^")!=std::string::npos)SavePath.replace(SavePath.find("^"),1,"");
-        while(SavePath.find("/")!=std::string::npos)SavePath.replace(SavePath.find("/"),1,"_");
-        while(SavePath.find(" ")!=std::string::npos)SavePath.replace(SavePath.find(" "),1,"_");
-        c_1->SaveAs(SavePath.c_str());
-        while(SavePath.find(".eps")!=std::string::npos)SavePath.replace(SavePath.find(".eps"),4,".png");
-        c_1->SaveAs(SavePath.c_str());
-        while(SavePath.find(".png")!=std::string::npos)SavePath.replace(SavePath.find(".png"),4,".pdf");
-        c_1->SaveAs(SavePath.c_str());
-        delete c_1;
-    }
-
-}
-
-
 
 //
 void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &allShapes, TString shName, bool isdataBlinded)
@@ -2145,10 +1344,10 @@ std::vector<TString>  buildDataCard(TString atgcpar, Int_t mass, TString histo, 
                         if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
 
                         if(it->second.find(RateKey_t(dci.procs[j-1],dci.ch[i-1])) != it->second.end()) {
-				//cout << "dci.procs[j-1]: " << dci.procs[j-1] << " it->first: " << it->first  << endl;
-                                if(!shape) sprintf(sFile,"%s%6.3f ",sFile,it->second[RateKey_t(dci.procs[j-1],dci.ch[i-1])]);
-				else       sprintf(sFile,"%s%6s ",sFile,"1.0");
-                                isSyst=true;
+                            //cout << "dci.procs[j-1]: " << dci.procs[j-1] << " it->first: " << it->first  << endl;
+                            if(!shape) sprintf(sFile,"%s%6.3f ",sFile,it->second[RateKey_t(dci.procs[j-1],dci.ch[i-1])]);
+                            else       sprintf(sFile,"%s%6s ",sFile,"1.0");
+                            isSyst=true;
                         } else {
                             sprintf(sFile,"%s%6s ",sFile,"-");
                         }
@@ -2255,8 +1454,8 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
                 allShapes[ch[i]+AnalysisBins[b]+sh[j]]=getShapeFromFile(inF, ch[i]+AnalysisBins[b],sh[j],indexcut_,Root,cutMin, cutMax);
                 cout << "Loading shapes: " << ch[i]+AnalysisBins[b]+sh[j] << endl;
                 if(indexcutL>=0 && indexcutR>=0) {
-                        allShapesL[ch[i]+AnalysisBins[b]+sh[j]]=getShapeFromFile(inF, ch[i]+AnalysisBins[b],sh[j],indexcutL,Root,cutMin, cutMax);
-                        allShapesR[ch[i]+AnalysisBins[b]+sh[j]]=getShapeFromFile(inF, ch[i]+AnalysisBins[b],sh[j],indexcutR,Root,cutMin, cutMax);
+                    allShapesL[ch[i]+AnalysisBins[b]+sh[j]]=getShapeFromFile(inF, ch[i]+AnalysisBins[b],sh[j],indexcutL,Root,cutMin, cutMax);
+                    allShapesR[ch[i]+AnalysisBins[b]+sh[j]]=getShapeFromFile(inF, ch[i]+AnalysisBins[b],sh[j],indexcutR,Root,cutMin, cutMax);
                 }
             }
         }
@@ -2296,12 +1495,12 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
         //if(subNRB2011 || subNRB2012) doBackgroundSubtraction(selCh,"emu",allShapes,histo,histo+"_NRBctrl", url, Root, true);
         //replace WZ by its estimate from 3rd Lepton SB
         //if(subWZ)doWZSubtraction(selCh,"emu",allShapes,histo,histo+"_3rdLepton");
-*/
+    */
 
-        // MC Z+jets -> DYExtrapolation
-        doDYextrapolation(selCh,allShapes,histo,"pfmet_minus_shapes", DYMET_EXTRAPOL, true);
-        //doDYextrapolation(selCh,allShapes,histo,"balancedif_minus_shapes", DYRESP_EXTRAPOL, false);
-        //doDYextrapolation(selCh,allShapes,histo,"dphizmet_minus_shapes", DYDPHI_EXTRAPOL, true);
+    // MC Z+jets -> DYExtrapolation
+    doDYextrapolation(selCh,allShapes,histo,"pfmet_minus_shapes", DYMET_EXTRAPOL, true);
+    //doDYextrapolation(selCh,allShapes,histo,"balancedif_minus_shapes", DYRESP_EXTRAPOL, false);
+    //doDYextrapolation(selCh,allShapes,histo,"dphizmet_minus_shapes", DYDPHI_EXTRAPOL, true);
 
 
     //replace Z+Jet background by Gamma+Jet estimates
@@ -2320,7 +1519,6 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
     //if(!fast)getYieldsFromShape(selCh,allShapes,histo,true); //blind data
     if(!fast)getYieldsFromShape(selCh,allShapes,histo,false); //unblind data
 
-    if(!fast)showShape(selCh,allShapes,histo,"plot");
 
 
     //prepare the output
@@ -2398,7 +1596,7 @@ DataCardInputs convertHistosForLimits(TString atgcpar,Int_t mass,TString histo,T
                 std::vector<TH1*>    hshapes;
                 systs.push_back("");
                 hshapes.push_back(shapeSt.signal[isignal]);
-		cout << "\n" << shapeSt.signal[isignal]->GetTitle() << " has rate: " << shapeSt.signal[isignal]->Integral() << endl;
+                cout << "\n" << shapeSt.signal[isignal]->GetTitle() << " has rate: " << shapeSt.signal[isignal]->Integral() << endl;
                 for(size_t v=0; v<vars.size(); v++) {
                     printf("SYSTEMATIC FOR SIGNAL %s : %s: %f\n",h->GetTitle(), vars[v].first.Data(), vars[v].second->Integral());
                     systs.push_back(vars[v].first);
@@ -2530,7 +1728,6 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
     proc.ReplaceAll("{","");
     proc.ToLower();
 
-    //cout << "Process: " << proc << endl;
     proc.ReplaceAll("zh1052lmet","ZH_hinv");
     proc.ReplaceAll("zh1152lmet","ZH_hinv");
     proc.ReplaceAll("zh1252lmet","ZH_hinv");
@@ -2650,19 +1847,19 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
             if(ch.Contains("mumu")) syst.ReplaceAll("_les", "_CMS_scale_m");
         } else if(syst.BeginsWith("_umet" )) {
             //syst.ReplaceAll("_umet", "_CMS_scale_met");
-	    continue; // skip
+            continue; // skip
         } else if(syst.BeginsWith("_qcdscale")) {
-	    if ( proc.Contains("ZZ") || proc.Contains("WZ") )  syst.ReplaceAll("_qcdscale", "_QCDscale_VV");
-	    else if ( proc.Contains("VVV") ) 		       syst.ReplaceAll("_qcdscale", "_QCDscale_VVV");
-	    else if ( proc.Contains("ewk_s_dm") )              syst.ReplaceAll("_qcdscale", "_QCDscale_EWKDM");
-	    else if ( proc.Contains("Unpart") )		       syst.ReplaceAll("_qcdscale", "_QCDscale_Unpart");
-	    else if ( proc.Contains("ADD") )                   syst.ReplaceAll("_qcdscale", "_QCDscale_ADD");
-	    else if ( proc.Contains("dm") && (proc.Contains("mv") || proc.Contains("ma")) )                   syst.ReplaceAll("_qcdscale", "_QCDscale_VDM");
-	    else syst.ReplaceAll("_qcdscale", "_QCDscale");
+            if ( proc.Contains("ZZ") || proc.Contains("WZ") )  syst.ReplaceAll("_qcdscale", "_QCDscale_VV");
+            else if ( proc.Contains("VVV") ) 		       syst.ReplaceAll("_qcdscale", "_QCDscale_VVV");
+            else if ( proc.Contains("ewk_s_dm") )              syst.ReplaceAll("_qcdscale", "_QCDscale_EWKDM");
+            else if ( proc.Contains("Unpart") )		       syst.ReplaceAll("_qcdscale", "_QCDscale_Unpart");
+            else if ( proc.Contains("ADD") )                   syst.ReplaceAll("_qcdscale", "_QCDscale_ADD");
+            else if ( proc.Contains("dm") && (proc.Contains("mv") || proc.Contains("ma")) )                   syst.ReplaceAll("_qcdscale", "_QCDscale_VDM");
+            else syst.ReplaceAll("_qcdscale", "_QCDscale");
 
         } else if(syst.BeginsWith("_pdf")) {
-	    syst.ReplaceAll("_pdf", "_pdf_qqbar");
-	} else {
+            syst.ReplaceAll("_pdf", "_pdf_qqbar");
+        } else {
             syst="_CMS_zllwimps"+syst;
         }
 
@@ -2785,9 +1982,9 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                             for(int jbin=1; jbin<=statup->GetXaxis()->GetNbins(); jbin++) {
                                 if(jbin!=iBin) continue;
                                 statup  ->SetBinContent(jbin,std::min(2*hshape->GetBinContent(jbin),
-									std::max(0.01*hshape->GetBinContent(jbin), statup  ->GetBinContent(jbin) + statup  ->GetBinError(jbin))));
+                                                                      std::max(0.01*hshape->GetBinContent(jbin), statup  ->GetBinContent(jbin) + statup  ->GetBinError(jbin))));
                                 statdown->SetBinContent(jbin,std::min(2*hshape->GetBinContent(jbin),
-									std::max(0.01*hshape->GetBinContent(jbin), statdown->GetBinContent(jbin) - statdown->GetBinError(jbin))));
+                                                                      std::max(0.01*hshape->GetBinContent(jbin), statdown->GetBinContent(jbin) - statdown->GetBinError(jbin))));
                                 //double variance = (statup->Integral()/hshapes[0]->Integral());
                             }
 
@@ -2799,7 +1996,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                             //nuisance_h->Fill(variance);
                             //#########Debug###########
                             //if((proc=="zz2l2nu") && variance<1.0001) {saveBins.push_back(iBin); continue;}
-			    if(variance < 1.005) saveBins.push_back(iBin);
+                            if(variance < 1.005) saveBins.push_back(iBin);
 
 //                            statup  ->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_Bin"+Bin+"Up");
 //                            statdown->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_Bin"+Bin+"Down");
@@ -2832,9 +2029,9 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                             TH1* statdown=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"_BinRestDown");
 
                             statup  ->SetBinContent(iBin,std::min(2*hshape->GetBinContent(iBin),
-						std::max(0.01*hshape->GetBinContent(iBin), statup  ->GetBinContent(iBin) + statup  ->GetBinError(iBin))));
+                                                                  std::max(0.01*hshape->GetBinContent(iBin), statup  ->GetBinContent(iBin) + statup  ->GetBinError(iBin))));
                             statdown->SetBinContent(iBin,std::min(2*hshape->GetBinContent(iBin),
-						std::max(0.01*hshape->GetBinContent(iBin), statdown->GetBinContent(iBin) - statdown->GetBinError(iBin))));
+                                                                  std::max(0.01*hshape->GetBinContent(iBin), statdown->GetBinContent(iBin) - statdown->GetBinError(iBin))));
 
                         }
 
@@ -2926,12 +2123,12 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
 //                if(shape && !systName.Contains("_pdf")) { //convert pdf shape uncertaint to normalization one
 //                    dci.systs[systName][RateKey_t(proc,ch)]=1.0;
 //                } else {
-                    double Unc = 1 + fabs(temp->Integral()/hshapes[0]->Integral());
-                    if(dci.systs.find(systName)==dci.systs.end() || dci.systs[systName].find(RateKey_t(proc,ch))==dci.systs[systName].end() ) {
-                        dci.systs[systName][RateKey_t(proc,ch)]=Unc;
-                    } else {
-                        dci.systs[systName][RateKey_t(proc,ch)]=(dci.systs[systName][RateKey_t(proc,ch)] + Unc)/2.0;
-                    }
+                double Unc = 1 + fabs(temp->Integral()/hshapes[0]->Integral());
+                if(dci.systs.find(systName)==dci.systs.end() || dci.systs[systName].find(RateKey_t(proc,ch))==dci.systs[systName].end() ) {
+                    dci.systs[systName][RateKey_t(proc,ch)]=Unc;
+                } else {
+                    dci.systs[systName][RateKey_t(proc,ch)]=(dci.systs[systName][RateKey_t(proc,ch)] + Unc)/2.0;
+                }
 //                }
             }
 
@@ -3144,8 +2341,6 @@ void doWjetsBackground(std::vector<TString>& selCh,map<TString, Shape_t>& allSha
             if(label_Syst.Contains("ee"))   sysErr = val_hChan_data*WjetsSyst_ee;
             else if(label_Syst.Contains("mumu")) sysErr = val_hChan_data*WjetsSyst_mm;
             h_Wjet->SetBinError(0,sysErr);
-
-
 
             shapeChan_SI.bckg.push_back(h_Wjet);
         }
