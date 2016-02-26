@@ -77,8 +77,6 @@ struct YIELDS_T {
 
 
 
-//TFile *fOut_binbybinNuisance   = TFile::Open("BinbyBinNuisance.root","RECREATE");
-//TH1F  *nuisance_h = new TH1F("nuisance_h","nuisance_h",100,1,1.1);
 
 // Map for non-shape systematics (lnN)
 std::map<TString, double> normSysts;
@@ -159,7 +157,6 @@ void dodataDrivenWWtW(std::vector<TString>& selCh,TString ctrlCh,map<TString, Sh
 void doWjetsBackground(std::vector<TString>& selCh,map<TString, Shape_t> &allShapes, TString mainHisto);
 void doDYextrapolation(std::vector<TString>& selCh,map<TString, Shape_t> &allShapes,TString mainHisto,TString DY_EXTRAPOL_SHAPES,float DY_EXTRAPOL,bool isleftCR);
 void doQCDBackground(std::vector<TString>& selCh,map<TString, Shape_t> &allShapes, TString mainHisto);
-void doDYReplacement(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t>& allShapes, TString mainHisto, TString metHistoForRescale);
 void doWZSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t>& allShapes, TString mainHisto, TString sideBandHisto);
 void BlindData(std::vector<TString>& selCh, map<TString, Shape_t>& allShapes, TString mainHisto, bool addSignal);
 
@@ -511,9 +508,6 @@ int main(int argc, char* argv[])
     //build the datacard for this mass point
     std::vector<TString> dcUrls = buildDataCard(mass,histo,inFileUrl, jsonFile);
 
-//    fOut_binbybinNuisance->cd();
-//    nuisance_h->Write("Bin by Bin Nuisance");
-//    fOut_binbybinNuisance->Close();
 }
 
 
@@ -1451,7 +1445,6 @@ DataCardInputs convertHistosForLimits(Int_t mass,TString histo,TString url,TStri
     dodataDrivenWWtW(selCh,"emu",allShapes,histo,false);
 
     /*
-
         //remove the non-resonant background from data
         //if(subNRB2011 || subNRB2012) doBackgroundSubtraction(selCh,"emu",allShapes,histo,histo+"_NRBctrl", url, Root, false);
         //MC closure test
@@ -1465,18 +1458,8 @@ DataCardInputs convertHistosForLimits(Int_t mass,TString histo,TString url,TStri
     //doDYextrapolation(selCh,allShapes,histo,"balancedif_minus_shapes", DYRESP_EXTRAPOL, false);
     //doDYextrapolation(selCh,allShapes,histo,"dphizmet_minus_shapes", DYDPHI_EXTRAPOL, true);
 
-
-    //replace Z+Jet background by Gamma+Jet estimates
-    ////if(subDY)doDYReplacement(selCh,"gamma",allShapes,histo,"met_met");
-    /////
-    //if(subDY)doDYReplacement(selCh,"gamma",allShapes,histo,"met_redMet");
-
     //replace data by total MC background
     if(blindData) BlindData(selCh,allShapes,histo, blindWithSignal);
-
-
-
-
 
     //print event yields from the mt shapes
     //if(!fast)getYieldsFromShape(selCh,allShapes,histo,true); //blind data
@@ -1485,7 +1468,7 @@ DataCardInputs convertHistosForLimits(Int_t mass,TString histo,TString url,TStri
 
 
     //prepare the output
-    dci.shapesFile="zllwimps_"+systpostfix+".root";
+    dci.shapesFile="zllwimps_"+massStr+systpostfix+".root";
     TFile *fout=TFile::Open(dci.shapesFile,"recreate");
 
     //loop on channel/proc/systematics
@@ -1575,7 +1558,6 @@ DataCardInputs convertHistosForLimits(Int_t mass,TString histo,TString url,TStri
                 TH1* h=shapeSt.bckg[ibckg];
                 if(h->Integral()<=1e-10) continue;
                 cout << "\n" << h->GetTitle() << " has rate: " << h->Integral() << endl;
-
 
                 //check if any bin content has a negative value
                 double tot_integralval = h->Integral();
@@ -1668,8 +1650,6 @@ DataCardInputs convertHistosForLimits(Int_t mass,TString histo,TString url,TStri
 }
 
 
-//print
-//bin-by-bin uncertainty
 void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bin, TString& ch, std::vector<TString>& systs, std::vector<TH1*>& hshapes)
 {
     proc.ReplaceAll("#bar{t}","tbar");
@@ -1797,7 +1777,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
         } else if(syst.BeginsWith("_jes")) {
             syst.ReplaceAll("_jes","_CMS_scale_j");
         } else if(syst.BeginsWith("_jer")) {
-            syst.ReplaceAll("_jer","_CMS_res_j"); // continue;//skip res for now
+            syst.ReplaceAll("_jer","_CMS_res_j");
         } else if(syst.BeginsWith("_btag")) {
             syst.ReplaceAll("_btag","_CMS_eff_b");
         } else if(syst.BeginsWith("_pu" )) {
@@ -1858,7 +1838,6 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                     hshape->SetName(proc+syst);
                     TH1* statup=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"Up");
                     TH1* statdown=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"Down");
-                    //RENJIE
                     if(proc.Contains("WWTopZtautau")) {
                         statup=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"Up");
                         statdown=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"Down");
@@ -1869,17 +1848,20 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                     }
 
                     for(int ibin=1; ibin<=statup->GetXaxis()->GetNbins(); ibin++) {
-                        statup  ->SetBinContent(ibin,std::min(2*hshape->GetBinContent(ibin), std::max(0.01*hshape->GetBinContent(ibin), statup  ->GetBinContent(ibin) + statup  ->GetBinError(ibin))));
-                        statdown->SetBinContent(ibin,std::min(2*hshape->GetBinContent(ibin), std::max(0.01*hshape->GetBinContent(ibin), statdown->GetBinContent(ibin) - statdown->GetBinError(ibin))));
+                        statup  ->SetBinContent(ibin,std::min(2*hshape->GetBinContent(ibin),
+                                                              std::max(0.01*hshape->GetBinContent(ibin), statup  ->GetBinContent(ibin) + statup  ->GetBinError(ibin))));
+                        statdown->SetBinContent(ibin,std::min(2*hshape->GetBinContent(ibin),
+                                                              std::max(0.01*hshape->GetBinContent(ibin), statdown->GetBinContent(ibin) - statdown->GetBinError(ibin))));
                     }
 
                     //############################################################################
                     //### bin-by-bin uncertainty
-                    //############################################################################
                     bool useBinbyBin(true);
+                    //############################################################################
                     useBinbyBin &= (proc.Contains("ZH") || proc.Contains("ZZ") || proc.Contains("WZ") || proc.Contains("WWTopZtautau") ||
                                     proc.Contains("D1") || proc.Contains("D4") || proc.Contains("D5") ||
-                                    proc.Contains("ewk_s_dm") || proc.Contains("VVV") || proc.Contains("zjets") ||
+                                    proc.Contains("ewk_s_dm") || proc.Contains("VVV") || proc.Contains("Zjets") ||
+                                    proc.Contains("dm") ||
                                     proc.Contains("D8") ||  proc.Contains("D9") || proc.Contains("C3")
                                    );
                     useBinbyBin &= (shape);
@@ -1918,14 +1900,11 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                         }
                     }
 
-                    //############################################################################
-                    //### bin-by-bin uncertainty
-                    //############################################################################
-                    //bool useBinbyBin(true);
+                    // bin-by-bin uncertainty
                     if(useBinbyBin) {
 
                         hshape->SetName(proc+syst);
-                        vector<int> saveBins;
+                        //vector<int> saveBins;
                         for(int iBin=1; iBin<=hshape->GetXaxis()->GetNbins(); iBin++) {
 
                             if(hshape->GetBinContent(iBin)<=0) continue;
@@ -1945,7 +1924,6 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                                                                       std::max(0.01*hshape->GetBinContent(jbin), statup  ->GetBinContent(jbin) + statup  ->GetBinError(jbin))));
                                 statdown->SetBinContent(jbin,std::min(2*hshape->GetBinContent(jbin),
                                                                       std::max(0.01*hshape->GetBinContent(jbin), statdown->GetBinContent(jbin) - statdown->GetBinError(jbin))));
-                                //double variance = (statup->Integral()/hshapes[0]->Integral());
                             }
 
                             //#########Debug###########
@@ -1953,13 +1931,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                             TString name_variance = proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_Bin"+Bin+"Up";
                             if(proc.Contains("WWTopZtautau")) name_variance = proc+postfix+"_CMS_zllwimps_stat_"+proc+systpostfix+"_Bin"+Bin+"Up";
                             cout << name_variance << ": " << variance << endl;
-                            //nuisance_h->Fill(variance);
-                            //#########Debug###########
-                            //if((proc=="zz2l2nu") && variance<1.0001) {saveBins.push_back(iBin); continue;}
-                            if(variance < 1.005) saveBins.push_back(iBin);
 
-//                            statup  ->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_Bin"+Bin+"Up");
-//                            statdown->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_Bin"+Bin+"Down");
 
                             if(proc.Contains("WWTopZtautau")) {
                                 statup  ->Write(proc+postfix+"_CMS_zllwimps_stat_"+proc+systpostfix+"_Bin"+Bin+"Up");
@@ -1979,49 +1951,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                             }
 
                         }
-
-                        //#################### Bin-by-Bin Rest bins #####################
-
-                        for(unsigned int ij=0; ij<saveBins.size(); ij++) {
-                            int iBin=saveBins[ij];
-                            if(hshape->GetBinContent(iBin)<=0) continue;
-                            TH1* statup=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"_BinRestUp");
-                            TH1* statdown=(TH1 *)hshape->Clone(proc+"_stat"+ch+proc+"_BinRestDown");
-
-                            statup  ->SetBinContent(iBin,std::min(2*hshape->GetBinContent(iBin),
-                                                                  std::max(0.01*hshape->GetBinContent(iBin), statup  ->GetBinContent(iBin) + statup  ->GetBinError(iBin))));
-                            statdown->SetBinContent(iBin,std::min(2*hshape->GetBinContent(iBin),
-                                                                  std::max(0.01*hshape->GetBinContent(iBin), statdown->GetBinContent(iBin) - statdown->GetBinError(iBin))));
-
-                        }
-
-
-                        if(saveBins.size()>0) {
-                            if(proc=="topwwztautaudata") {
-                                statup  ->Write(proc+postfix+"_CMS_zllwimps_stat_"+proc+systpostfix+"_BinRestUp");
-                                statdown->Write(proc+postfix+"_CMS_zllwimps_stat_"+proc+systpostfix+"_BinRestDown");
-                            } else {
-                                statup  ->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_BinRestUp");
-                                statdown->Write(proc+postfix+"_CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_BinRestDown");
-                            }
-
-                            if(shape) {
-                                if(proc=="topwwztautaudata") dci.systs["CMS_zllwimps_stat_"+proc+systpostfix+"_BinRest"][RateKey_t(proc,ch)]=1.0;
-                                else dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_BinRest"][RateKey_t(proc,ch)]=1.0;
-
-                            } else {
-                                if(proc=="topwwztautaudata") dci.systs["CMS_zllwimps_stat_"+proc+systpostfix+"_BinRest"][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
-                                else dci.systs["CMS_zllwimps_stat_"+ch+"_"+proc+systpostfix+"_BinRest"][RateKey_t(proc,ch)]=(statup->Integral()/hshapes[0]->Integral());
-                            }
-                        }
-
-
-
-
-
                     }
-                    //############################################################################
-                    //############################################################################
 
 
 
@@ -2917,174 +2847,6 @@ void doBackgroundSubtraction(std::vector<TString>& selCh,TString ctrlCh,map<TStr
     cout << "########################## doBackgroundSubtraction ##########################" << endl;
 }
 
-
-
-void doDYReplacement(std::vector<TString>& selCh,TString ctrlCh,map<TString, Shape_t>& allShapes, TString mainHisto, TString metHistoForRescale)
-{
-    cout << "########################## doDYReplacement ##########################" << endl;
-    TString DYProcName = "Z+jets";
-    TString GammaJetProcName = "Instr. background (data)";
-    std::map<TString, double> LowMetIntegral;
-
-
-    string Ccol   = "\\begin{tabular}{|l|c|c|c|";
-    string Cname  = "channel & rescale & yield data & yield mc";
-    string Cval   = "";
-    FILE* pFile = NULL;
-    if(!fast) {
-        pFile = fopen("GammaJets.tex","w");
-        fprintf(pFile,"\\begin{table}[htp]\n\\begin{center}\n\\caption{Instrumental background estimation.}\n\\label{tab:table}\n");
-        fprintf(pFile,"%s}\\hline\n", Ccol.c_str());
-        fprintf(pFile,"%s\\\\\\hline\n", Cname.c_str());
-    }
-
-    FILE* gjFile = NULL;
-    gjFile = fopen("DataDY_Yields.log","w");
-
-
-    //open input file
-    TFile* inF = TFile::Open(inFileUrl);
-    if( !inF || inF->IsZombie() ) {
-        cout << "Invalid file name : " << inFileUrl << endl;
-        return;
-    }
-
-    TDirectory *pdir = (TDirectory *)inF->Get(DYProcName);
-    if(!pdir) {
-        printf("Skip Z+Jet estimation because %s directory is missing in root file\n", DYProcName.Data());
-        return;
-    }
-
-    //all done with input file
-    inF->Close();
-
-
-    //open gamma+jet file
-    inF = TFile::Open(DYFile);
-    if( !inF || inF->IsZombie() ) {
-        cout << "Invalid file name : " << DYFile << endl;
-        return;
-    }
-
-    pdir = (TDirectory *)inF->Get(GammaJetProcName);
-    if(!pdir) {
-        printf("Skip Z+Jet estimation because %s directory is missing in Gamma+Jet file\n", GammaJetProcName.Data());
-        return;
-    }
-
-    for(size_t i=0; i<selCh.size(); i++) {
-        for(size_t b=0; b<AnalysisBins.size(); b++) {
-            Cval   = selCh[i]+string(" - ")+AnalysisBins[b];
-            Shape_t& shapeChan_SI = allShapes.find(selCh[i]+AnalysisBins[b]+mainHisto)->second;
-
-            //find DY background
-            for(size_t ibckg=0; ibckg<shapeChan_SI.bckg.size(); ibckg++) {
-                TString proc(shapeChan_SI.bckg[ibckg]->GetTitle());
-                if( proc.Contains(DYProcName) ) {
-
-                    double rescaleFactor = 1.0;
-                    char buffer[255];
-                    sprintf(buffer,"%6.3f",rescaleFactor);
-                    Cval   += string(" &") + buffer;
-
-                    Double_t valerr, val = shapeChan_SI.bckg[ibckg]->IntegralAndError(1,shapeChan_SI.bckg[ibckg]->GetXaxis()->GetNbins(),valerr);
-                    if(val<1E-6) {
-                        val=0.0;
-                        valerr=0.0;
-                    }
-                    string MCTruth = toLatexRounded(val,valerr);
-                    double systError = val;
-
-                    //replace DY histogram by G+Jets data
-                    int indexcut_ = indexcut;
-                    double cutMin=shapeMin;
-                    double cutMax=shapeMax;
-                    if(indexvbf>=0 && AnalysisBins[b].Contains("vbf")) {
-                        printf("use vbf index(%i) for bin %s\n", indexvbf, AnalysisBins[b].Data());
-                        indexcut_ = indexvbf;
-                        cutMin=shapeMinVBF;
-                        cutMax=shapeMaxVBF;
-                    }
-
-                    std::cout<<">>>>>  " << selCh[i]+AnalysisBins[b]+"_"+mainHisto <<"\n";
-                    fprintf(gjFile,"[%-10.10s - %s]\n", (selCh[i]+AnalysisBins[b]).Data(), mainHisto.Data());
-
-                    TH2* gjets2Dshape  = (TH2*)pdir->Get(selCh[i]+AnalysisBins[b]+"_"+mainHisto);
-                    if(!gjets2Dshape)printf("Can't find histo: %s in g+jets template\n",(selCh[i]+AnalysisBins[b]+"_"+mainHisto).Data());
-
-                    TH1* gjets1Dshape  = gjets2Dshape->ProjectionY("tmpName",indexcut_,indexcut_);
-
-                    //apply the cuts
-                    for(int x=0; x<=gjets1Dshape->GetXaxis()->GetNbins()+1; x++) {
-                        if(gjets1Dshape->GetXaxis()->GetBinCenter(x)<=cutMin || gjets1Dshape->GetXaxis()->GetBinCenter(x)>=cutMax) {
-                            gjets1Dshape->SetBinContent(x,0);
-                            gjets1Dshape->SetBinError(x,0);
-                        }
-                    }
-                    //gjets1Dshape->Rebin(2);
-
-                    shapeChan_SI.bckg[ibckg]->SetTitle(DYProcName + " (data)");
-                    for(int i=1; i<=shapeChan_SI.bckg[ibckg]->GetNbinsX(); i++) {
-                        double val = gjets1Dshape->GetBinContent(i);
-                        cout << "i: " << i << " \tval: " << val << endl;
-                        fprintf(gjFile,"bin: %d, \tval: %f\n", i, val);
-                        double err = gjets1Dshape->GetBinError(i);
-                        //if(val<0) val=0;
-                        //if(AnalysisBins[b]=="eq1jets" && val<0) val=0;
-                        double newval = rescaleFactor*val;
-                        double newerr = rescaleFactor*err;
-                        shapeChan_SI.bckg[ibckg]->SetBinContent(i, newval);
-                        shapeChan_SI.bckg[ibckg]->SetBinError  (i, newerr);
-                    }
-                    delete gjets1Dshape;
-
-                    shapeChan_SI.bckg[ibckg]->Scale(DDRescale);
-
-                    val  = shapeChan_SI.bckg[ibckg]->IntegralAndError(1,shapeChan_SI.bckg[ibckg]->GetXaxis()->GetNbins(),valerr);
-                    cout << "Normalization: " << val << " $pm$ " << valerr << "(stat.)" << endl;
-                    //systError = std::min(GammaJetSyst * val, fabs(systError - val) ); //syst is difference between G+Jet estimate and MC
-                    systError = GammaJetSyst * val; //syst completely coming from G+Jet estimate
-                    shapeChan_SI.bckg[ibckg]->SetBinError(0,systError);//save syst error in underflow bin that is always empty
-                    if(val<1E-6) {
-                        val=0.0;
-                        valerr=0.0;
-                        systError=-1;
-                    }
-                    Cval+= string(" &") + toLatexRounded(val,valerr,systError) +" & " + MCTruth;
-
-                    //erase Systematic relatated to DY background
-                    std::map<TString,std::vector<std::pair<TString, TH1*> > >::iterator dyvars = shapeChan_SI.bckgVars.find(DYProcName);
-                    if(dyvars!=shapeChan_SI.bckgVars.end()) {
-                        shapeChan_SI.bckgVars.erase(dyvars);
-                    }
-
-                    //recompute total background
-                    shapeChan_SI.totalBckg->Reset();
-                    for(size_t i=0; i<shapeChan_SI.bckg.size(); i++) {
-                        shapeChan_SI.totalBckg->Add(shapeChan_SI.bckg[i]);
-                    }
-
-                    if(pFile) {
-                        fprintf(pFile,"%s\\\\\n", Cval.c_str());
-                    }
-                }
-            }
-
-
-        }
-    }
-
-    if(pFile) {
-        fprintf(pFile,"\\hline\n");
-        fprintf(pFile,"\\end{tabular}\n\\end{center}\n\\end{table}\n");
-        fprintf(pFile,"\n\n\n\n");
-        fclose(pFile);
-    }
-
-    //all done with gamma+jet file
-    inF->Close();
-    cout << "########################## doDYReplacement ##########################" << endl;
-}
 
 
 
