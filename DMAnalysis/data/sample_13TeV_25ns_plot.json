@@ -25,9 +25,9 @@
       "marker": 856, 
       "data": [
         {
-          "dtag": "MC13TeV_WZamcatnloFXFX", 
-          "xsec": 5.29, 
-          "split": 10, 
+          "dtag": "MC13TeV_WZpowheg", 
+          "xsec": 4.102, 
+          "split": 2, 
           "br": [
             1
           ]
@@ -137,7 +137,7 @@
         {
           "dtag": "MC13TeV_ST_t-channel_4f", 
           "xsec": 70.69, 
-          "split": 10
+          "split": 20
         }
       ]
     }, 
@@ -151,7 +151,7 @@
         {
           "dtag": "MC13TeV_TTJetsamcatnloFXFX", 
           "xsec": 831.76, 
-          "split": 20, 
+          "split": 40, 
           "br": [
             1
           ]
@@ -401,7 +401,7 @@
         {
           "dtag": "MC13TeV_DYJetsToLL_10to50", 
           "xsec": 18610, 
-          "split": 10, 
+          "split": 30, 
           "br": [
             1
           ]
@@ -409,7 +409,7 @@
         {
           "dtag": "MC13TeV_DYJetsToLL_50toInf", 
           "xsec": 6025, 
-          "split": 10, 
+          "split": 40, 
           "br": [
             1
           ]
@@ -427,7 +427,7 @@
         {
           "dtag": "MC13TeV_DYJetsToLL_10to50", 
           "xsec": 18610, 
-          "split": 10, 
+          "split": 30, 
           "br": [
             1
           ]
@@ -435,7 +435,7 @@
         {
           "dtag": "MC13TeV_DYJetsToLL_50toInf", 
           "xsec": 6025, 
-          "split": 10, 
+          "split": 40, 
           "br": [
             1
           ]
@@ -450,63 +450,43 @@
       "marker": 20, 
       "data": [
         {
-          "dtag": "Data13TeV_DoubleEG2015C_05Oct2015", 
+          "dtag": "Data13TeV_DoubleEG2015C_16Dec2015", 
           "split": 1
         }, 
         {
-          "dtag": "Data13TeV_DoubleMuon2015C_05Oct2015", 
+          "dtag": "Data13TeV_DoubleMuon2015C_16Dec2015", 
           "split": 1
         }, 
         {
-          "dtag": "Data13TeV_MuonEG2015C_05Oct2015", 
+          "dtag": "Data13TeV_MuonEG2015C_16Dec2015", 
           "split": 1
         }, 
         {
-          "dtag": "Data13TeV_SingleElectron2015C_05Oct2015", 
+          "dtag": "Data13TeV_SingleElectron2015C_16Dec2015", 
           "split": 1
         }, 
         {
-          "dtag": "Data13TeV_SingleMuon2015C_05Oct2015", 
+          "dtag": "Data13TeV_SingleMuon2015C_16Dec2015", 
           "split": 1
         }, 
         {
-          "dtag": "Data13TeV_DoubleEG2015D_05Oct2015", 
-          "split": 5
-        }, 
-        {
-          "dtag": "Data13TeV_DoubleMuon2015D_05Oct2015", 
-          "split": 5
-        }, 
-        {
-          "dtag": "Data13TeV_MuonEG2015D_05Oct2015", 
-          "split": 5
-        }, 
-        {
-          "dtag": "Data13TeV_SingleElectron2015D_05Oct2015", 
+          "dtag": "Data13TeV_DoubleEG2015D_16Dec2015", 
           "split": 20
         }, 
         {
-          "dtag": "Data13TeV_SingleMuon2015D_05Oct2015", 
+          "dtag": "Data13TeV_DoubleMuon2015D_16Dec2015", 
           "split": 20
         }, 
         {
-          "dtag": "Data13TeV_DoubleEG2015D_PromptRecov4", 
+          "dtag": "Data13TeV_MuonEG2015D_16Dec2015", 
           "split": 10
         }, 
         {
-          "dtag": "Data13TeV_DoubleMuon2015D_PromptRecov4", 
-          "split": 10
+          "dtag": "Data13TeV_SingleElectron2015D_16Dec2015", 
+          "split": 40
         }, 
         {
-          "dtag": "Data13TeV_MuonEG2015D_PromptRecov4", 
-          "split": 10
-        }, 
-        {
-          "dtag": "Data13TeV_SingleElectron2015D_PromptRecov4", 
-          "split": 20
-        }, 
-        {
-          "dtag": "Data13TeV_SingleMuon2015D_PromptRecov4", 
+          "dtag": "Data13TeV_SingleMuon2015D_16Dec2015", 
           "split": 20
         }
       ], 
@@ -558,11 +538,11 @@
     }, 
     {
       "isdata": false, 
-      "color": "6", 
+      "color": "5", 
       "issignal": true, 
       "tag": "ADD(3)", 
       "lwidth": 2, 
-      "marker": 6, 
+      "marker": 5, 
       "data": [
         {
           "dtag": "MC13TeV_ADD_D3", 
@@ -575,7 +555,7 @@
       ], 
       "fill": 0, 
       "spimpose": true, 
-      "lcolor": "6", 
+      "lcolor": "5", 
       "lstyle": 7
     }, 
     {
