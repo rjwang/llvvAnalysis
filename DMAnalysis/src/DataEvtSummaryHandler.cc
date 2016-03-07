@@ -60,16 +60,10 @@ bool DataEvtSummaryHandler::initTree(TTree *t)
     t_->Branch("weight_QCDscale_muR0p5_muF2",     &evSummary_.weight_QCDscale_muR0p5_muF2,      "weight_QCDscale_muR0p5_muF2/F");
     t_->Branch("weight_QCDscale_muR0p5_muF0p5",     &evSummary_.weight_QCDscale_muR0p5_muF0p5,      "weight_QCDscale_muR0p5_muF0p5/F");
 
-
-
-
-
-
-
-
-
-
-
+    t_->Branch("npdfs", &evSummary_.npdfs, "npdfs/I");
+    t_->Branch("pdfWeights", evSummary_.pdfWeights, "pdfWeights[npdfs]/F");
+    t_->Branch("nalphaS", &evSummary_.nalphaS, "nalphaS/I");
+    t_->Branch("alphaSWeights", evSummary_.alphaSWeights, "alphaSWeights[nalphaS]/F");
 
     //mc truth
     t_->Branch("nmcparticles", 	&evSummary_.nmcparticles,   "nmcparticles/I");
@@ -338,6 +332,10 @@ bool DataEvtSummaryHandler::attachToTree(TTree *t)
     t_->SetBranchAddress("weight_QCDscale_muR0p5_muF2",       &evSummary_.weight_QCDscale_muR0p5_muF2);
     t_->SetBranchAddress("weight_QCDscale_muR0p5_muF0p5",       &evSummary_.weight_QCDscale_muR0p5_muF0p5);
 
+    t_->SetBranchAddress("npdfs", &evSummary_.npdfs);
+    t_->SetBranchAddress("pdfWeights", evSummary_.pdfWeights);
+    t_->SetBranchAddress("nalphaS", &evSummary_.nalphaS);
+    t_->SetBranchAddress("alphaSWeights", evSummary_.alphaSWeights);
 
 
     //mc truth
@@ -570,6 +568,8 @@ void DataEvtSummaryHandler::resetStruct()
     evSummary_.jet=0;
     //evSummary_.pjet=0;
     //evSummary_.fjet=0;
+    evSummary_.npdfs=0;
+    evSummary_.nalphaS=0;
 
     evSummary_.ngenITpu=0;
     evSummary_.ngenOOTpu=0;

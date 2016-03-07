@@ -19,7 +19,7 @@ process.load('Configuration.StandardSequences.MagneticField_38T_cff')
 
 #------ Declare the correct global tag ------#
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
-process.GlobalTag.globaltag = '76X_mcRun2_asymptotic_v12'
+process.GlobalTag.globaltag = '76X_mcRun2_asymptotic_RunIIFall15DR76_v1'
 
 
 #
@@ -72,8 +72,8 @@ process.TFileService = cms.Service("TFileService",
 
 
 
-process.p = cms.Path( process.HBHENoiseFilterResultProducer * #produces HBHE baseline bools
-                        process.ApplyBaselineHBHENoiseFilter *  #reject events based
-                        process.ApplyBaselineHBHEIsoNoiseFilter *   #reject events based  < 10e-3 mistake rate
+process.p = cms.Path( #process.HBHENoiseFilterResultProducer * #produces HBHE baseline bools
+                        #process.ApplyBaselineHBHENoiseFilter *  #reject events based
+                        #process.ApplyBaselineHBHEIsoNoiseFilter *   #reject events based  < 10e-3 mistake rate
                         process.egmGsfElectronIDSequence * process.mainAnalyzer
 )

@@ -719,11 +719,8 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
     TString MVStr("");
     if(MV>0)MVStr += MV;
 
-
     TString MAStr("");
     if(MA>0)MAStr += MA;
-
-
 
     TString K1Str("");
     std::ostringstream K1out;
@@ -736,8 +733,6 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
     K2out << std::setprecision(2) << K2;
     std::string K2str = K2out.str();
     if(K2>0) K2Str = K2str;
-
-
 
     YIELDS_T ee0jet_Yields;
     YIELDS_T ee1jet_Yields;
@@ -763,12 +758,8 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
                 TH1* h=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.bckg[ibckg];
                 TString procTitle(h->GetTitle());
                 cout << "backgrounds:  " << procTitle << endl;
-                //if(procTitle.Contains("QCD"))continue;
-                //if(procTitle.Contains("Z#rightarrow #tau#tau"))continue;
 
                 val = h->IntegralAndError(1,h->GetXaxis()->GetNbins(),valerr);
-                //syst = h->GetBinError(0)<=0 ? -1 : h->GetBinError(0);
-
 
                 if(procTitle.Contains("ZZ#rightarrow 2l2#nu")) {
                     fortableYields.ZZ = val;
@@ -798,12 +789,6 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
                 }
             } //nbckgs END!
 
-
-            //total bckg
-            ////h=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.totalBckg;
-            ////val = h->IntegralAndError(1,h->GetXaxis()->GetNbins(),valerr);
-            //syst = h->GetBinError(0)<=0 ? -1 : h->GetBinError(0);
-
             fortableYields.totBkg = sum_allbkgs;
             fortableYields.totBkg_StatErr = sqrt(err_allbkgs);
 
@@ -815,7 +800,7 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
                 procTitle.ReplaceAll("#","\\");
 
                 if(mass>0 && !procTitle.Contains(massStr))continue;
-                //MonoZ
+
                 if(procTitle.Contains("D1")) {
                     if(mass>0 && !procTitle.Contains("D1("+massStr+"GeV)"))continue;
                 }
@@ -848,7 +833,6 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
                     if(mass>0 && !procTitle.Contains("EWK_S_DM("+massStr+")_K1("+K1Str+")_K2("+K2Str+")"))continue;
                 }
 
-
                 if(procTitle.Contains("DM") && procTitle.Contains("MV")) {
                     if(mass<0 || MV<0) continue;
                     if(!procTitle.Contains("DM("+massStr+")MV("+MVStr+")")) continue;
@@ -859,16 +843,13 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
                     if(!procTitle.Contains("DM("+massStr+")MA("+MAStr+")")) continue;
                 }
 
-
                 cout << "Signals >>>>>>> " << procTitle << endl;
-
 
                 if(mass>0 && procTitle.Contains("ggH") && procTitle.Contains("ZZ"))procTitle = "ggH("+massStr+")";
                 else if(mass>0 && procTitle.Contains("qqH") && procTitle.Contains("ZZ"))procTitle = "qqH("+massStr+")";
                 else if(mass>0 && procTitle.Contains("ggH") && procTitle.Contains("WW"))procTitle = "ggH("+massStr+")WW";
                 else if(mass>0 && procTitle.Contains("qqH") && procTitle.Contains("WW"))procTitle = "qqH("+massStr+")WW";
                 else if(mass>0 && procTitle.Contains("ZH")                             )procTitle = "ZH("+massStr+")2lMET";
-
 
                 val = h->IntegralAndError(1,h->GetXaxis()->GetNbins(),valerr);
 
@@ -1452,6 +1433,9 @@ DataCardInputs convertHistosForLimits(Int_t mass,TString histo,TString url,TStri
                 hshapes.push_back(shapeSt.signal[isignal]);
                 cout << "\n" << shapeSt.signal[isignal]->GetTitle() << " has rate: " << shapeSt.signal[isignal]->Integral() << endl;
                 for(size_t v=0; v<vars.size(); v++) {
+		    //if(vars[v].first=="_qcdscaleacceptup" || vars[v].first=="_qcdscaleacceptdown"){
+		    //	vars[v].second->Scale(shapeSt.signal[isignal]->Integral()/vars[v].second->Integral());
+		    //}
                     printf("SYSTEMATIC FOR SIGNAL %s : %s: %f\n",h->GetTitle(), vars[v].first.Data(), vars[v].second->Integral());
                     systs.push_back(vars[v].first);
                     hshapes.push_back(vars[v].second);

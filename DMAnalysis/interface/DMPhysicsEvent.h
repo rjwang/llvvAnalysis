@@ -156,6 +156,8 @@ bool isDYToLL(int id1, int id2);
 bool isDYToTauTau(int id1, int id2);
 float getSFfrom2DHist(double xval, double yval, TH2F* h_);
 
+float getNLOEWKZZWeight(double trailing_pt);
+float kfactor_qqZZ_qcd_dPhi(float GENdPhiZZ);
 
 
 

@@ -116,14 +116,6 @@
       "marker": 400, 
       "data": [
         {
-          "dtag": "MC13TeV_WJetsamcatnloFXFX", 
-          "xsec": 61526.7, 
-          "split": 10, 
-          "br": [
-            1
-          ]
-        }, 
-        {
           "dtag": "MC13TeV_WJetsmadgraphMLM", 
           "xsec": 61526.7, 
           "split": 20, 
@@ -141,25 +133,9 @@
       "marker": 885, 
       "data": [
         {
-          "dtag": "MC13TeV_TTpowheg", 
-          "xsec": 831.76, 
-          "split": 20, 
-          "br": [
-            1
-          ]
-        }, 
-        {
           "dtag": "MC13TeV_TTJetsamcatnloFXFX", 
           "xsec": 831.76, 
-          "split": 20, 
-          "br": [
-            1
-          ]
-        }, 
-        {
-          "dtag": "MC13TeV_TTTo2L2Nupowheg", 
-          "xsec": 87.31, 
-          "split": 9, 
+          "split": 40, 
           "br": [
             1
           ]
@@ -202,7 +178,7 @@
         {
           "dtag": "MC13TeV_ST_t-channel_4f", 
           "xsec": 70.69, 
-          "split": 10
+          "split": 20
         }
       ]
     }, 
@@ -216,7 +192,7 @@
         {
           "dtag": "MC13TeV_DYJetsToLL_10to50", 
           "xsec": 18610, 
-          "split": 10, 
+          "split": 30, 
           "br": [
             1
           ]
@@ -224,7 +200,7 @@
         {
           "dtag": "MC13TeV_DYJetsToLL_50toInf", 
           "xsec": 6025, 
-          "split": 10, 
+          "split": 35, 
           "br": [
             1
           ]
@@ -242,7 +218,7 @@
         {
           "dtag": "MC13TeV_DYJetsToLL_10to50", 
           "xsec": 18610, 
-          "split": 10, 
+          "split": 30, 
           "br": [
             1
           ]
@@ -250,7 +226,7 @@
         {
           "dtag": "MC13TeV_DYJetsToLL_50toInf", 
           "xsec": 6025, 
-          "split": 10, 
+          "split": 35, 
           "br": [
             1
           ]
@@ -482,97 +458,47 @@
       "marker": 20, 
       "data": [
         {
-          "dtag": "Data13TeV_DoubleEG2015C_05Oct2015", 
+          "dtag": "Data13TeV_DoubleEG2015C_16Dec2015", 
           "split": 1
         }, 
         {
-          "dtag": "Data13TeV_DoubleMuon2015C_05Oct2015", 
+          "dtag": "Data13TeV_DoubleMuon2015C_16Dec2015", 
           "split": 1
         }, 
         {
-          "dtag": "Data13TeV_MuonEG2015C_05Oct2015", 
+          "dtag": "Data13TeV_MuonEG2015C_16Dec2015", 
           "split": 1
         }, 
         {
-          "dtag": "Data13TeV_SingleElectron2015C_05Oct2015", 
+          "dtag": "Data13TeV_SingleElectron2015C_16Dec2015", 
           "split": 1
         }, 
         {
-          "dtag": "Data13TeV_SingleMuon2015C_05Oct2015", 
+          "dtag": "Data13TeV_SingleMuon2015C_16Dec2015", 
           "split": 1
         }, 
         {
-          "dtag": "Data13TeV_DoubleEG2015D_05Oct2015", 
-          "split": 5
-        }, 
-        {
-          "dtag": "Data13TeV_DoubleMuon2015D_05Oct2015", 
-          "split": 5
-        }, 
-        {
-          "dtag": "Data13TeV_MuonEG2015D_05Oct2015", 
-          "split": 5
-        }, 
-        {
-          "dtag": "Data13TeV_SingleElectron2015D_05Oct2015", 
+          "dtag": "Data13TeV_DoubleEG2015D_16Dec2015", 
           "split": 20
         }, 
         {
-          "dtag": "Data13TeV_SingleMuon2015D_05Oct2015", 
+          "dtag": "Data13TeV_DoubleMuon2015D_16Dec2015", 
           "split": 20
         }, 
         {
-          "dtag": "Data13TeV_DoubleEG2015D_PromptRecov4", 
+          "dtag": "Data13TeV_MuonEG2015D_16Dec2015", 
           "split": 10
         }, 
         {
-          "dtag": "Data13TeV_DoubleMuon2015D_PromptRecov4", 
-          "split": 10
+          "dtag": "Data13TeV_SingleElectron2015D_16Dec2015", 
+          "split": 40
         }, 
         {
-          "dtag": "Data13TeV_MuonEG2015D_PromptRecov4", 
-          "split": 10
-        }, 
-        {
-          "dtag": "Data13TeV_SingleElectron2015D_PromptRecov4", 
-          "split": 20
-        }, 
-        {
-          "dtag": "Data13TeV_SingleMuon2015D_PromptRecov4", 
+          "dtag": "Data13TeV_SingleMuon2015D_16Dec2015", 
           "split": 20
         }
       ], 
       "fill": 0
-    }, 
-    {
-      "isdata": false, 
-      "color": "90", 
-      "issignal": true, 
-      "tag": "ZH(125)", 
-      "lwidth": 2, 
-      "marker": 90, 
-      "data": [
-        {
-          "dtag": "MC13TeV_ZH_ZToEE_HToInv_M125", 
-          "xsec": 0.8696, 
-          "split": 1, 
-          "br": [
-            0.033658
-          ]
-        }, 
-        {
-          "dtag": "MC13TeV_ZH_ZToMM_HToInv_M125", 
-          "xsec": 0.8696, 
-          "split": 1, 
-          "br": [
-            0.033658
-          ]
-        }
-      ], 
-      "fill": 0, 
-      "spimpose": true, 
-      "lcolor": "90", 
-      "lstyle": 1
     }, 
     {
       "isdata": false, 

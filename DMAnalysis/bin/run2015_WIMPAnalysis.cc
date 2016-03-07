@@ -1,6 +1,7 @@
 #include <iostream>
 
-#include "FWCore/FWLite/interface/AutoLibraryLoader.h"
+//#include "FWCore/FWLite/interface/AutoLibraryLoader.h"
+#include "FWCore/FWLite/interface/FWLiteEnabler.h"
 #include "FWCore/PythonParameterSet/interface/MakeParameterSets.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
@@ -88,7 +89,8 @@ int main(int argc, char* argv[])
 
     // load framework libraries
     gSystem->Load( "libFWCoreFWLite" );
-    AutoLibraryLoader::enable();
+    //AutoLibraryLoader::enable();
+    FWLiteEnabler::enable();
 
     // configure the process
     const edm::ParameterSet &runProcess = edm::readPSetsFrom(argv[1])->getParameter<edm::ParameterSet>("runProcess");
@@ -134,12 +136,12 @@ int main(int argc, char* argv[])
     bool isMC_WZ  = isMC && ( string(url.Data()).find("TeV_WZamcatnloFXFX")  != string::npos
                               || string(url.Data()).find("MC13TeV_WZpowheg")  != string::npos );
 
-    bool isMC_VVV = isMC && ( string(url.Data()).find("MC13TeV_WZZ_")  != string::npos
-                              || string(url.Data()).find("MC13TeV_WWZ_")  != string::npos
-                              || string(url.Data()).find("MC13TeV_ZZZ_")  != string::npos );
+    bool isMC_VVV = isMC && ( string(url.Data()).find("MC13TeV_WZZ")  != string::npos
+                              || string(url.Data()).find("MC13TeV_WWZ")  != string::npos
+                              || string(url.Data()).find("MC13TeV_ZZZ")  != string::npos );
 
-    bool isMCBkg_runPDF = (isMC_ZZ2L2Nu || isMC_ZZTo4L || isMC_ZZTo2L2Q ||
-                           isMC_WZ || isMC_VVV);
+    bool isMCBkg_runPDFQCDscale = (isMC_ZZ2L2Nu || isMC_ZZTo4L || isMC_ZZTo2L2Q ||
+                                   isMC_WZ || isMC_VVV);
 
     bool isMC_ttbar = isMC && (string(url.Data()).find("TeV_TT")  != string::npos);
     bool isMC_stop  = isMC && (string(url.Data()).find("TeV_SingleT")  != string::npos);
@@ -176,7 +178,7 @@ int main(int argc, char* argv[])
     bool runSystematics                        = runProcess.getParameter<bool>("runSystematics");
     std::vector<TString> varNames(1,"");
     if(runSystematics) {
-        cout << "Systematics will be computed for this analysis" << endl;
+        cout << "Systematics will be computed for this analysis: " << endl;
         varNames.push_back("_jerup"); 	//1
         varNames.push_back("_jerdown"); //2
         varNames.push_back("_jesup"); 	//3
@@ -189,11 +191,20 @@ int main(int argc, char* argv[])
         varNames.push_back("_pudown"); 	//10
         varNames.push_back("_btagup"); 	//11
         varNames.push_back("_btagdown");//12
-        if(isSignal || isMCBkg_runPDF) {
+        if(isMCBkg_runPDFQCDscale) {
             varNames.push_back("_pdfup");
             varNames.push_back("_pdfdown");
             varNames.push_back("_qcdscaleup");
             varNames.push_back("_qcdscaledown");
+        }
+	if(isSignal){
+            varNames.push_back("_pdfup");
+            varNames.push_back("_pdfdown");
+	    varNames.push_back("_qcdscaleacceptup");
+	    varNames.push_back("_qcdscaleacceptdown");
+	}
+        for(size_t sys=1; sys<varNames.size(); sys++) {
+            cout << varNames[sys] << endl;
         }
     }
     size_t nvarsToInclude=varNames.size();
@@ -225,7 +236,7 @@ int main(int argc, char* argv[])
 
     //pdf info
     PDFInfo *mPDFInfo=0;
-    if(isSignal || isMCBkg_runPDF) {
+    if(isSignal || isMCBkg_runPDFQCDscale) {
         TString pdfUrl = runProcess.getParameter<std::string>("pdfInput");
         std::string Url = runProcess.getParameter<std::string>("input");
         if(doWIMPreweighting) {
@@ -270,6 +281,10 @@ int main(int argc, char* argv[])
     h->GetXaxis()->SetBinLabel(7,"|E_{T}^{miss}-#it{q}_{T}|/#it{q}_{T}<0.2");
     h->GetXaxis()->SetBinLabel(8,"E_{T}^{miss}>80");
 
+    h=(TH1F*) mon.addHistogram( new TH1F ("DMAcceptance", ";;Events", 3,0,3) );
+    h->GetXaxis()->SetBinLabel(1,"Trigger && 2 Tight Leptons");
+    h->GetXaxis()->SetBinLabel(2,"Trigger && 2 Tight Leptons && #geq 1 Leptons in MEX/1");
+    h->GetXaxis()->SetBinLabel(3,"Trigger && 2 Tight Leptons && =2 Leptons in MEX/1");
 
     //for MC normalization (to 1/pb)
     TH1F* Hcutflow  = (TH1F*) mon.addHistogram(  new TH1F ("cutflow"    , "cutflow"    ,6,0,6) ) ;
@@ -470,14 +485,21 @@ int main(int argc, char* argv[])
     mon.addHistogram( new TH2F ("pfmet_minus_shapes",";cut index; E_{T}^{miss} [GeV];#Events ",nOptims,0,nOptims, 100,0,500) );
 
 
+    double MT2Bins[]= {0,100,200,300,400,500,600,700,800,1000,1200};
+    const int xnBinsMT2 = sizeof(MT2Bins)/sizeof(double) - 1;
+
+    double MET2Bins[]= {0,80,160,320,400,480,560,640,800,1200};
+    const int xnBinsMET2 = sizeof(MET2Bins)/sizeof(double) - 1;
 
     for(size_t ivar=0; ivar<nvarsToInclude; ivar++) {
         Hoptim_systs->GetXaxis()->SetBinLabel(ivar+1, varNames[ivar]);
 
         //1D shapes for limit setting
-        mon.addHistogram( new TH2F (TString("mt_shapes")+varNames[ivar],";cut index; #it{m}_{T} [GeV];#Events (/100GeV)",nOptims,0,nOptims,12,0,1200) );
-        //mon.addHistogram( new TH2F (TString("pfmet_shapes")+varNames[ivar],";cut index; E_{T}^{miss} [GeV];#Events",nOptims,0,nOptims,nBinPFMET,xbinsPFMET) );
+        mon.addHistogram( new TH2F (TString("mt_shapes")+varNames[ivar],";cut index; #it{m}_{T} [GeV];#Events (/100GeV)",nOptims,0,nOptims,  12,0,1200) );
+        mon.addHistogram( new TH2F (TString("mt2_shapes")+varNames[ivar],";cut index; #it{m}_{T} [GeV];#Events",nOptims,0,nOptims, xnBinsMT2,MT2Bins) );
 
+        mon.addHistogram( new TH2F (TString("met_shapes")+varNames[ivar],";cut index; E_{T}^{miss} [GeV];#Events (/80GeV)",nOptims,0,nOptims, 15,0,1200) );
+        mon.addHistogram( new TH2F (TString("met2_shapes")+varNames[ivar],";cut index; E_{T}^{miss} [GeV];#Events",nOptims,0,nOptims, xnBinsMET2,MET2Bins) );
         //2D shapes for limit setting
         //
         //
@@ -592,11 +614,11 @@ int main(int argc, char* argv[])
     TH2F* h_MuonTrigEffSF = (TH2F *) MuonTrigEffSF_File->Get("muon_trigeff_sf_eta_eta");
 
     // electron trigger efficiency SF
-    TString ElectronTrigEffSF_ = runProcess.getParameter<std::string>("ElectronTrigEffSF");
-    gSystem->ExpandPathName(ElectronTrigEffSF_);
-    cout << "Loading Electron Trigger Eff SF: " << ElectronTrigEffSF_ << endl;
-    TFile *ElectronTrigEffSF_File = TFile::Open(ElectronTrigEffSF_);
-    TH2F* h_ElectronTrigEffSF = (TH2F *) ElectronTrigEffSF_File->Get("electron_trigeff_sf_abseta_abseta");
+    //TString ElectronTrigEffSF_ = runProcess.getParameter<std::string>("ElectronTrigEffSF");
+    //gSystem->ExpandPathName(ElectronTrigEffSF_);
+    //cout << "Loading Electron Trigger Eff SF: " << ElectronTrigEffSF_ << endl;
+    //TFile *ElectronTrigEffSF_File = TFile::Open(ElectronTrigEffSF_);
+    //TH2F* h_ElectronTrigEffSF = (TH2F *) ElectronTrigEffSF_File->Get("electron_trigeff_sf_abseta_abseta");
 
 
     // event categorizer
@@ -736,6 +758,24 @@ int main(int argc, char* argv[])
         }
 
 
+        if(isMC_ZZ2L2Nu) {
+            if(phys.genleptons.size()!=2) continue;
+            if(phys.genneutrinos.size()!=2) continue;
+            double pt_dilep = (phys.genleptons[0]+phys.genleptons[1]).pt();
+            double pt_zvv = (phys.genneutrinos[0]+phys.genneutrinos[1]).pt();
+            double trailing_pt = pt_dilep < pt_zvv ? pt_dilep : pt_zvv;
+            // ewk correction ZZ
+            double qqZZ_EWKNLO = getNLOEWKZZWeight(trailing_pt);
+
+            // NNLO/NLO k-factor
+            double dPhiZZ = deltaPhi((phys.genleptons[0]+phys.genleptons[1]).Phi(), (phys.genneutrinos[0]+phys.genneutrinos[1]).Phi());
+            double qqZZ_NNLO = kfactor_qqZZ_qcd_dPhi(dPhiZZ);
+
+	    //double qqZZwgt = (weight * qqZZ_EWKNLO * qqZZ_NNLO); //qqZZ
+	    //double ggZZwgt = (weight * 0.1); // ggZZ: an extra 10% to account for gg->ZZ contribution
+	    //weight = qqZZwgt+ggZZwgt;
+	    weight *= (0.1 + qqZZ_EWKNLO * qqZZ_NNLO);
+        }
 
 
 
@@ -768,6 +808,7 @@ int main(int argc, char* argv[])
             if(lep.pt()<20) continue;
             if(abs(lepid)==13 && fabs(lep.eta())> 2.4) continue;
             if(abs(lepid)==11 && fabs(lep.eta())> 2.5) continue;
+	    if(abs(lepid)==11 && fabs(lep.eta()) > 1.442 && fabs(lep.eta()) < 1.556) continue;
 
             bool hasTightIdandIso(true);
             if(abs(lepid)==13) { //muon
@@ -915,13 +956,18 @@ int main(int argc, char* argv[])
             if(evcat==MUMU) {
                 trigger_sf *= getSFfrom2DHist( lep1.eta(), lep2.eta(), h_MuonTrigEffSF );
             } else if(evcat==EE) {
-                trigger_sf *= getSFfrom2DHist( fabs(lep1.eta()), fabs(lep2.eta()), h_ElectronTrigEffSF );
+                //trigger_sf *= getSFfrom2DHist( fabs(lep1.eta()), fabs(lep2.eta()), h_ElectronTrigEffSF );
             }
 
             if(trigger_sf < 0.01) trigger_sf = 1.;
             weight *= trigger_sf;
         }
 
+        if(isMC_WIMP) {
+            mon.fillHisto("DMAcceptance",tags,0,1);
+            if( (fabs(lep1.eta())>1.6 && fabs(lep1.eta())<2.4) || (fabs(lep2.eta())>1.6 && fabs(lep2.eta())<2.4) ) mon.fillHisto("DMAcceptance",tags,1,1);
+            if( (fabs(lep1.eta())>1.6 && fabs(lep1.eta())<2.4) && (fabs(lep2.eta())>1.6 && fabs(lep2.eta())<2.4) ) mon.fillHisto("DMAcceptance",tags,2,1);
+        }
 
         mon.fillHisto("eventflow",tags,0,weight);
         mon.fillHisto("nleptons_raw",tags, nGoodLeptons, weight);
@@ -955,8 +1001,11 @@ int main(int argc, char* argv[])
         for(size_t ilep=0; ilep<phys.leptons.size(); ilep++) {
             LorentzVector lep=phys.leptons[ilep];
             int lepid = phys.leptons[ilep].id;
+	    //muon veto
             if(abs(lepid)==13 && fabs(lep.eta())> 2.4) continue;
+	    //electront veto
             if(abs(lepid)==11 && fabs(lep.eta())> 2.5) continue;
+	    if(abs(lepid)==11 && fabs(lep.eta()) > 1.442 && fabs(lep.eta()) < 1.556) continue;
             //tau veto
             if(abs(lepid)==15 && fabs(lep.eta())> 2.4) continue;
 
@@ -978,9 +1027,9 @@ int main(int argc, char* argv[])
                 hasTightIdandIso &= ( phys.leptons[ilep].isElpassMedium && phys.leptons[ilep].pt()>10 );
 
             } else if(abs(lepid)==15) { //tau
-                hasLooseIdandIso &= ( phys.leptons[ilep].isTauDM && phys.leptons[ilep].ta_IsLooseIso && phys.leptons[ilep].pt()>20 );
+                //hasLooseIdandIso &= ( phys.leptons[ilep].isTauDM && phys.leptons[ilep].ta_IsLooseIso && phys.leptons[ilep].pt()>20 );
                 //
-                hasTightIdandIso &= ( phys.leptons[ilep].isTauDM && phys.leptons[ilep].ta_IsTightIso && phys.leptons[ilep].pt()>20 );
+                //hasTightIdandIso &= ( phys.leptons[ilep].isTauDM && phys.leptons[ilep].ta_IsTightIso && phys.leptons[ilep].pt()>20 );
 
             } else continue;
 
@@ -1143,8 +1192,15 @@ int main(int argc, char* argv[])
         mon.fillHisto("zpt_raw"                         ,tags, zll.pt(),   weight);
         mon.fillHisto("pfmet_raw"                       ,tags, metP4.pt(), weight);
 
-        mon.fillHisto("mt_raw"                          ,tags, MT_massless, weight);
-        mon.fillHisto("mt2_raw"                          ,tags, MT_massless, weight,true);
+        if(!isMC) {
+            if(MT_massless<300) {
+                mon.fillHisto("mt_raw"                          ,tags, MT_massless, weight);
+                mon.fillHisto("mt2_raw"                          ,tags, MT_massless, weight,true);
+            }
+        } else {
+            mon.fillHisto("mt_raw"                          ,tags, MT_massless, weight);
+            mon.fillHisto("mt2_raw"                          ,tags, MT_massless, weight,true);
+        }
         mon.fillHisto("zmass_raw"                       ,tags, zll.mass(), weight);
         mon.fillHisto("njets_raw"                       ,tags, nJetsGood30, weight);
         mon.fillHisto("nbjets_raw"                      ,tags, nCSVLtags, weight);
@@ -1295,6 +1351,8 @@ int main(int argc, char* argv[])
 
 
 
+	//for acceptance calculation, and apply the weights to up and down systematics
+        //
 
 
 
@@ -1315,7 +1373,7 @@ int main(int argc, char* argv[])
             if(varNames[ivar]=="_pudown")      iweight *=TotalWeight_minus;       //pu down
 
             //PDF
-            if( (isSignal) && (varNames[ivar]=="_pdfup" || varNames[ivar]=="_pdfdown")) {
+            if( (isSignal || isMCBkg_runPDFQCDscale) && (varNames[ivar]=="_pdfup" || varNames[ivar]=="_pdfdown")) {
                 /*
                         printf("Loop on PDF sets and variations\n");
                         float PDFWeight_plus(1.0), PDFWeight_down(1.0);
@@ -1345,16 +1403,42 @@ int main(int argc, char* argv[])
                         PDFWeight_plus = TMath::Max(PDFWeight_plus,wgts[ipw]);
                         PDFWeight_down = TMath::Min(PDFWeight_down,wgts[ipw]);
                     }
-                    if(varNames[ivar]=="_pdfup")    iweight *= PDFWeight_plus;
-                    else if(varNames[ivar]=="_pdfdown")  iweight *= PDFWeight_down;
+                    //if(varNames[ivar]=="_pdfup")    iweight *= PDFWeight_plus;
+                    //else if(varNames[ivar]=="_pdfdown")  iweight *= PDFWeight_down;
                 }
+
+
+                // retrive PDFweights from ntuple
+                TH1F *pdf_h = new TH1F();
+                for(int npdf=0; npdf<ev.npdfs; npdf++) {
+                    pdf_h->Fill(ev.pdfWeights[npdf]);
+                }
+                double pdfError = pdf_h->GetRMS();
+                delete pdf_h;
+                //cout << "pdfError: " << pdfError << endl;
+
+                // retrive alphaSweights from ntuple
+                TH1F *alphaS_h = new TH1F();
+                for(int nalphaS=0; nalphaS<ev.nalphaS; nalphaS++) {
+                    alphaS_h->Fill(ev.alphaSWeights[nalphaS]);
+                }
+                double alphaSError = alphaS_h->GetRMS();
+                delete alphaS_h;
+                //cout << "alphaSError: " << alphaSError << endl;
+                double PDFalphaSWeight = sqrt(pdfError*pdfError + alphaSError*alphaSError);
+
+                if(varNames[ivar]=="_pdfup")    iweight *= (1.+PDFalphaSWeight);
+                else if(varNames[ivar]=="_pdfdown")  iweight *= (1.-PDFalphaSWeight);
+
 
             }
 
 
             //QCDscale
-            if( (isSignal || isMCBkg_runPDF) && (varNames[ivar]=="_qcdscaleup" || varNames[ivar]=="_qcdscaledown")) {
+            if( (isSignal || isMCBkg_runPDFQCDscale) && (varNames[ivar]=="_qcdscaleup" || varNames[ivar]=="_qcdscaledown" ||
+				varNames[ivar]=="_qcdscaleacceptup" || varNames[ivar]=="_qcdscaleacceptdown") ) {
                 float QCDscaleWeight_plus(1.0), QCDscaleWeight_down(1.0);
+
                 std::vector<float> QCDscaleWgts;
                 QCDscaleWgts.clear();
                 QCDscaleWgts.push_back(ev.weight_QCDscale_muR1_muF2);
@@ -1365,16 +1449,22 @@ int main(int argc, char* argv[])
                 QCDscaleWgts.push_back(ev.weight_QCDscale_muR0p5_muF0p5);
                 for(size_t ipw=0; ipw<QCDscaleWgts.size(); ipw++) {
                     if(ipw==0) {
-                        QCDscaleWeight_plus = QCDscaleWgts[0];
-                        QCDscaleWeight_down = QCDscaleWgts[0];
+			// need to add */genWeight to remove the negative sign from negative event
+			// the negative sign is already assigned when using iweight = weight
+                        QCDscaleWeight_plus = QCDscaleWgts[ipw]/genWeight;
+                        QCDscaleWeight_down = QCDscaleWgts[ipw]/genWeight;
                     } else {
-                        QCDscaleWeight_plus = TMath::Max(QCDscaleWeight_plus,QCDscaleWgts[ipw]);
-                        QCDscaleWeight_down = TMath::Min(QCDscaleWeight_down,QCDscaleWgts[ipw]);
+                        QCDscaleWeight_plus = TMath::Max(QCDscaleWeight_plus,QCDscaleWgts[ipw]/genWeight);
+                        QCDscaleWeight_down = TMath::Min(QCDscaleWeight_down,QCDscaleWgts[ipw]/genWeight);
                     }
+                    //cout << "QCDscaleWgts[" << ipw << "]: " << QCDscaleWgts[ipw] << endl;
                 }
-                if(varNames[ivar]=="_qcdscaleup")    iweight *= QCDscaleWeight_plus;
-                else if(varNames[ivar]=="_qcdscaledown")  iweight *= QCDscaleWeight_down;
+
+                if(varNames[ivar]=="_qcdscaleup" || varNames[ivar]=="_qcdscaleacceptup")    	   iweight *= QCDscaleWeight_plus;
+                else if(varNames[ivar]=="_qcdscaledown" || varNames[ivar]=="_qcdscaleacceptdown")  iweight *= QCDscaleWeight_down;
             }
+
+
 
 
             //##############################################
@@ -1436,8 +1526,8 @@ int main(int argc, char* argv[])
                         //valerr = myBtagUtils.getBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/c_eff").second;
                         double BTagSF_Up   = btag_reader_up.eval( BTagEntry::FLAV_C, vJets[ijet].eta(), (vJets[ijet].pt()<670. ? vJets[ijet].pt() : 670.) );
                         double BTagSF_Down = btag_reader_down.eval( BTagEntry::FLAV_C, vJets[ijet].eta(), (vJets[ijet].pt()<670. ? vJets[ijet].pt() : 670.) );
-                        BTagWeights_Up 	   *= myBtagUtils.getNewBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),BTagSF_Up,"CSVM","CSVM/c_eff");
-                        BTagWeights_Down   *= myBtagUtils.getNewBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),BTagSF_Down,"CSVM","CSVM/c_eff");
+                        BTagWeights_Up 	   *= myBtagUtils.getNewBTagWeight( isLocalCSVtagged,vJets[ijet].pt(),BTagSF_Up,"CSVM","CSVM/c_eff" );
+                        BTagWeights_Down   *= myBtagUtils.getNewBTagWeight( isLocalCSVtagged,vJets[ijet].pt(),BTagSF_Down,"CSVM","CSVM/c_eff" );
 
                     } else {
                         //val = myBtagUtils.getBTagWeight(isLocalCSVtagged,vJets[ijet].pt(),vJets[ijet].eta(),abs(vJets[ijet].flavid),"CSVL","CSVL/udsg_eff").first;
@@ -1486,6 +1576,10 @@ int main(int argc, char* argv[])
                 // fill shapes for limit setting
                 if( passOptimSelection ) {
                     mon.fillHisto(TString("mt_shapes")+varNames[ivar],tags,index, mt_massless, iweight);
+                    mon.fillHisto(TString("mt2_shapes")+varNames[ivar],tags,index, mt_massless, iweight);
+
+                    mon.fillHisto(TString("met_shapes")+varNames[ivar],tags,index, vMET.pt(), iweight);
+                    mon.fillHisto(TString("met2_shapes")+varNames[ivar],tags,index, vMET.pt(), iweight);
                 }
 
 
@@ -1541,7 +1635,7 @@ int main(int argc, char* argv[])
     PU_Down_File->Close();
 
     MuonTrigEffSF_File->Close();
-    ElectronTrigEffSF_File->Close();
+    //ElectronTrigEffSF_File->Close();
 
     if(outTxtFile_final)fclose(outTxtFile_final);
 }

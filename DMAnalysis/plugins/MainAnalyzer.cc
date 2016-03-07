@@ -52,6 +52,7 @@
 #include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+#include "SimDataFormats/GeneratorProducts/interface/LHERunInfoProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 #include "SimDataFormats/TrackingAnalysis/interface/TrackingVertexContainer.h"
 
@@ -72,6 +73,7 @@
 #include "llvvAnalysis/DMAnalysis/interface/TSelectionMonitor.h"
 #include "llvvAnalysis/DMAnalysis/interface/DataEvtSummaryHandler.h"
 
+#include "llvvAnalysis/DMAnalysis/interface/PDFWeightsHelper.h"
 
 #include "DataFormats/Common/interface/ValueMap.h"
 //#include "llvvAnalysis/DMAnalysis/interface/EGammaMvaEleEstimatorCSA14.h"
@@ -128,7 +130,8 @@ private:
     edm::EDGetTokenT<GenEventInfoProduct> genInfoTag_;
     edm::EDGetTokenT<edm::View<pat::PackedGenParticle> > packedGenTag_;
     edm::EDGetTokenT<edm::View<reco::GenJet> > genjetTag_;
-
+    edm::InputTag lheRunInfoTag_;
+    edm::EDGetTokenT<LHERunInfoProduct> lheRunInfoToken_;
 
 
     edm::EDGetTokenT<edm::TriggerResults> triggerBits_;
@@ -181,14 +184,24 @@ private:
     int matchToTruth(const pat::Electron &el, const edm::Handle<edm::View<reco::GenParticle>>  &prunedGenParticles);
     void findFirstNonElectronMother(const reco::Candidate *particle, int &ancestorPID, int &ancestorStatus);
 
-    //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
-    //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
+    virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
+    //void beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup);
+    virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
     //virtual void beginLuminosityBlock(edm::LuminosityBlock &iLumi, edm::EventSetup &iSetup);
     //virtual void endLuminosityBlock(edm::LuminosityBlock &iLumi, edm::EventSetup &iSetup);
 
     // ----------member data ---------------------------
     float curAvgInstLumi_;
     float curIntegLumi_;
+
+    //PhysicsTools/HepMCCandAlgos/plugins/PDFWeightsTest.cc
+    PDFWeightsHelper pdfweightshelper;
+
+    int firstPdfWeight;
+    int lastPdfWeight;
+    int firstAlphasWeight;
+    int lastAlphasWeight;
+
 
 };
 
@@ -241,6 +254,8 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
     genInfoTag_(        consumes<GenEventInfoProduct>(iConfig.getParameter<edm::InputTag>("genInfoTag"))                ),
     packedGenTag_(	consumes<edm::View<pat::PackedGenParticle> >(iConfig.getParameter<edm::InputTag>("packedTag"))	),
     genjetTag_(		consumes<edm::View<reco::GenJet> >(iConfig.getParameter<edm::InputTag>("genJetsTag"))		),
+    lheRunInfoTag_(     iConfig.getParameter<edm::InputTag>("lheInfo")                                                  ),
+    lheRunInfoToken_(   consumes<LHERunInfoProduct,edm::InRun>(lheRunInfoTag_)						),
     triggerBits_(	consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("bits"))			),
     triggerObjects_(	consumes<pat::TriggerObjectStandAloneCollection>(iConfig.getParameter<edm::InputTag>("objects"))),
     triggerPrescales_(	consumes<pat::PackedTriggerPrescales>(iConfig.getParameter<edm::InputTag>("prescales"))		),
@@ -296,6 +311,10 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
     //controlHistos_.addHistogram("instlumi", ";Max average inst. luminosity; Events",100,0,1e5);
     controlHistos_.addHistogram("pileuptrue", ";True pileup; Events",100,-0.5,99.5);
 
+    controlHistos_.addHistogram("sumWeights",";;sumWeights;",1,-0.5,0.5);
+    controlHistos_.addHistogram("sumScaleWeights",";;sumScaleWeights;",9,-0.5,8.5);
+    controlHistos_.addHistogram("sumPdfWeights",";;sumPdfWeights;",100,-0.5,99.5);
+    controlHistos_.addHistogram("sumAlphasWeights",";;sumAlphasWeights;",2,-0.5,1.5);
 
     //set up electron MVA ID
     /*
@@ -333,6 +352,18 @@ MainAnalyzer::MainAnalyzer(const edm::ParameterSet& iConfig):
                                  myNonTrigWeights);
 
     */
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }
@@ -497,10 +528,19 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
     const edm::TriggerNames &metNames = event.triggerNames(*metFilterBits);
     bool passMETFilters(true);
     for(unsigned int i = 0, n = metFilterBits->size(); i < n; ++i) {
-        if(strcmp(metNames.triggerName(i).c_str(), "Flag_goodVertices") == 0)
+        if(strcmp(metNames.triggerName(i).c_str(), 	 "Flag_goodVertices") == 0){
             passMETFilters &= metFilterBits->accept(i);
-        else if(strcmp(metNames.triggerName(i).c_str(), "Flag_eeBadScFilter") == 0)
+	}else if(strcmp(metNames.triggerName(i).c_str(), "Flag_eeBadScFilter") == 0){
             passMETFilters &= metFilterBits->accept(i);
+	}else if(strcmp(metNames.triggerName(i).c_str(), "Flag_HBHENoiseFilter") == 0){
+            passMETFilters &= metFilterBits->accept(i);
+        }else if(strcmp(metNames.triggerName(i).c_str(), "Flag_HBHENoiseIsoFilter") == 0){
+            passMETFilters &= metFilterBits->accept(i);
+        }else if(strcmp(metNames.triggerName(i).c_str(), "Flag_CSCTightHalo2015Filter") == 0){
+            passMETFilters &= metFilterBits->accept(i);
+        }else if(strcmp(metNames.triggerName(i).c_str(), "Flag_EcalDeadCellTriggerPrimitiveFilter") == 0){
+            passMETFilters &= metFilterBits->accept(i);
+	}
     }
     if(!passMETFilters) return;
 
@@ -797,42 +837,42 @@ MainAnalyzer::analyze(const edm::Event& event, const edm::EventSetup& iSetup)
         ev.jet++;
     }
 
-/*
-    //
-    // slimmedJetsPuppi
-    //
-    edm::Handle<pat::JetCollection> puppijets;
-    event.getByToken(jetPuppiTag_, puppijets);
+    /*
+        //
+        // slimmedJetsPuppi
+        //
+        edm::Handle<pat::JetCollection> puppijets;
+        event.getByToken(jetPuppiTag_, puppijets);
 
-    ev.pjet=0;
-    if(puppijets.isValid()) {
-        for (const pat::Jet &j : *puppijets) {
-            if(j.pt() < 20) continue;
-            ev.pjet_px[ev.pjet] = j.px(); //correctedP4(0).px();
-            ev.pjet_py[ev.pjet] = j.px(); //correctedP4(0).py();
-            ev.pjet_pz[ev.pjet] = j.pz(); //correctedP4(0).pz();
-            ev.pjet_en[ev.pjet] = j.energy(); //correctedP4(0).energy();
+        ev.pjet=0;
+        if(puppijets.isValid()) {
+            for (const pat::Jet &j : *puppijets) {
+                if(j.pt() < 20) continue;
+                ev.pjet_px[ev.pjet] = j.px(); //correctedP4(0).px();
+                ev.pjet_py[ev.pjet] = j.px(); //correctedP4(0).py();
+                ev.pjet_pz[ev.pjet] = j.pz(); //correctedP4(0).pz();
+                ev.pjet_en[ev.pjet] = j.energy(); //correctedP4(0).energy();
 
-            const reco::GenJet *gJet=j.genJet();
-            if(gJet) ev.pjet_genpt[ev.pjet] = gJet->pt();
-            else     ev.pjet_genpt[ev.pjet] = 0;
+                const reco::GenJet *gJet=j.genJet();
+                if(gJet) ev.pjet_genpt[ev.pjet] = gJet->pt();
+                else     ev.pjet_genpt[ev.pjet] = 0;
 
-            ev.pjet_btag0[ev.pjet] = j.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
-            ev.pjet_btag1[ev.pjet] = j.bDiscriminator("pfJetBProbabilityBJetTags");
-            ev.pjet_btag2[ev.pjet] = j.bDiscriminator("pfJetProbabilityBJetTags");
-            ev.pjet_btag3[ev.pjet] = j.bDiscriminator("pfTrackCountingHighPurBJetTags");
-            ev.pjet_btag4[ev.pjet] = j.bDiscriminator("pfTrackCountingHighEffBJetTags");
-            ev.pjet_btag5[ev.pjet] = j.bDiscriminator("pfSimpleSecondaryVertexHighEffBJetTags");
-            ev.pjet_btag6[ev.pjet] = j.bDiscriminator("pfSimpleSecondaryVertexHighPurBJetTags");
-            ev.pjet_btag7[ev.pjet] = j.bDiscriminator("combinedSecondaryVertexBJetTags");
-            ev.pjet_btag8[ev.pjet] = j.bDiscriminator("pfCombinedSecondaryVertexV2BJetTags");
-            ev.pjet_btag9[ev.pjet] = j.bDiscriminator("pfCombinedSecondaryVertexSoftLeptonBJetTags");
-            ev.pjet_btag10[ev.pjet] = j.bDiscriminator("pfCombinedMVABJetTags");
-            ev.pjet++;
+                ev.pjet_btag0[ev.pjet] = j.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags");
+                ev.pjet_btag1[ev.pjet] = j.bDiscriminator("pfJetBProbabilityBJetTags");
+                ev.pjet_btag2[ev.pjet] = j.bDiscriminator("pfJetProbabilityBJetTags");
+                ev.pjet_btag3[ev.pjet] = j.bDiscriminator("pfTrackCountingHighPurBJetTags");
+                ev.pjet_btag4[ev.pjet] = j.bDiscriminator("pfTrackCountingHighEffBJetTags");
+                ev.pjet_btag5[ev.pjet] = j.bDiscriminator("pfSimpleSecondaryVertexHighEffBJetTags");
+                ev.pjet_btag6[ev.pjet] = j.bDiscriminator("pfSimpleSecondaryVertexHighPurBJetTags");
+                ev.pjet_btag7[ev.pjet] = j.bDiscriminator("combinedSecondaryVertexBJetTags");
+                ev.pjet_btag8[ev.pjet] = j.bDiscriminator("pfCombinedSecondaryVertexV2BJetTags");
+                ev.pjet_btag9[ev.pjet] = j.bDiscriminator("pfCombinedSecondaryVertexSoftLeptonBJetTags");
+                ev.pjet_btag10[ev.pjet] = j.bDiscriminator("pfCombinedMVABJetTags");
+                ev.pjet++;
+            }
         }
-    }
 
-*/
+    */
     //
     // fat jet selection (ak8PFJetsCHS)
     //
@@ -1023,6 +1063,10 @@ MainAnalyzer::getMCtruth(const edm::Event& event, const edm::EventSetup& iSetup)
     //event.getByLabel("generator", genEventInfoProd);
     event.getByToken(genInfoTag_, genEventInfoProd);
     ev.genWeight = genEventInfoProd->weight();
+    float SignGenWeight=1;
+    if(ev.genWeight<0) SignGenWeight=-1;
+
+    controlHistos_.fillHisto("sumWeights","all",0.,SignGenWeight);
     ev.qscale = genEventInfoProd->qScale();
     if(genEventInfoProd->pdf()) {
         ev.x1  = genEventInfoProd->pdf()->x.first;
@@ -1040,19 +1084,61 @@ MainAnalyzer::getMCtruth(const edm::Event& event, const edm::EventSetup& iSetup)
     //https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW
     vector<edm::Handle<LHEEventProduct> > EvtHandles;
     event.getManyByType(EvtHandles);
+    ev.npdfs=0;
+    ev.nalphaS=0;
     if(EvtHandles.size()>0) {
+
         edm::Handle<LHEEventProduct> EvtHandle = EvtHandles.front();
-        if(EvtHandle.isValid() && EvtHandle->weights().size()>=9) {
-            ev.weight_QCDscale_muR1_muF1 		= EvtHandle->weights()[0].wgt/EvtHandle->originalXWGTUP();
-            ev.weight_QCDscale_muR1_muF2 		= EvtHandle->weights()[1].wgt/EvtHandle->originalXWGTUP();
-            ev.weight_QCDscale_muR1_muF0p5 		= EvtHandle->weights()[2].wgt/EvtHandle->originalXWGTUP();
-            ev.weight_QCDscale_muR2_muF1 		= EvtHandle->weights()[3].wgt/EvtHandle->originalXWGTUP();
-            ev.weight_QCDscale_muR2_muF2 		= EvtHandle->weights()[4].wgt/EvtHandle->originalXWGTUP();
-            ev.weight_QCDscale_muR2_muF0p5 		= EvtHandle->weights()[5].wgt/EvtHandle->originalXWGTUP();
-            ev.weight_QCDscale_muR0p5_muF1 		= EvtHandle->weights()[6].wgt/EvtHandle->originalXWGTUP();
-            ev.weight_QCDscale_muR0p5_muF2 		= EvtHandle->weights()[7].wgt/EvtHandle->originalXWGTUP();
-            ev.weight_QCDscale_muR0p5_muF0p5 		= EvtHandle->weights()[8].wgt/EvtHandle->originalXWGTUP();
-        }
+        if(EvtHandle.isValid() && EvtHandle->weights().size()>0) {
+
+            //fill scale variation weights
+            if(EvtHandle->weights().size()>=9) {
+                ev.weight_QCDscale_muR1_muF1 		= SignGenWeight * EvtHandle->weights()[0].wgt/EvtHandle->originalXWGTUP();
+                ev.weight_QCDscale_muR1_muF2 		= SignGenWeight * EvtHandle->weights()[1].wgt/EvtHandle->originalXWGTUP();
+                ev.weight_QCDscale_muR1_muF0p5 		= SignGenWeight * EvtHandle->weights()[2].wgt/EvtHandle->originalXWGTUP();
+                ev.weight_QCDscale_muR2_muF1 		= SignGenWeight * EvtHandle->weights()[3].wgt/EvtHandle->originalXWGTUP();
+                ev.weight_QCDscale_muR2_muF2 		= SignGenWeight * EvtHandle->weights()[4].wgt/EvtHandle->originalXWGTUP();
+                ev.weight_QCDscale_muR2_muF0p5 		= SignGenWeight * EvtHandle->weights()[5].wgt/EvtHandle->originalXWGTUP();
+                ev.weight_QCDscale_muR0p5_muF1 		= SignGenWeight * EvtHandle->weights()[6].wgt/EvtHandle->originalXWGTUP();
+                ev.weight_QCDscale_muR0p5_muF2 		= SignGenWeight * EvtHandle->weights()[7].wgt/EvtHandle->originalXWGTUP();
+                ev.weight_QCDscale_muR0p5_muF0p5 	= SignGenWeight * EvtHandle->weights()[8].wgt/EvtHandle->originalXWGTUP();
+
+		for(int w=0; w<9; w++) controlHistos_.fillHisto("sumScaleWeights","all",double(w), SignGenWeight * EvtHandle->weights()[w].wgt/EvtHandle->originalXWGTUP());
+
+            } // scale variation weights END
+
+
+            //fill pdf+alpha_s variation weights
+            if (firstPdfWeight>=0 && lastPdfWeight>=0 && lastPdfWeight<int(EvtHandle->weights().size()) && (lastPdfWeight-firstPdfWeight+1)==100) {
+
+                //fill pdf variation weights after converting with mc2hessian transformation
+                //std::array<double, 100> inpdfweights;
+                for (int iwgt=firstPdfWeight; iwgt<=lastPdfWeight; ++iwgt) {
+                    ev.pdfWeights[ev.npdfs] = SignGenWeight * EvtHandle->weights()[iwgt].wgt/EvtHandle->originalXWGTUP();
+		    controlHistos_.fillHisto("sumPdfWeights","all",double(ev.npdfs), ev.pdfWeights[ev.npdfs]);
+		    ev.npdfs++;
+                }
+
+                //std::array<double, 60> outpdfweights;
+                //pdfweightshelper.DoMC2Hessian(EvtHandle->originalXWGTUP(),inpdfweights.data(),outpdfweights.data());
+                //for (unsigned int iwgt=0; iwgt<60; ++iwgt) {
+                //    ev.pdfWeights[ev.npdfs] = ev.genWeight * outpdfweights[iwgt];
+                //    ev.npdfs++;
+                //}
+
+                //fill alpha_s variation weights
+                if (firstAlphasWeight>=0 && lastAlphasWeight>=0 && lastAlphasWeight<int(EvtHandle->weights().size())) {
+                    for (int iwgt = firstAlphasWeight; iwgt<=lastAlphasWeight; ++iwgt) {
+                        ev.alphaSWeights[ev.nalphaS] = SignGenWeight * EvtHandle->weights()[iwgt].wgt/EvtHandle->originalXWGTUP();
+			controlHistos_.fillHisto("sumAlphasWeights","all",double(ev.nalphaS), ev.alphaSWeights[ev.nalphaS]);
+			ev.nalphaS++;
+                    }
+                }
+
+            } // pdf variation weights END
+
+        }// EvtHandle.isValid
+
     }
 
 
@@ -1321,20 +1407,78 @@ MainAnalyzer::endJob()
 }
 
 // ------------ method called when starting to processes a run  ------------
-/*
+
 void
-MainAnalyzer::beginRun(edm::Run const&, edm::EventSetup const&)
+MainAnalyzer::beginRun(const edm::Run& iRun, const edm::EventSetup& iSetup)
 {
+
+    edm::Handle<LHERunInfoProduct> lheRunInfo;
+    iRun.getByLabel(lheRunInfoTag_,lheRunInfo);
+
+    if (lheRunInfo.isValid()) {
+
+        int pdfidx = lheRunInfo->heprup().PDFSUP.first;
+
+        if (pdfidx == 263000) {
+            if(verbose_) cout << "NNPDF30_lo_as_0130 (nf5) for LO madgraph samples" << endl;
+            pdfweightshelper.Init(100,60,edm::FileInPath("llvvAnalysis/DMAnalysis/data/NNPDF30_lo_as_0130_hessian_60.csv"));
+            firstPdfWeight = 10;
+            lastPdfWeight = 109;
+            firstAlphasWeight = -1;
+            lastAlphasWeight = -1;
+        } else if (pdfidx == 263400) {
+            if(verbose_) cout << "NNPdf30_lo_as_0130_nf4 for LO madgraph samples" << endl;
+            pdfweightshelper.Init(100,60,edm::FileInPath("llvvAnalysis/DMAnalysis/data/NNPDF30_lo_as_0130_nf_4_hessian_60.csv"));
+            firstPdfWeight = 111;
+            lastPdfWeight = 210;
+            firstAlphasWeight = -1;
+            lastAlphasWeight = -1;
+        } else if (pdfidx == 260000 || pdfidx == -1) {
+            if(verbose_) cout << "NNPdf30_nlo_as_0118 (nf5) for NLO powheg samples" << endl;
+            //(work around apparent bug in current powheg samples by catching "-1" as well)
+            pdfweightshelper.Init(100,60,edm::FileInPath("llvvAnalysis/DMAnalysis/data/NNPDF30_nlo_as_0118_hessian_60.csv"));
+            firstPdfWeight = 9;
+            lastPdfWeight = 108;
+            firstAlphasWeight = 109;
+            lastAlphasWeight = 110;
+        } else if (pdfidx == 292200) {
+            if(verbose_) cout << "NNPdf30_nlo_as_0118 (nf5) with built-in alphas variations for NLO aMC@NLO samples" << endl;
+            pdfweightshelper.Init(100,60,edm::FileInPath("llvvAnalysis/DMAnalysis/data/NNPDF30_nlo_as_0118_hessian_60.csv"));
+            firstPdfWeight = 9;
+            lastPdfWeight = 108;
+            firstAlphasWeight = 109;
+            lastAlphasWeight = 110;
+        } else if (pdfidx == 292000) {
+            if(verbose_) cout << "NNPdf30_nlo_as_0118_nf4 with built-in alphas variations for NLO aMC@NLO samples" << endl;
+            pdfweightshelper.Init(100,60,edm::FileInPath("llvvAnalysis/DMAnalysis/data/NNPDF30_nlo_as_0118_nf_4_hessian_60.csv"));
+            firstPdfWeight = 9;
+            lastPdfWeight = 108;
+            firstAlphasWeight = 109;
+            lastAlphasWeight = 110;
+        } else {
+            firstPdfWeight = -1;
+            lastPdfWeight = -1;
+            firstAlphasWeight = -1;
+            lastAlphasWeight = -1;
+        }
+
+    } else {
+        firstPdfWeight = -1;
+        lastPdfWeight = -1;
+        firstAlphasWeight = -1;
+        lastAlphasWeight = -1;
+    }
+
 }
-*/
+
 
 // ------------ method called when ending the processing of a run  ------------
-/*
+
 void
 MainAnalyzer::endRun(edm::Run const&, edm::EventSetup const&)
 {
 }
-*/
+
 
 // ------------ method called when starting to processes a luminosity block  ------------
 /*

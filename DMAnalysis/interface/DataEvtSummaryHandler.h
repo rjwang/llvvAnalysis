@@ -23,6 +23,7 @@ typedef std::vector<LorentzVector> LorentzVectorCollection;
 
 #define MAXPARTICLES 50
 #define MAXMCPARTICLES 250
+#define MAXLHEWEIGHTS 500
 
 struct DataEvtSummary_t {
 
@@ -51,6 +52,10 @@ struct DataEvtSummary_t {
     Float_t weight_QCDscale_muR0p5_muF0p5;
 
 
+    Int_t   npdfs;
+    Float_t pdfWeights[MAXLHEWEIGHTS];
+    Int_t   nalphaS;
+    Float_t alphaSWeights[MAXLHEWEIGHTS];
 
 
     //gen level event
