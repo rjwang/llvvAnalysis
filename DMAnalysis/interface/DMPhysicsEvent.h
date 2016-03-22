@@ -155,6 +155,7 @@ int getDileptonId(int id1, int id2);
 bool isDYToLL(int id1, int id2);
 bool isDYToTauTau(int id1, int id2);
 float getSFfrom2DHist(double xval, double yval, TH2F* h_);
+float getSFfrom1DHist(double xval, TH1F* h_);
 
 float getNLOEWKZZWeight(double trailing_pt);
 float kfactor_qqZZ_qcd_dPhi(float GENdPhiZZ);

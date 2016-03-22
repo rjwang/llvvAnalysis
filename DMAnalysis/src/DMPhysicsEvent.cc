@@ -221,8 +221,31 @@ float getSFfrom2DHist(double xval, double yval, TH2F* h_)
     int biny = h_->GetYaxis()->FindBin(yval);
     float sf_ = h_->GetBinContent(binx,biny);
 
-    return sf_;
+    if(sf_==0.) return 1.;
+    else return sf_;
 }
+
+float getSFfrom1DHist(double xval, TH1F* h_)
+{
+
+    if(h_==NULL) {
+        cout << "[getSFfrom1DHist]: empty hist! " << endl;
+        return 1;
+    }
+    int xbins = h_->GetXaxis()->GetNbins();
+    if(xval > h_->GetXaxis()->GetBinUpEdge(xbins)    ) xval = h_->GetXaxis()->GetBinUpEdge(xbins);
+    if(xval < h_->GetXaxis()->GetBinLowEdge(1)       ) xval = h_->GetXaxis()->GetBinLowEdge(1);
+
+
+    int binx = h_->GetXaxis()->FindBin(xval);
+    float sf_ = h_->GetBinContent(binx);
+
+    if(sf_==0.) return 1.;
+    else return sf_;
+}
+
+
+
 
 float getNLOEWKZZWeight(double trailing_pt)
 {
