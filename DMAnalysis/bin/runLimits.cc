@@ -205,7 +205,7 @@ void initNormalizationSysts()
 {
     normSysts["lumi_7TeV"] = 0.022;
     normSysts["lumi_8TeV"] = 0.026;
-    normSysts["lumi_13TeV"] = 0.027; //0.046;
+    normSysts["lumi_13TeV"] = 0.0270; //0.046;
     normSysts["accept_7TeV"] = 0.;//0.02;//0.003; //RJ
     normSysts["accept_8TeV"] = 0.;//0.02;//0.018; //RJ
     normSysts["sherpa_kin_syst"] = sysSherpa-1.0;
@@ -819,7 +819,9 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
                 if(procTitle.Contains("C3")) {
                     if(mass>0 && !procTitle.Contains("C3("+massStr+"GeV)"))continue;
                 }
+
                 if(procTitle.Contains("Unpart")) {
+                    if(MV>0 || MA>0) continue;
                     if(mass>0 && !procTitle.Contains("Unpart("+massStr+")"))continue;
                 }
 
@@ -1114,29 +1116,7 @@ std::vector<TString>  buildDataCard(Int_t mass, TString histo, TString url, TStr
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                     if(!dci.procs[j-1].Contains("WWTopZtautau") && !dci.procs[j-1].Contains("Zjets") && !dci.procs[j-1].Contains("Wjets")) {
-                        fprintf(pFile,"%6f ",1.0+normSysts["lumi_13TeV"]);
-                    } else {
-                        fprintf(pFile,"%6s ","-");
-                    }
-                }
-                fprintf(pFile,"\n");
-            } else if(systpostfix.Contains('8')) {
-                fprintf(pFile,"%45s %10s ", "lumi_8TeV", "lnN");
-                for(size_t j=1; j<=dci.procs.size(); j++) {
-                    if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                    if(!dci.procs[j-1].Contains("WWTopZtautau") && !dci.procs[j-1].Contains("Zjets") && !dci.procs[j-1].Contains("Wjets")) {
-                        fprintf(pFile,"%6f ",1.0+normSysts["lumi_8TeV"]);
-                    } else {
-                        fprintf(pFile,"%6s ","-");
-                    }
-                }
-                fprintf(pFile,"\n");
-            } else {
-                fprintf(pFile,"%45s %10s ", "lumi_7TeV", "lnN");
-                for(size_t j=1; j<=dci.procs.size(); j++) {
-                    if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
-                    if(!dci.procs[j-1].Contains("WWTopZtautau") && !dci.procs[j-1].Contains("Zjets")) {
-                        fprintf(pFile,"%6f ",1.0+normSysts["lumi_7TeV"]);
+                        fprintf(pFile,"%6.5f ",1.0+normSysts["lumi_13TeV"]);
                     } else {
                         fprintf(pFile,"%6s ","-");
                     }
@@ -1144,13 +1124,24 @@ std::vector<TString>  buildDataCard(Int_t mass, TString histo, TString url, TStr
                 fprintf(pFile,"\n");
             }
 
+            fprintf(pFile,"%45s %10s ", "Norm_ggZZ", "lnN");
+            for(size_t j=1; j<=dci.procs.size(); j++) {
+                if(dci.procs[j-1].Contains("ZZ")) {
+                	fprintf(pFile,"%6.5f ",1.1);
+                } else {
+                    	fprintf(pFile,"%6s ","-");
+                }
+            }
+            fprintf(pFile,"\n");
+
+
             //leptont efficiency
             if(dci.ch[i-1].Contains("ee")) {
                 fprintf(pFile,"%45s %10s ", "CMS_eff_e", "lnN");
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                     if(!dci.procs[j-1].Contains("WWTopZtautau") && !dci.procs[j-1].Contains("Zjets") /*&& !dci.procs[j-1].Contains("Wjets")*/) {
-                        fprintf(pFile,"%6f ",1.0+normSysts["CMS_eff_e"]);
+                        fprintf(pFile,"%6.5f ",1.0+normSysts["CMS_eff_e"]);
                     } else {
                         fprintf(pFile,"%6s ","-");
                     }
@@ -1161,7 +1152,7 @@ std::vector<TString>  buildDataCard(Int_t mass, TString histo, TString url, TStr
                 for(size_t j=1; j<=dci.procs.size(); j++) {
                     if(dci.rates.find(RateKey_t(dci.procs[j-1],dci.ch[i-1]))==dci.rates.end()) continue;
                     if(!dci.procs[j-1].Contains("WWTopZtautau") && !dci.procs[j-1].Contains("Zjets") /*&& !dci.procs[j-1].Contains("Wjets")*/) {
-                        fprintf(pFile,"%6f ",1.0+normSysts["CMS_eff_m"]);
+                        fprintf(pFile,"%6.5f ",1.0+normSysts["CMS_eff_m"]);
                     } else {
                         fprintf(pFile,"%6s ","-");
                     }
@@ -1183,7 +1174,7 @@ std::vector<TString>  buildDataCard(Int_t mass, TString histo, TString url, TStr
                             if(systUnc<=0) {
                                 sprintf(sFile,"%s%6s ",sFile,"-");
                             } else {
-                                sprintf(sFile,"%s%6f ",sFile,(1.0+ (systUnc / dci.rates[RateKey_t(dci.procs[j-1],dci.ch[i-1])]) ));
+                                sprintf(sFile,"%s%6.5f ",sFile,(1.0+ (systUnc / dci.rates[RateKey_t(dci.procs[j-1],dci.ch[i-1])]) ));
                                 isSyst=true;
                             }
                         } else {
@@ -1203,7 +1194,7 @@ std::vector<TString>  buildDataCard(Int_t mass, TString histo, TString url, TStr
 
                         if(it->second.find(RateKey_t(dci.procs[j-1],dci.ch[i-1])) != it->second.end()) {
                             //cout << "dci.procs[j-1]: " << dci.procs[j-1] << " it->first: " << it->first  << endl;
-                            if(!shape) sprintf(sFile,"%s%6.3f ",sFile,it->second[RateKey_t(dci.procs[j-1],dci.ch[i-1])]);
+                            if(!shape) sprintf(sFile,"%s%6.5f ",sFile,it->second[RateKey_t(dci.procs[j-1],dci.ch[i-1])]);
                             else       sprintf(sFile,"%s%6s ",sFile,"1.0");
                             isSyst=true;
                         } else {
@@ -1400,6 +1391,7 @@ DataCardInputs convertHistosForLimits(Int_t mass,TString histo,TString url,TStri
                     if(mass>0 && !proc.Contains("C3("+massStr+"GeV)"))continue;
                 }
                 if(proc.Contains("Unpart")) {
+                    if(MV>0 || MA>0) continue;
                     if(mass>0 && !proc.Contains("Unpart("+massStr+")"))continue;
                 }
 
@@ -1433,9 +1425,9 @@ DataCardInputs convertHistosForLimits(Int_t mass,TString histo,TString url,TStri
                 hshapes.push_back(shapeSt.signal[isignal]);
                 cout << "\n" << shapeSt.signal[isignal]->GetTitle() << " has rate: " << shapeSt.signal[isignal]->Integral() << endl;
                 for(size_t v=0; v<vars.size(); v++) {
-		    //if(vars[v].first=="_qcdscaleacceptup" || vars[v].first=="_qcdscaleacceptdown"){
-		    //	vars[v].second->Scale(shapeSt.signal[isignal]->Integral()/vars[v].second->Integral());
-		    //}
+                    //if(vars[v].first=="_qcdscaleacceptup" || vars[v].first=="_qcdscaleacceptdown"){
+                    //	vars[v].second->Scale(shapeSt.signal[isignal]->Integral()/vars[v].second->Integral());
+                    //}
                     printf("SYSTEMATIC FOR SIGNAL %s : %s: %f\n",h->GetTitle(), vars[v].first.Data(), vars[v].second->Integral());
                     systs.push_back(vars[v].first);
                     hshapes.push_back(vars[v].second);
@@ -1670,7 +1662,8 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
         if(syst=="") {
             syst="";
         } else if(syst.BeginsWith("_jes")) {
-            syst.ReplaceAll("_jes","_CMS_scale_j");
+            continue; // skip
+            //syst.ReplaceAll("_jes","_CMS_scale_j");
         } else if(syst.BeginsWith("_jer")) {
             syst.ReplaceAll("_jer","_CMS_res_j");
         } else if(syst.BeginsWith("_btag")) {
@@ -1687,13 +1680,15 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
             if ( proc.Contains("ZZ") || proc.Contains("WZ") )  syst.ReplaceAll("_qcdscale", "_QCDscale_VV");
             else if ( proc.Contains("VVV") ) 		       syst.ReplaceAll("_qcdscale", "_QCDscale_VVV");
             else if ( proc.Contains("ewk_s_dm") )              syst.ReplaceAll("_qcdscale", "_QCDscale_EWKDM");
-            else if ( proc.Contains("Unpart") )		       syst.ReplaceAll("_qcdscale", "_QCDscale_Unpart");
-            else if ( proc.Contains("ADD") )                   syst.ReplaceAll("_qcdscale", "_QCDscale_ADD");
+            else if ( proc.Contains("UnPart") )		       syst.ReplaceAll("_qcdscale", "_QCDscale_Unpart");
+            else if ( proc.Contains("add") )                   syst.ReplaceAll("_qcdscale", "_QCDscale_ADD");
             else if ( proc.Contains("dm") && (proc.Contains("mv") || proc.Contains("ma")) )                   syst.ReplaceAll("_qcdscale", "_QCDscale_VDM");
             else syst.ReplaceAll("_qcdscale", "_QCDscale");
 
         } else if(syst.BeginsWith("_pdf")) {
             syst.ReplaceAll("_pdf", "_pdf_qqbar");
+	} else if(syst.BeginsWith("_qqZZewk")) {
+	    syst.ReplaceAll("_qqZZewk", "_qqZZewkcorr");
         } else {
             syst="_CMS_zllwimps"+syst;
         }
@@ -1756,7 +1751,7 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
                     useBinbyBin &= (proc.Contains("ZH") || proc.Contains("ZZ") || proc.Contains("WZ") || proc.Contains("WWTopZtautau") ||
                                     proc.Contains("D1") || proc.Contains("D4") || proc.Contains("D5") ||
                                     proc.Contains("ewk_s_dm") || proc.Contains("VVV") || proc.Contains("Zjets") ||
-                                    proc.Contains("dm") ||
+                                    proc.Contains("dm") ||  proc.Contains("add") || proc.Contains("UnPart") ||
                                     proc.Contains("D8") ||  proc.Contains("D9") || proc.Contains("C3")
                                    );
                     useBinbyBin &= (shape);
@@ -2033,16 +2028,21 @@ void doDYextrapolation(std::vector<TString>& selCh,map<TString, Shape_t>& allSha
 
             //update  Feb 24
             TString tag_dy = selCh[i]+AnalysisBins[b];
-            if(tag_dy=="eelesq1jets") sf = 1.02964;//1.49205;
-            else if(tag_dy=="mumulesq1jets") sf = 1.09576;//1.46399;
+            if(tag_dy=="eelesq1jets") sf = 0.936755;//1.02964;//1.49205;
+            else if(tag_dy=="mumulesq1jets") sf = 0.894015;//1.09576;//1.46399;
             else sf = 1.;
 
             cout << "Scale Factor: " << sf << " DY MC: " << hChan_DATADY->Integral() << endl;
             hChan_DATADY->Scale(sf);
 
             //assign Systematics
-            if(tag_dy=="eelesq1jets") hChan_DATADY->SetBinError(0, 0.1251/*0.193361*/*hChan_DATADY->Integral());
-            if(tag_dy=="mumulesq1jets") hChan_DATADY->SetBinError(0, 0.0876983/*0.48201*/*hChan_DATADY->Integral());
+            //if(tag_dy=="eelesq1jets") hChan_DATADY->SetBinError(0, 0.1251/*0.193361*/*hChan_DATADY->Integral());
+            //if(tag_dy=="mumulesq1jets") hChan_DATADY->SetBinError(0, 0.0876983/*0.48201*/*hChan_DATADY->Integral());
+
+            // 100% systematics
+            if(tag_dy=="eelesq1jets") hChan_DATADY->SetBinError(0, 1.0/*0.193361*/*hChan_DATADY->Integral());
+            if(tag_dy=="mumulesq1jets") hChan_DATADY->SetBinError(0, 1.0/*0.48201*/*hChan_DATADY->Integral());
+
 
             cout << "DY Extrapolation: " << hChan_DATADY->Integral() << endl;
             if(hChan_DATADY->Integral() > 1E-6) shapeChan_SI.bckg.push_back(hChan_DATADY);

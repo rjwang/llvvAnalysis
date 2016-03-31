@@ -72,7 +72,10 @@ struct stPDFval {
     int id2;
 };
 
-
+//https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation76X
+const float CSVLooseWP = 0.460;
+const float CSVMediumWP = 0.800;
+const float CSVTightWP = 0.935;
 
 
 int main(int argc, char* argv[])
@@ -196,13 +199,23 @@ int main(int argc, char* argv[])
             varNames.push_back("_pdfdown");
             varNames.push_back("_qcdscaleup");
             varNames.push_back("_qcdscaledown");
+
         }
-	if(isSignal){
+        if(isSignal) {
             varNames.push_back("_pdfup");
             varNames.push_back("_pdfdown");
-	    varNames.push_back("_qcdscaleacceptup");
-	    varNames.push_back("_qcdscaleacceptdown");
-	}
+            varNames.push_back("_qcdscaleup");
+            varNames.push_back("_qcdscaledown");
+//            varNames.push_back("_pdfacceptup");
+//            varNames.push_back("_pdfacceptdown");
+//            varNames.push_back("_qcdscaleacceptup");
+//            varNames.push_back("_qcdscaleacceptdown");
+        }
+        if(isMC_ZZ2L2Nu) {
+            varNames.push_back("_qqZZewkup");
+            varNames.push_back("_qqZZewkdown");
+        }
+
         for(size_t sys=1; sys<varNames.size(); sys++) {
             cout << varNames[sys] << endl;
         }
@@ -221,45 +234,17 @@ int main(int argc, char* argv[])
     cout << "Loading jet energy scale uncertainties: " << uncFile << endl;
     JetCorrectionUncertainty jecUnc(uncFile.Data());
 
-    /*
-        //INITIALIZE THE PDF TOOL
-        string pdfSets[]   = {"NNPDF30_lo_as_0130.LHgrid"}; //cteq66.LHgrid","NNPDF30_lo_as_0130.LHgrid","MSTW2008lo68cl.LHgrid"};
-        std::vector<Int_t>   nPdfVars;
-        const size_t nPdfSets=sizeof(pdfSets)/sizeof(string);
-        //const size_t nPdfSets=1;
-        for(size_t ipdf=0; ipdf<nPdfSets; ipdf++) {
-            LHAPDF::initPDFSet(ipdf+1, pdfSets[ipdf]);
-            nPdfVars.push_back( LHAPDF::numberPDF(ipdf+1) );
-        }
-    */
-
-
     //pdf info
     PDFInfo *mPDFInfo=0;
-    if(isSignal || isMCBkg_runPDFQCDscale) {
+    if(isMC_Unpart || isMC_ADD) {
         TString pdfUrl = runProcess.getParameter<std::string>("pdfInput");
         std::string Url = runProcess.getParameter<std::string>("input");
-        if(doWIMPreweighting) {
-            if(Url.find("TeV_DM_V_Mx") != string::npos) 	Url = runProcess.getParameter<std::string>("WIMPreweighting_DM_V_Mx");
-            else if(Url.find("TeV_DM_A_Mx") != string::npos) 	Url = runProcess.getParameter<std::string>("WIMPreweighting_DM_A_Mx");
-        }
-
         std::size_t found = Url.find_last_of("/\\");
         pdfUrl += '/';
         pdfUrl += Url.substr(found+1);
-
-
-        if(pdfUrl.Contains("K1_0.1_K2_1")) pdfUrl.ReplaceAll("K1_0.1_K2_1","K1_1_K2_1");
-        if(pdfUrl.Contains("K1_0.2_K2_1")) pdfUrl.ReplaceAll("K1_0.2_K2_1","K1_1_K2_1");
-        if(pdfUrl.Contains("K1_0.3_K2_1")) pdfUrl.ReplaceAll("K1_0.3_K2_1","K1_1_K2_1");
-        if(pdfUrl.Contains("K1_0.5_K2_1")) pdfUrl.ReplaceAll("K1_0.5_K2_1","K1_1_K2_1");
-        if(pdfUrl.Contains("K1_2_K2_1"))   pdfUrl.ReplaceAll("K1_2_K2_1","K1_1_K2_1");
-        if(pdfUrl.Contains("K1_3_K2_1"))   pdfUrl.ReplaceAll("K1_3_K2_1","K1_1_K2_1");
-        if(pdfUrl.Contains("K1_5_K2_1"))   pdfUrl.ReplaceAll("K1_5_K2_1","K1_1_K2_1");
-        if(pdfUrl.Contains("K1_10_K2_1"))  pdfUrl.ReplaceAll("K1_10_K2_1","K1_1_K2_1");
         pdfUrl.ReplaceAll(".root","_pdf.root");
 
-        mPDFInfo=new PDFInfo(pdfUrl,"cteq66.LHgrid");
+        mPDFInfo=new PDFInfo(pdfUrl,"NNPDF30_lo_as_0130.LHgrid");//cteq66.LHgrid");
         cout << "Readout " << mPDFInfo->numberPDFs() << " pdf variations: " << pdfUrl << endl;
     }
 
@@ -302,13 +287,13 @@ int main(int argc, char* argv[])
     mon.addHistogram( new TH2F( "ptlep1vs2_raw",";#it{p}_{T}^{l1} [GeV];#it{p}_{T}^{l2} [GeV];Events",250,0,500, 250,0,500) );
 
     mon.addHistogram( new TH1F( "leadlep_pt_raw", ";Leading lepton #it{p}_{T}^{l};Events", 50,0,500) );
-    mon.addHistogram( new TH1F( "leadlep_eta_raw",";Leading lepton #eta^{l};Events", 50,-2.6,2.6) );
+    mon.addHistogram( new TH1F( "leadlep_eta_raw",";Leading lepton #eta^{l};Events", 52,-2.6,2.6) );
     mon.addHistogram( new TH1F( "trailep_pt_raw", ";Trailing lepton #it{p}_{T}^{l};Events", 50,0,500) );
-    mon.addHistogram( new TH1F( "trailep_eta_raw",";Trailing lepton #eta^{l};Events", 50,-2.6,2.6) );
+    mon.addHistogram( new TH1F( "trailep_eta_raw",";Trailing lepton #eta^{l};Events", 52,-2.6,2.6) );
 
 
     mon.addHistogram( new TH1F( "jet_pt_raw", ";all jet #it{p}_{T}^{j};Events", 50,0,500) );
-    mon.addHistogram( new TH1F( "jet_eta_raw",";all jet #eta^{j};Events", 50,-2.6,2.6) );
+    mon.addHistogram( new TH1F( "jet_eta_raw",";all jet #eta^{j};Events", 52,-2.6,2.6) );
 
 
     TH1F *h1 = (TH1F*) mon.addHistogram( new TH1F( "nleptons_raw", ";Lepton multiplicity;Events", 3,2,5) );
@@ -345,6 +330,16 @@ int main(int argc, char* argv[])
     double METBins2[]= {0,10,20,30,40,50,60,70,80,90,100,120,140,160,180,200,250,300,350,400,500,1000};
     const int nBinsMET2 = sizeof(METBins2)/sizeof(double) - 1;
 
+    //double METBins3[]= {0,40,50,60,120,260,1000};
+//    double METBins3[]= {0,10,20,30,40,50,60,70,80,90,100,120,140,160,180,200,250,300,350,400,500,1000};
+//    const int nBinsMET3 = sizeof(METBins3)/sizeof(double) - 1;
+
+    double MET2Bins[]= {0,80,160,240,320,400,480,560,640,800,1200};
+    const int xnBinsMET2 = sizeof(MET2Bins)/sizeof(double) - 1;
+
+    double MT2Bins[]= {0,100,200,300,400,500,600,700,800,1000,1200};
+    const int xnBinsMT2 = sizeof(MT2Bins)/sizeof(double) - 1;
+
     mon.addHistogram( new TH1F( "pfmet_presel",      ";E_{T}^{miss} [GeV];Events / 1 GeV", nBinsMET, METBins));
     mon.addHistogram( new TH1F( "pfmet2_presel",     ";E_{T}^{miss} [GeV];Events / 1 GeV", nBinsMET2, METBins2));
     mon.addHistogram( new TH1F( "dphiZMET_presel",   ";#Delta#it{#phi}(#it{l^{+}l^{-}},E_{T}^{miss});Events", 10,0,TMath::Pi()) );
@@ -354,6 +349,24 @@ int main(int argc, char* argv[])
     mon.addHistogram( new TH1F( "axialpfmet_presel", ";Axial E_{T}^{miss} [GeV];Events", 50,-150,150) );
 
     //adding N-1 plots
+    mon.addHistogram( new TH1F( "pfmet_nm1",       ";E_{T}^{miss} [GeV];Events / 80 GeV", 15,0,1200));
+    mon.addHistogram( new TH1F( "pfmet2_nm1",      ";E_{T}^{miss} [GeV];Events / 1 GeV", xnBinsMET2,MET2Bins));
+    mon.addHistogram( new TH1F( "mt_nm1",          ";#it{m}_{T} [GeV];Events / 100 GeV", 12,0,1200));
+    mon.addHistogram( new TH1F( "mt2_nm1",         ";#it{m}_{T} [GeV];Events / 1 GeV", xnBinsMT2,MT2Bins));
+
+    mon.addHistogram( new TH1F( "pfmet_met80",       ";E_{T}^{miss} [GeV];Events / 80 GeV", 15,0,1200));
+    mon.addHistogram( new TH1F( "pfmet2_met80",      ";E_{T}^{miss} [GeV];Events / 1 GeV", xnBinsMET2,MET2Bins));
+    mon.addHistogram( new TH1F( "mt_met80",          ";#it{m}_{T} [GeV];Events / 100 GeV", 12,0,1200));
+    mon.addHistogram( new TH1F( "mt2_met80",         ";#it{m}_{T} [GeV];Events / 1 GeV", xnBinsMT2,MT2Bins));
+
+    mon.addHistogram( new TH1F( "pfmet_met140",       ";E_{T}^{miss} [GeV];Events / 80 GeV", 15,0,1200));
+    mon.addHistogram( new TH1F( "pfmet2_met140",      ";E_{T}^{miss} [GeV];Events / 1 GeV", xnBinsMET2,MET2Bins));
+    mon.addHistogram( new TH1F( "mt_met140",          ";#it{m}_{T} [GeV];Events / 100 GeV", 12,0,1200));
+    mon.addHistogram( new TH1F( "mt2_met140",         ";#it{m}_{T} [GeV];Events / 1 GeV", xnBinsMT2,MT2Bins));
+
+
+
+
 
 
     //MET X-Y shift correction
@@ -379,19 +392,22 @@ int main(int argc, char* argv[])
     h->GetXaxis()->SetBinLabel(1,"Gen");
     h->GetXaxis()->SetBinLabel(2,"Gen Acc");
 
-
     // btaging efficiency
     std::vector<TString> CSVkey;
     CSVkey.push_back("CSVL");
     CSVkey.push_back("CSVM");
     CSVkey.push_back("CSVT");
+
+    double JetPTBins[]= {20,40,60,80,100,120,150,300,500};
+    const int nJetPTBins = sizeof(JetPTBins)/sizeof(double) - 1;
+
     for(size_t csvtag=0; csvtag<CSVkey.size(); csvtag++) {
-        mon.addHistogram( new TH1F( TString("beff_Denom_")+CSVkey[csvtag],      "; Jet #it{p}_{T} [GeV];Events", 20,20,500) );
-        mon.addHistogram( new TH1F( TString("ceff_Denom_")+CSVkey[csvtag],      "; Jet #it{p}_{T} [GeV];Events", 20,20,500) );
-        mon.addHistogram( new TH1F( TString("udsgeff_Denom_")+CSVkey[csvtag],   "; Jet #it{p}_{T} [GeV];Events", 20,20,500) );
-        mon.addHistogram( new TH1F( TString("beff_Num_")+CSVkey[csvtag],        "; Jet #it{p}_{T} [GeV];Events", 20,20,500) );
-        mon.addHistogram( new TH1F( TString("ceff_Num_")+CSVkey[csvtag],        "; Jet #it{p}_{T} [GeV];Events", 20,20,500) );
-        mon.addHistogram( new TH1F( TString("udsgeff_Num_")+CSVkey[csvtag],     "; Jet #it{p}_{T} [GeV];Events", 20,20,500) );
+        mon.addHistogram( new TH1F( TString("beff_Denom_")+CSVkey[csvtag],      "; Jet #it{p}_{T} [GeV];Events", nJetPTBins,JetPTBins) );
+        mon.addHistogram( new TH1F( TString("ceff_Denom_")+CSVkey[csvtag],      "; Jet #it{p}_{T} [GeV];Events", nJetPTBins,JetPTBins) );
+        mon.addHistogram( new TH1F( TString("udsgeff_Denom_")+CSVkey[csvtag],   "; Jet #it{p}_{T} [GeV];Events", nJetPTBins,JetPTBins) );
+        mon.addHistogram( new TH1F( TString("beff_Num_")+CSVkey[csvtag],        "; Jet #it{p}_{T} [GeV];Events", nJetPTBins,JetPTBins) );
+        mon.addHistogram( new TH1F( TString("ceff_Num_")+CSVkey[csvtag],        "; Jet #it{p}_{T} [GeV];Events", nJetPTBins,JetPTBins) );
+        mon.addHistogram( new TH1F( TString("udsgeff_Num_")+CSVkey[csvtag],     "; Jet #it{p}_{T} [GeV];Events", nJetPTBins,JetPTBins) );
     }
 
 
@@ -485,11 +501,6 @@ int main(int argc, char* argv[])
     mon.addHistogram( new TH2F ("pfmet_minus_shapes",";cut index; E_{T}^{miss} [GeV];#Events ",nOptims,0,nOptims, 100,0,500) );
 
 
-    double MT2Bins[]= {0,100,200,300,400,500,600,700,800,1000,1200};
-    const int xnBinsMT2 = sizeof(MT2Bins)/sizeof(double) - 1;
-
-    double MET2Bins[]= {0,80,160,320,400,480,560,640,800,1200};
-    const int xnBinsMET2 = sizeof(MET2Bins)/sizeof(double) - 1;
 
     for(size_t ivar=0; ivar<nvarsToInclude; ivar++) {
         Hoptim_systs->GetXaxis()->SetBinLabel(ivar+1, varNames[ivar]);
@@ -500,6 +511,7 @@ int main(int argc, char* argv[])
 
         mon.addHistogram( new TH2F (TString("met_shapes")+varNames[ivar],";cut index; E_{T}^{miss} [GeV];#Events (/80GeV)",nOptims,0,nOptims, 15,0,1200) );
         mon.addHistogram( new TH2F (TString("met2_shapes")+varNames[ivar],";cut index; E_{T}^{miss} [GeV];#Events",nOptims,0,nOptims, xnBinsMET2,MET2Bins) );
+
         //2D shapes for limit setting
         //
         //
@@ -578,33 +590,6 @@ int main(int argc, char* argv[])
     TH1F* weight_pileup_Down = (TH1F *) PU_Down_File->Get("pileup");
 
 
-    /*
-        //loop over events
-        std::vector<stPDFval> pdfvals;
-        //loop on all the events
-        if(isSignal) {
-            printf("Progressing Bar     :0%%       20%%       40%%       60%%       80%%       100%%\n");
-            printf("Scanning the ntuple :");
-            int treeStep = (evEnd-evStart)/50;
-            if(treeStep==0)treeStep=1;
-            for( int iev=evStart; iev<evEnd; iev++) {
-                if((iev-evStart)%treeStep==0) {
-                    printf(".");
-                    fflush(stdout);
-                }
-                summaryHandler_.getEntry(iev);
-                DataEvtSummary_t &ev = summaryHandler_.getEvent();
-                stPDFval valForPDF;
-                valForPDF.qscale = ev.qscale;
-                valForPDF.x1     = ev.x1;
-                valForPDF.x2     = ev.x2;
-                valForPDF.id1     = ev.id1;
-                valForPDF.id2     = ev.id2;
-                pdfvals.push_back(valForPDF);
-            }
-        }
-    */
-
 
     // muon trigger efficiency SF
     TString MuonTrigEffSF_ = runProcess.getParameter<std::string>("MuonTrigEffSF");
@@ -621,6 +606,36 @@ int main(int argc, char* argv[])
     //TH2F* h_ElectronTrigEffSF = (TH2F *) ElectronTrigEffSF_File->Get("electron_trigeff_sf_abseta_abseta");
 
 
+
+    //Electron ID RECO SF
+    TString ElectronMediumWPSF_ = runProcess.getParameter<std::string>("ElectronMediumWPSF");
+    gSystem->ExpandPathName(ElectronMediumWPSF_);
+    cout << "Loading Electron MediumWP SF: " << ElectronMediumWPSF_ << endl;
+    TFile *ElectronMediumWPSF_File = TFile::Open(ElectronMediumWPSF_);
+    TH2F* h_ElectronMediumWPSF = (TH2F *) ElectronMediumWPSF_File->Get("EGamma_SF2D");
+
+    TString ElectronRECOSF_ = runProcess.getParameter<std::string>("ElectronRECOSF");
+    gSystem->ExpandPathName(ElectronRECOSF_);
+    cout << "Loading Electron RECO SF: " << ElectronRECOSF_ << endl;
+    TFile *ElectronRECOSF_File = TFile::Open(ElectronRECOSF_);
+    TH2F* h_ElectronRECOSF = (TH2F *) ElectronRECOSF_File->Get("EGamma_SF2D");
+
+
+
+
+    //
+    TString UnpartQCDscaleWeights_ = runProcess.getParameter<std::string>("UnpartQCDscaleWeights");
+    gSystem->ExpandPathName(UnpartQCDscaleWeights_);
+    cout << "Loading UnpartQCDscaleWeights: " << UnpartQCDscaleWeights_ << endl;
+    TFile *UnpartQCDscaleWeights_File = TFile::Open(UnpartQCDscaleWeights_);
+
+
+    TString ADDQCDscaleWeights_ = runProcess.getParameter<std::string>("ADDQCDscaleWeights");
+    gSystem->ExpandPathName(ADDQCDscaleWeights_);
+    cout << "Loading ADDQCDscaleWeights: " << ADDQCDscaleWeights_ << endl;
+    TFile *ADDQCDscaleWeights_File = TFile::Open(ADDQCDscaleWeights_);
+
+
     // event categorizer
     EventCategory eventCategoryInst(1);   //jet(0,1,>=2) binning
 
@@ -632,13 +647,15 @@ int main(int argc, char* argv[])
     //###########################################           EVENT LOOP         ###########################################
     //####################################################################################################################
 
+
     // loop on all the events
-    printf("Progressing Bar     :0%%       20%%       40%%       60%%       80%%       100%%\n");
-    printf("Scanning the ntuple :");
     int treeStep = (evEnd-evStart)/50;
     if(treeStep==0)treeStep=1;
     DuplicatesChecker duplicatesChecker;
     int nDuplicates(0);
+    printf("Progressing Bar     :0%%       20%%       40%%       60%%       80%%       100%%\n");
+    printf("Scanning the ntuple :");
+
     for( int iev=evStart; iev<evEnd; iev++) {
         if((iev-evStart)%treeStep==0) {
             printf("#");
@@ -673,21 +690,9 @@ int main(int argc, char* argv[])
         if(isMC) mon.fillHisto("pileup", "all", ev.ngenTruepu, 1.0);
 
         if(isMC) {
-            float xval = ev.ngenTruepu;
-            int xbins = weight_pileup_Central->GetXaxis()->GetNbins();
-            if     (xval > weight_pileup_Central->GetXaxis()->GetBinUpEdge(xbins)    ) xval = weight_pileup_Central->GetXaxis()->GetBinUpEdge(xbins);
-            else if(xval < weight_pileup_Central->GetXaxis()->GetBinLowEdge(1)       ) xval = weight_pileup_Central->GetXaxis()->GetBinLowEdge(1);
-
-            int binx = weight_pileup_Central->GetXaxis()->FindBin(xval);
-
-            weight            *= weight_pileup_Central->GetBinContent(binx);
-            TotalWeight_plus  *= weight_pileup_Up->GetBinContent(binx);
-            TotalWeight_minus *= weight_pileup_Down->GetBinContent(binx);
-
-            //cout << "PU weight: " << weight_pileup_Central->GetBinContent(binx)
-            //		<< " plus: " << weight_pileup_Up->GetBinContent(binx)
-            //		<< " minus: " << weight_pileup_Down->GetBinContent(binx) << endl;
-
+            weight 		*= getSFfrom1DHist(ev.ngenTruepu, weight_pileup_Central);
+            TotalWeight_plus 	*= getSFfrom1DHist(ev.ngenTruepu, weight_pileup_Up);
+            TotalWeight_minus 	*= getSFfrom1DHist(ev.ngenTruepu, weight_pileup_Down);
         }
 
         Hcutflow->Fill(1,genWeight);
@@ -720,6 +725,13 @@ int main(int argc, char* argv[])
 
 
         //for Wimps
+        double weight_QCDscale_muR1_muF2(0.);
+        double weight_QCDscale_muR1_muF0p5(0.);
+        double weight_QCDscale_muR2_muF1(0.);
+        double weight_QCDscale_muR2_muF2(0.);
+        double weight_QCDscale_muR0p5_muF1(0.);
+        double weight_QCDscale_muR0p5_muF0p5(0.);
+
         if(isMC_WIMP || isMC_ADD || isMC_Unpart || isMC_ZZ2L2Nu) {
             if(phys.genleptons.size()!=2) continue;
             if(phys.genGravitons.size()!=1 && phys.genWIMPs.size()!=2 && phys.genneutrinos.size()!=2) continue;
@@ -755,15 +767,88 @@ int main(int argc, char* argv[])
             mon.fillHisto("acceptance",tags,0,1.0);
             if(isInGenAcceptance) mon.fillHisto("acceptance",tags,1,1.0);
 
+            if(isMC_Unpart || isMC_ADD) {
+
+                TString tag_unpartadd="";
+                if     (string(url.Data()).find("TeV_Unpart_1p01") != string::npos) tag_unpartadd = "Unpart_dU_1.01";
+                else if(string(url.Data()).find("TeV_Unpart_1p02") != string::npos) tag_unpartadd = "Unpart_dU_1.02";
+                else if(string(url.Data()).find("TeV_Unpart_1p04") != string::npos) tag_unpartadd = "Unpart_dU_1.04";
+                else if(string(url.Data()).find("TeV_Unpart_1p06") != string::npos) tag_unpartadd = "Unpart_dU_1.06";
+                else if(string(url.Data()).find("TeV_Unpart_1p09") != string::npos) tag_unpartadd = "Unpart_dU_1.09";
+                else if(string(url.Data()).find("TeV_Unpart_1p10") != string::npos) tag_unpartadd = "Unpart_dU_1.1";
+                else if(string(url.Data()).find("TeV_Unpart_1p20") != string::npos) tag_unpartadd = "Unpart_dU_1.2";
+                else if(string(url.Data()).find("TeV_Unpart_1p30") != string::npos) tag_unpartadd = "Unpart_dU_1.3";
+                else if(string(url.Data()).find("TeV_Unpart_1p40") != string::npos) tag_unpartadd = "Unpart_dU_1.4";
+                else if(string(url.Data()).find("TeV_Unpart_1p50") != string::npos) tag_unpartadd = "Unpart_dU_1.5";
+                else if(string(url.Data()).find("TeV_Unpart_1p60") != string::npos) tag_unpartadd = "Unpart_dU_1.6";
+                else if(string(url.Data()).find("TeV_Unpart_1p70") != string::npos) tag_unpartadd = "Unpart_dU_1.7";
+                else if(string(url.Data()).find("TeV_Unpart_1p80") != string::npos) tag_unpartadd = "Unpart_dU_1.8";
+                else if(string(url.Data()).find("TeV_Unpart_1p90") != string::npos) tag_unpartadd = "Unpart_dU_1.9";
+                else if(string(url.Data()).find("TeV_Unpart_2p00") != string::npos) tag_unpartadd = "Unpart_dU_2.0";
+                else if(string(url.Data()).find("TeV_Unpart_2p20") != string::npos) tag_unpartadd = "Unpart_dU_2.2";
+                else if(string(url.Data()).find("TeV_ADD_D2") != string::npos)  tag_unpartadd = "ADD_d_2";
+                else if(string(url.Data()).find("TeV_ADD_D3") != string::npos)  tag_unpartadd = "ADD_d_3";
+                else if(string(url.Data()).find("TeV_ADD_D4") != string::npos)  tag_unpartadd = "ADD_d_4";
+                else if(string(url.Data()).find("TeV_ADD_D5") != string::npos)  tag_unpartadd = "ADD_d_5";
+                else if(string(url.Data()).find("TeV_ADD_D6") != string::npos)  tag_unpartadd = "ADD_d_6";
+                else if(string(url.Data()).find("TeV_ADD_D7") != string::npos)  tag_unpartadd = "ADD_d_7";
+                else if(string(url.Data()).find("TeV_ADD_D8") != string::npos)  tag_unpartadd = "ADD_d_8";
+
+                TH1F* h_muR1_muF2 = NULL;
+                TH1F* h_muR1_muF0p5 = NULL;
+                TH1F* h_muR2_muF1 = NULL;
+                TH1F* h_muR2_muF2 = NULL;
+                TH1F* h_muR0p5_muF1 = NULL;
+                TH1F* h_muR0p5_muF0p5 = NULL;
+
+                if(isMC_Unpart) {
+                    h_muR1_muF2             = (TH1F *) UnpartQCDscaleWeights_File->Get(tag_unpartadd+"_muR_1.0_muF_2.0");
+                    h_muR1_muF0p5           = (TH1F *) UnpartQCDscaleWeights_File->Get(tag_unpartadd+"_muR_1.0_muF_0.5");
+                    h_muR2_muF1             = (TH1F *) UnpartQCDscaleWeights_File->Get(tag_unpartadd+"_muR_2.0_muF_1.0");
+                    h_muR2_muF2             = (TH1F *) UnpartQCDscaleWeights_File->Get(tag_unpartadd+"_muR_2.0_muF_2.0");
+                    h_muR0p5_muF1           = (TH1F *) UnpartQCDscaleWeights_File->Get(tag_unpartadd+"_muR_0.5_muF_1.0");
+                    h_muR0p5_muF0p5         = (TH1F *) UnpartQCDscaleWeights_File->Get(tag_unpartadd+"_muR_0.5_muF_0.5");
+                } else if(isMC_ADD) {
+                    h_muR1_muF2             = (TH1F *) ADDQCDscaleWeights_File->Get(tag_unpartadd+"_muR_1.0_muF_2.0");
+                    h_muR1_muF0p5           = (TH1F *) ADDQCDscaleWeights_File->Get(tag_unpartadd+"_muR_1.0_muF_0.5");
+                    h_muR2_muF1             = (TH1F *) ADDQCDscaleWeights_File->Get(tag_unpartadd+"_muR_2.0_muF_1.0");
+                    h_muR2_muF2             = (TH1F *) ADDQCDscaleWeights_File->Get(tag_unpartadd+"_muR_2.0_muF_2.0");
+                    h_muR0p5_muF1           = (TH1F *) ADDQCDscaleWeights_File->Get(tag_unpartadd+"_muR_0.5_muF_1.0");
+                    h_muR0p5_muF0p5         = (TH1F *) ADDQCDscaleWeights_File->Get(tag_unpartadd+"_muR_0.5_muF_0.5");
+                }
+
+                weight_QCDscale_muR1_muF2    = getSFfrom1DHist(genmet.pt(),h_muR1_muF2);
+                weight_QCDscale_muR1_muF0p5  = getSFfrom1DHist(genmet.pt(),h_muR1_muF0p5);
+                weight_QCDscale_muR2_muF1    = getSFfrom1DHist(genmet.pt(),h_muR2_muF1);
+                weight_QCDscale_muR2_muF2    = getSFfrom1DHist(genmet.pt(),h_muR2_muF2);
+                weight_QCDscale_muR0p5_muF1  = getSFfrom1DHist(genmet.pt(),h_muR0p5_muF1);
+                weight_QCDscale_muR0p5_muF0p5 = getSFfrom1DHist(genmet.pt(),h_muR0p5_muF0p5);
+
+                delete h_muR1_muF2;
+                delete h_muR1_muF0p5;
+                delete h_muR2_muF1;
+                delete h_muR2_muF2;
+                delete h_muR0p5_muF1;
+                delete h_muR0p5_muF0p5;
+
+
+            }
+
         }
 
 
+        double weight_ewkup(1.0);
+        double weight_ewkdown(1.0);
         if(isMC_ZZ2L2Nu) {
             if(phys.genleptons.size()!=2) continue;
             if(phys.genneutrinos.size()!=2) continue;
             double pt_dilep = (phys.genleptons[0]+phys.genleptons[1]).pt();
             double pt_zvv = (phys.genneutrinos[0]+phys.genneutrinos[1]).pt();
             double trailing_pt = pt_dilep < pt_zvv ? pt_dilep : pt_zvv;
+            // Variable to assess the hadronic activity in the event
+            float rhoZZ = (phys.genleptons[0]+phys.genleptons[1]+phys.genneutrinos[0]+phys.genneutrinos[1]).pt();
+            rhoZZ /= (phys.genleptons[0].pt() + phys.genleptons[1].pt() + phys.genneutrinos[0].pt() + phys.genneutrinos[1].pt());
+
             // ewk correction ZZ
             double qqZZ_EWKNLO = getNLOEWKZZWeight(trailing_pt);
 
@@ -771,10 +856,16 @@ int main(int argc, char* argv[])
             double dPhiZZ = deltaPhi((phys.genleptons[0]+phys.genleptons[1]).Phi(), (phys.genneutrinos[0]+phys.genneutrinos[1]).Phi());
             double qqZZ_NNLO = kfactor_qqZZ_qcd_dPhi(dPhiZZ);
 
-	    //double qqZZwgt = (weight * qqZZ_EWKNLO * qqZZ_NNLO); //qqZZ
-	    //double ggZZwgt = (weight * 0.1); // ggZZ: an extra 10% to account for gg->ZZ contribution
-	    //weight = qqZZwgt+ggZZwgt;
-	    weight *= (0.1 + qqZZ_EWKNLO * qqZZ_NNLO);
+            //double qqZZwgt = (weight * qqZZ_EWKNLO * qqZZ_NNLO); //qqZZ
+            //double ggZZwgt = (weight * 0.1); // ggZZ: an extra 10% to account for gg->ZZ contribution
+            //weight = qqZZwgt+ggZZwgt;
+            weight *= (0.1 + qqZZ_EWKNLO * qqZZ_NNLO);
+
+            float newEwk_up   = qqZZ_EWKNLO / (rhoZZ<0.3 ? (1. - (1.6 - 1.)*(1. - qqZZ_EWKNLO)) : qqZZ_EWKNLO);
+            float newEwk_down = qqZZ_EWKNLO * (rhoZZ<0.3 ? (1. - (1.6 - 1.)*(1. - qqZZ_EWKNLO)) : qqZZ_EWKNLO);
+
+            weight_ewkup   = (0.1 + newEwk_up * qqZZ_NNLO)  /(0.1 + qqZZ_EWKNLO * qqZZ_NNLO);
+            weight_ewkdown = (0.1 + newEwk_down * qqZZ_NNLO)/(0.1 + qqZZ_EWKNLO * qqZZ_NNLO);
         }
 
 
@@ -808,7 +899,7 @@ int main(int argc, char* argv[])
             if(lep.pt()<20) continue;
             if(abs(lepid)==13 && fabs(lep.eta())> 2.4) continue;
             if(abs(lepid)==11 && fabs(lep.eta())> 2.5) continue;
-	    if(abs(lepid)==11 && fabs(lep.eta()) > 1.442 && fabs(lep.eta()) < 1.556) continue;
+            if(abs(lepid)==11 && fabs(lep.eta()) > 1.442 && fabs(lep.eta()) < 1.556) continue;
 
             bool hasTightIdandIso(true);
             if(abs(lepid)==13) { //muon
@@ -860,9 +951,17 @@ int main(int argc, char* argv[])
         // Need to implement variations for errors (unused for now)
         if(isMC) {
             float llScaleFactor = 1.0;
-            llScaleFactor *= lsf.getLeptonEfficiency( lep1.pt(), lep1.eta(), abs(id1) ).first;
-            llScaleFactor *= lsf.getLeptonEfficiency( lep2.pt(), lep2.eta(), abs(id2) ).first;
+            if(abs(id1)==13) llScaleFactor *= lsf.getLeptonEfficiency( lep1.pt(), lep1.eta(), abs(id1) ).first;
+            if(abs(id2)==13) llScaleFactor *= lsf.getLeptonEfficiency( lep2.pt(), lep2.eta(), abs(id2) ).first;
             if(llScaleFactor>0) weight *= llScaleFactor;
+
+            //electron ID SF
+            if(abs(id1)==11) weight *= getSFfrom2DHist( fabs(lep1.eta()), lep1.pt(), h_ElectronMediumWPSF );
+            if(abs(id2)==11) weight *= getSFfrom2DHist( fabs(lep2.eta()), lep2.pt(), h_ElectronMediumWPSF );
+
+            //electron RECO SF
+            if(abs(id1)==11) weight *= getSFfrom2DHist( lep1.eta(), lep1.pt(), h_ElectronRECOSF );
+            if(abs(id2)==11) weight *= getSFfrom2DHist( lep2.eta(), lep2.pt(), h_ElectronRECOSF );
         }
 
 
@@ -1001,13 +1100,13 @@ int main(int argc, char* argv[])
         for(size_t ilep=0; ilep<phys.leptons.size(); ilep++) {
             LorentzVector lep=phys.leptons[ilep];
             int lepid = phys.leptons[ilep].id;
-	    //muon veto
-            if(abs(lepid)==13 && fabs(lep.eta())> 2.4) continue;
-	    //electront veto
-            if(abs(lepid)==11 && fabs(lep.eta())> 2.5) continue;
-	    if(abs(lepid)==11 && fabs(lep.eta()) > 1.442 && fabs(lep.eta()) < 1.556) continue;
+            //muon veto
+            if(abs(lepid)==13 && fabs(lep.eta()) > 2.4) continue;
+            //electront veto
+            if(abs(lepid)==11 && fabs(lep.eta()) > 2.5) continue;
+            if(abs(lepid)==11 && fabs(lep.eta()) > 1.442 && fabs(lep.eta()) < 1.556) continue;
             //tau veto
-            if(abs(lepid)==15 && fabs(lep.eta())> 2.4) continue;
+            //if(abs(lepid)==15 && fabs(lep.eta())> 2.4) continue;
 
             bool isMatched(false);
             isMatched |= (deltaR(lep1,lep) < 0.01);
@@ -1026,7 +1125,7 @@ int main(int argc, char* argv[])
                 //
                 hasTightIdandIso &= ( phys.leptons[ilep].isElpassMedium && phys.leptons[ilep].pt()>10 );
 
-            } else if(abs(lepid)==15) { //tau
+            //} else if(abs(lepid)==15) { //tau
                 //hasLooseIdandIso &= ( phys.leptons[ilep].isTauDM && phys.leptons[ilep].ta_IsLooseIso && phys.leptons[ilep].pt()>20 );
                 //
                 //hasTightIdandIso &= ( phys.leptons[ilep].isTauDM && phys.leptons[ilep].ta_IsTightIso && phys.leptons[ilep].pt()>20 );
@@ -1085,13 +1184,13 @@ int main(int argc, char* argv[])
             //https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation74X
             if(corrJets[ijet].pt()>30 && fabs(corrJets[ijet].eta())<2.4)  {
 
-                nCSVLtags += (corrJets[ijet].btag0>0.605);
-                nCSVMtags += (corrJets[ijet].btag0>0.89);
-                nCSVTtags += (corrJets[ijet].btag0>0.97);
+                nCSVLtags += (corrJets[ijet].btag0>CSVLooseWP);
+                nCSVMtags += (corrJets[ijet].btag0>CSVMediumWP);
+                nCSVTtags += (corrJets[ijet].btag0>CSVTightWP);
 
 
                 if(!isMC) continue;
-                bool isCSVtagged(corrJets[ijet].btag0>0.89);
+                bool isCSVtagged(corrJets[ijet].btag0>CSVMediumWP);
 
 
                 if(abs(corrJets[ijet].flavid)==5) {
@@ -1114,9 +1213,9 @@ int main(int argc, char* argv[])
                     int flavid = abs(corrJets[ijet].flavid);
                     for(size_t csvtag=0; csvtag<CSVkey.size(); csvtag++) {
                         bool isBTag(false);
-                        if     (CSVkey[csvtag]=="CSVL" && (corrJets[ijet].btag0>0.605)) isBTag = true;
-                        else if(CSVkey[csvtag]=="CSVM" && (corrJets[ijet].btag0>0.89)) isBTag = true;
-                        else if(CSVkey[csvtag]=="CSVT" && (corrJets[ijet].btag0>0.97)) isBTag = true;
+                        if     (CSVkey[csvtag]=="CSVL" && (corrJets[ijet].btag0>CSVLooseWP)) isBTag = true;
+                        else if(CSVkey[csvtag]=="CSVM" && (corrJets[ijet].btag0>CSVMediumWP)) isBTag = true;
+                        else if(CSVkey[csvtag]=="CSVT" && (corrJets[ijet].btag0>CSVTightWP)) isBTag = true;
 
                         if(flavid==5) {
                             mon.fillHisto(TString("beff_Denom_")+CSVkey[csvtag],tags,corrJets[ijet].pt(),weight);
@@ -1317,6 +1416,28 @@ int main(int argc, char* argv[])
                             mon.fillHisto("dphiZMET_DYctrlN_3",tags, dphiZMET, weight);
                         }
 
+                        //N-1 for MET
+                        if(passDphiZMETcut && passResponseCut && passBalanceCut) {
+                            mon.fillHisto("pfmet_nm1", tags, metP4.pt(), weight);
+                            mon.fillHisto("pfmet2_nm1", tags, metP4.pt(), weight,true);
+                            mon.fillHisto("mt_nm1",   tags, MT_massless, weight);
+                            mon.fillHisto("mt2_nm1",   tags, MT_massless, weight,true);
+
+                            if(metP4.pt()>80) {
+                                mon.fillHisto("pfmet_met80", tags, metP4.pt(), weight);
+                                mon.fillHisto("pfmet2_met80", tags, metP4.pt(), weight,true);
+                                mon.fillHisto("mt_met80",   tags, MT_massless, weight);
+                                mon.fillHisto("mt2_met80",   tags, MT_massless, weight,true);
+                            }
+
+                            if(metP4.pt()>140) {
+                                mon.fillHisto("pfmet_met140", tags, metP4.pt(), weight);
+                                mon.fillHisto("pfmet2_met140", tags, metP4.pt(), weight,true);
+                                mon.fillHisto("mt_met140",   tags, MT_massless, weight);
+                                mon.fillHisto("mt2_met140",   tags, MT_massless, weight,true);
+                            }
+                        }
+
                         if(passDphiZMETcut && passResponseCut) {
                             mon.fillHisto("eventflow",  tags, 5, weight);
 
@@ -1351,10 +1472,6 @@ int main(int argc, char* argv[])
 
 
 
-	//for acceptance calculation, and apply the weights to up and down systematics
-        //
-
-
 
 
 
@@ -1372,85 +1489,72 @@ int main(int argc, char* argv[])
             if(varNames[ivar]=="_puup")        iweight *=TotalWeight_plus;        //pu up
             if(varNames[ivar]=="_pudown")      iweight *=TotalWeight_minus;       //pu down
 
-            //PDF
-            if( (isSignal || isMCBkg_runPDFQCDscale) && (varNames[ivar]=="_pdfup" || varNames[ivar]=="_pdfdown")) {
-                /*
-                        printf("Loop on PDF sets and variations\n");
-                        float PDFWeight_plus(1.0), PDFWeight_down(1.0);
-                        for(size_t ipdf=0; ipdf<nPdfSets; ipdf++) {
-                            for(int i=0; i <(nPdfVars[ipdf]+1); ++i) {
-                                LHAPDF::usePDFMember(ipdf+1,i);
-                                char nameBuf[256];
-                                sprintf(nameBuf,"%s_var%d", pdfSets[ipdf].c_str(), i);
-                                for(unsigned int v=0; v<pdfvals.size(); v++) {
-                                    double xpdf1 = LHAPDF::xfx(ipdf+1, pdfvals[v].x1, pdfvals[v].qscale, pdfvals[v].id1)/pdfvals[v].x1;
-                                    double xpdf2 = LHAPDF::xfx(ipdf+1, pdfvals[v].x2, pdfvals[v].qscale, pdfvals[v].id2)/pdfvals[v].x2;
-                                    float pdfWgt = xpdf1 * xpdf2;
-                                    PDFWeight_plus = TMath::Max(PDFWeight_plus,pdfWgt);
-                                    PDFWeight_down = TMath::Min(PDFWeight_down,pdfWgt);
-                                }
-                            }
-                        }
+            //PDF variation: Acceptance+Normalization
+            if( (isSignal || isMCBkg_runPDFQCDscale) && (varNames[ivar]=="_pdfup" || varNames[ivar]=="_pdfdown") ) {
 
+                if(isMC_Unpart || isMC_ADD) {
+                    //for Pythia8 based signal samples, PDF weights do not exist in miniAOD
+                    if(mPDFInfo) {
+                        float PDFWeight_plus(1.0), PDFWeight_down(1.0);
+                        std::vector<float> wgts=mPDFInfo->getWeights(iev);
+                        for(size_t ipw=0; ipw<wgts.size(); ipw++) {
+                            PDFWeight_plus = TMath::Max(PDFWeight_plus,wgts[ipw]);
+                            PDFWeight_down = TMath::Min(PDFWeight_down,wgts[ipw]);
+                        }
                         if(varNames[ivar]=="_pdfup")    iweight *= PDFWeight_plus;
                         else if(varNames[ivar]=="_pdfdown")  iweight *= PDFWeight_down;
-                */
-
-                if(mPDFInfo) {
-                    float PDFWeight_plus(1.0), PDFWeight_down(1.0);
-                    std::vector<float> wgts=mPDFInfo->getWeights(iev);
-                    for(size_t ipw=0; ipw<wgts.size(); ipw++) {
-                        PDFWeight_plus = TMath::Max(PDFWeight_plus,wgts[ipw]);
-                        PDFWeight_down = TMath::Min(PDFWeight_down,wgts[ipw]);
                     }
-                    //if(varNames[ivar]=="_pdfup")    iweight *= PDFWeight_plus;
-                    //else if(varNames[ivar]=="_pdfdown")  iweight *= PDFWeight_down;
+                } else {
+                    // for POWHEG, MADGRAPH based samples
+                    // retrive PDFweights from ntuple
+                    TH1F *pdf_h = new TH1F();
+                    for(int npdf=0; npdf<ev.npdfs; npdf++) {
+                        pdf_h->Fill(ev.pdfWeights[npdf]);
+                    }
+                    double pdfError = pdf_h->GetRMS();
+                    delete pdf_h;
+                    //cout << "pdfError: " << pdfError << endl;
+
+                    // retrive alphaSweights from ntuple
+                    TH1F *alphaS_h = new TH1F();
+                    for(int nalphaS=0; nalphaS<ev.nalphaS; nalphaS++) {
+                        alphaS_h->Fill(ev.alphaSWeights[nalphaS]);
+                    }
+                    double alphaSError = alphaS_h->GetRMS();
+                    delete alphaS_h;
+                    //cout << "alphaSError: " << alphaSError << endl;
+                    double PDFalphaSWeight = sqrt(pdfError*pdfError + alphaSError*alphaSError);
+
+                    if(varNames[ivar]=="_pdfup")    iweight *= (1.+PDFalphaSWeight);
+                    else if(varNames[ivar]=="_pdfdown")  iweight *= (1.-PDFalphaSWeight);
                 }
-
-
-                // retrive PDFweights from ntuple
-                TH1F *pdf_h = new TH1F();
-                for(int npdf=0; npdf<ev.npdfs; npdf++) {
-                    pdf_h->Fill(ev.pdfWeights[npdf]);
-                }
-                double pdfError = pdf_h->GetRMS();
-                delete pdf_h;
-                //cout << "pdfError: " << pdfError << endl;
-
-                // retrive alphaSweights from ntuple
-                TH1F *alphaS_h = new TH1F();
-                for(int nalphaS=0; nalphaS<ev.nalphaS; nalphaS++) {
-                    alphaS_h->Fill(ev.alphaSWeights[nalphaS]);
-                }
-                double alphaSError = alphaS_h->GetRMS();
-                delete alphaS_h;
-                //cout << "alphaSError: " << alphaSError << endl;
-                double PDFalphaSWeight = sqrt(pdfError*pdfError + alphaSError*alphaSError);
-
-                if(varNames[ivar]=="_pdfup")    iweight *= (1.+PDFalphaSWeight);
-                else if(varNames[ivar]=="_pdfdown")  iweight *= (1.-PDFalphaSWeight);
-
-
             }
 
-
-            //QCDscale
-            if( (isSignal || isMCBkg_runPDFQCDscale) && (varNames[ivar]=="_qcdscaleup" || varNames[ivar]=="_qcdscaledown" ||
-				varNames[ivar]=="_qcdscaleacceptup" || varNames[ivar]=="_qcdscaleacceptdown") ) {
+            //QCDscale: Acceptance+Normalization
+            if( (isMCBkg_runPDFQCDscale || isSignal) && (varNames[ivar]=="_qcdscaleup" || varNames[ivar]=="_qcdscaledown") ) {
                 float QCDscaleWeight_plus(1.0), QCDscaleWeight_down(1.0);
 
                 std::vector<float> QCDscaleWgts;
                 QCDscaleWgts.clear();
-                QCDscaleWgts.push_back(ev.weight_QCDscale_muR1_muF2);
-                QCDscaleWgts.push_back(ev.weight_QCDscale_muR1_muF0p5);
-                QCDscaleWgts.push_back(ev.weight_QCDscale_muR2_muF1);
-                QCDscaleWgts.push_back(ev.weight_QCDscale_muR2_muF2);
-                QCDscaleWgts.push_back(ev.weight_QCDscale_muR0p5_muF1);
-                QCDscaleWgts.push_back(ev.weight_QCDscale_muR0p5_muF0p5);
+                if(isMC_Unpart || isMC_ADD) {
+                    QCDscaleWgts.push_back(weight_QCDscale_muR1_muF2*genWeight);
+                    QCDscaleWgts.push_back(weight_QCDscale_muR1_muF0p5*genWeight);
+                    QCDscaleWgts.push_back(weight_QCDscale_muR2_muF1*genWeight);
+                    QCDscaleWgts.push_back(weight_QCDscale_muR2_muF2*genWeight);
+                    QCDscaleWgts.push_back(weight_QCDscale_muR0p5_muF1*genWeight);
+                    QCDscaleWgts.push_back(weight_QCDscale_muR0p5_muF0p5*genWeight);
+                } else {
+                    QCDscaleWgts.push_back(ev.weight_QCDscale_muR1_muF2);
+                    QCDscaleWgts.push_back(ev.weight_QCDscale_muR1_muF0p5);
+                    QCDscaleWgts.push_back(ev.weight_QCDscale_muR2_muF1);
+                    QCDscaleWgts.push_back(ev.weight_QCDscale_muR2_muF2);
+                    QCDscaleWgts.push_back(ev.weight_QCDscale_muR0p5_muF1);
+                    QCDscaleWgts.push_back(ev.weight_QCDscale_muR0p5_muF0p5);
+                }
                 for(size_t ipw=0; ipw<QCDscaleWgts.size(); ipw++) {
                     if(ipw==0) {
-			// need to add */genWeight to remove the negative sign from negative event
-			// the negative sign is already assigned when using iweight = weight
+                        // need to add */genWeight to remove the negative sign from negative event
+                        // the negative sign is already assigned when using iweight = weight
                         QCDscaleWeight_plus = QCDscaleWgts[ipw]/genWeight;
                         QCDscaleWeight_down = QCDscaleWgts[ipw]/genWeight;
                     } else {
@@ -1459,9 +1563,13 @@ int main(int argc, char* argv[])
                     }
                     //cout << "QCDscaleWgts[" << ipw << "]: " << QCDscaleWgts[ipw] << endl;
                 }
+                if(varNames[ivar]=="_qcdscaleup")    	   iweight *= QCDscaleWeight_plus;
+                else if(varNames[ivar]=="_qcdscaledown")   iweight *= QCDscaleWeight_down;
+            }
 
-                if(varNames[ivar]=="_qcdscaleup" || varNames[ivar]=="_qcdscaleacceptup")    	   iweight *= QCDscaleWeight_plus;
-                else if(varNames[ivar]=="_qcdscaledown" || varNames[ivar]=="_qcdscaleacceptdown")  iweight *= QCDscaleWeight_down;
+            if( isMC_ZZ2L2Nu && (varNames[ivar]=="_qqZZewkup" || varNames[ivar]=="_qqZZewkdown") ) {
+                if(varNames[ivar]=="_qqZZewkup")        iweight *= weight_ewkup;
+                if(varNames[ivar]=="_qqZZewkdown")      iweight *= weight_ewkdown;
             }
 
 
@@ -1485,7 +1593,6 @@ int main(int argc, char* argv[])
                 vJets = variedJets[ivar];
             }
 
-
             bool passLocalBveto(true);
             for(size_t ijet=0; ijet<vJets.size(); ijet++) {
 
@@ -1508,8 +1615,8 @@ int main(int argc, char* argv[])
 
                 if(vJets[ijet].pt()>30 && fabs(vJets[ijet].eta())<2.4) {
 
-                    passLocalBveto &= (vJets[ijet].btag0<0.89);
-                    bool isLocalCSVtagged(vJets[ijet].btag0>0.89);
+                    passLocalBveto &= (vJets[ijet].btag0<CSVMediumWP);
+                    bool isLocalCSVtagged(vJets[ijet].btag0>CSVMediumWP);
 
                     //double val=1., valerr=0.;
                     double BTagWeights_Up=1., BTagWeights_Down=1.;
@@ -1627,7 +1734,6 @@ int main(int argc, char* argv[])
     //save all to the file
     TFile *ofile=TFile::Open(outUrl, "recreate");
     mon.Write();
-
     ofile->Close();
 
     PU_Central_File->Close();
@@ -1636,6 +1742,11 @@ int main(int argc, char* argv[])
 
     MuonTrigEffSF_File->Close();
     //ElectronTrigEffSF_File->Close();
+    ElectronMediumWPSF_File->Close();
+    ElectronRECOSF_File->Close();
+
+    UnpartQCDscaleWeights_File->Close();
+    ADDQCDscaleWeights_File->Close();
 
     if(outTxtFile_final)fclose(outTxtFile_final);
 }

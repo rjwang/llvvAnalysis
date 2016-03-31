@@ -55,34 +55,58 @@ PhysicsObject_Jet smearedJet(const PhysicsObject_Jet &origJet, double genJetPt, 
 
     //https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution#JER_Scaling_factors_and_Uncertai
     double ptSF(1.0), ptSF_up(1.0), ptSF_down(1.0);
-    if(eta<0.8)                    {
-        ptSF=1.061;
-        ptSF_up=ptSF+0.023;
-        ptSF_down=ptSF-0.023;
-    } else if(eta>=0.8 && eta<1.3) {
-        ptSF=1.088;
-        ptSF_up=ptSF+0.029;
-        ptSF_down=ptSF-0.029;
-    } else if(eta>=1.3 && eta<1.9) {
-        ptSF=1.106;
-        ptSF_up=ptSF+0.030;
-        ptSF_down=ptSF-0.030;
-    } else if(eta>=1.9 && eta<2.5) {
-        ptSF=1.126;
-        ptSF_up=ptSF+0.094;
-        ptSF_down=ptSF-0.094;
-    } else if(eta>=2.5 && eta<3.0) {
-        ptSF=1.343;
-        ptSF_up=ptSF+0.123;
-        ptSF_down=ptSF-0.123;
+    if(eta<0.5)			   {
+        ptSF=1.095;
+        ptSF_up=ptSF+0.018;
+        ptSF_down=ptSF-0.018;
+    } else if(eta>=0.5 && eta<0.8) {
+        ptSF=1.120;
+        ptSF_up=ptSF+0.028;
+        ptSF_down=ptSF-0.028;
+    } else if(eta>=0.8 && eta<1.1) {
+        ptSF=1.097;
+        ptSF_up=ptSF+0.017;
+        ptSF_down=ptSF-0.017;
+    } else if(eta>=1.1 && eta<1.3) {
+        ptSF=1.103;
+        ptSF_up=ptSF+0.033;
+        ptSF_down=ptSF-0.033;
+    } else if(eta>=1.3 && eta<1.7) {
+        ptSF=1.118;
+        ptSF_up=ptSF+0.014;
+        ptSF_down=ptSF-0.014;
+    } else if(eta>=1.7 && eta<1.9) {
+        ptSF=1.100;
+        ptSF_up=ptSF+0.033;
+        ptSF_down=ptSF-0.033;
+    } else if(eta>=1.9 && eta<2.1) {
+        ptSF=1.162;
+        ptSF_up=ptSF+0.044;
+        ptSF_down=ptSF-0.044;
+    } else if(eta>=2.1 && eta<2.3) {
+        ptSF=1.160;
+        ptSF_up=ptSF+0.048;
+        ptSF_down=ptSF-0.048;
+    } else if(eta>=2.3 && eta<2.5) {
+        ptSF=1.161;
+        ptSF_up=ptSF+0.060;
+        ptSF_down=ptSF-0.060;
+    } else if(eta>=2.5 && eta<2.8) {
+        ptSF=1.209;
+        ptSF_up=ptSF+0.059;
+        ptSF_down=ptSF-0.059;
+    } else if(eta>=2.8 && eta<3.0) {
+        ptSF=1.564;
+        ptSF_up=ptSF+0.321;
+        ptSF_down=ptSF-0.321;
     } else if(eta>=3.0 && eta<3.2) {
-        ptSF=1.303;
-        ptSF_up=ptSF+0.111;
-        ptSF_down=ptSF-0.111;
+        ptSF=1.384;
+        ptSF_up=ptSF+0.033;
+        ptSF_down=ptSF-0.033;
     } else if(eta>=3.2 && eta<5.0) {
-        ptSF=1.320;
-        ptSF_up=ptSF+0.286;
-        ptSF_down=ptSF-0.286;
+        ptSF=1.216;
+        ptSF_up=ptSF+0.050;
+        ptSF_down=ptSF-0.050;
     }
 
     if(mode==1) ptSF = ptSF_up;

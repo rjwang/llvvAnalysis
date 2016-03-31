@@ -14,14 +14,6 @@
           "br": [
             1
           ]
-        }, 
-        {
-          "dtag": "MC13TeV_WZamcatnloFXFX", 
-          "xsec": 5.29, 
-          "split": 10, 
-          "br": [
-            1
-          ]
         }
       ]
     }, 
@@ -200,7 +192,7 @@
         {
           "dtag": "MC13TeV_DYJetsToLL_50toInf", 
           "xsec": 6025, 
-          "split": 35, 
+          "split": 40, 
           "br": [
             1
           ]
@@ -226,7 +218,7 @@
         {
           "dtag": "MC13TeV_DYJetsToLL_50toInf", 
           "xsec": 6025, 
-          "split": 35, 
+          "split": 40, 
           "br": [
             1
           ]

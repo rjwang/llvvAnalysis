@@ -839,6 +839,8 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 
 	 TString tSaveName = hist->GetName();
 	 float binsize = hist->GetBinWidth(1);
+	 float binsizeN = hist->GetBinWidth(hist->GetXaxis()->GetNbins());
+	 if(binsize!=binsizeN) binsize=1;
 	 std::ostringstream strs;
 	 strs.precision(2);
 	 strs << binsize;

@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
     outFileUrl.ReplaceAll(".root","");
 
     //INITIALIZE THE PDF TOOL
-    string pdfSets[]   = {"cteq66.LHgrid"};//,"NNPDF30_lo_as_0130.LHgrid","MSTW2008lo68cl.LHgrid"};
+    string pdfSets[]   = {"NNPDF30_lo_as_0130.LHgrid"};//cteq66.LHgrid"};//,"NNPDF30_lo_as_0130.LHgrid","MSTW2008lo68cl.LHgrid"};
     std::vector<Int_t>   nPdfVars;
     const size_t nPdfSets=sizeof(pdfSets)/sizeof(string);
     //const size_t nPdfSets=1;
