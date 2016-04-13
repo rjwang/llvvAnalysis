@@ -1662,8 +1662,8 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& bi
         if(syst=="") {
             syst="";
         } else if(syst.BeginsWith("_jes")) {
-            continue; // skip
-            //syst.ReplaceAll("_jes","_CMS_scale_j");
+            //continue; // skip
+            syst.ReplaceAll("_jes","_CMS_scale_j");
         } else if(syst.BeginsWith("_jer")) {
             syst.ReplaceAll("_jer","_CMS_res_j");
         } else if(syst.BeginsWith("_btag")) {
